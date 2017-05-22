@@ -9,7 +9,7 @@ class OurPDO extends PDO {
 
   // override __construct
 
-  // override query __construct
+  // override query 
 
 }
 
