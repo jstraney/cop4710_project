@@ -1,0 +1,85 @@
+================================================================================
+Directives
+--------------------------------------------------------------------------------
+Hey guys, this is jeff. I've read over the assignment guidelines, and I must
+say we have a big project here (map integration, social media integration,
+integration with rss feeds)
+
+I'm feeling very confident on how we can achieve all of this, and so I've
+compiled a list of high level items that will need to happen. For each item,
+I reference files which I've created which should have high level pseudo code
+comments to help us get started.
+================================================================================
+Create routing for the application
+--------------------------------------------------------------------------------
+routing is when a request to apache is taken and redirected or some action is
+performed (in this case, with php). Normally, apache looks for directories and
+files (http://localhost/cop4710_project/directives.txt will request this file)
+
+This can quickly spiral out of control because we would need a file for
+cop4710_project/events, cop4710_project/events/add cop4710_project/events/edit
+
+instead we use a .htaccess file to tell apache to redirect all traffic to our
+index.php (I've done this already). Next we include a class of router which
+looks at the request uri, breaks it up at '/', and deciphers what php code to
+run (create new student, edit student, delete event).
+
+files of concern: /includes/classes/router.inc, /.htacces
+
+================================================================================
+Connecting to the Database
+--------------------------------------------------------------------------------
+When you connect to a database using php, you can use a PDO (php data object)
+This is a class of object which connects to a database and runs queries using
+prepared statements which prevent sql injection (users typing in arbitrary sql.
+once we concatenate their input to our query, we actually run their code)
+
+e.g.
+our query: "SELECT * from events WHERE id = [user-input]"
+user input: "1 or 1 = 1; DROP * WHERE 1 = 1; #"
+
+note that the # is a comment in sql, so it will run their drop query and comment
+out the rest of our original query.
+
+files of concern: /includes/classes/pdo.inc
+
+================================================================================
+Using a Class of Entity Controller
+--------------------------------------------------------------------------------
+The router will use this class to check permissions of the current user and 
+perform actions using the PDO object on the database.
+
+You can think of the controller as glue between the router and the pdo object
+
+files of concern: /includes/classes/controller.inc
+================================================================================
+Other helpful files
+--------------------------------------------------------------------------------
+in the includes directory, there is a file called helpers.inc which has
+functions to make things a little simpler. Right now it contains a function
+called console_log which takes a variable and pretty prints it out on the webpage
+
+--------------------------------------------------------------------------------
+================================================================================
+General Project Structure
+--------------------------------------------------------------------------------
+includes - contains partials and php classes and functions to be included
+res - contains application resources (images, gui icons)
+style - contains css to style the webpages.
+js - includes javascript to run client side, we will definitely need javascript
+to embed a map in our webapp (the project rubric describes)
+
+================================================================================
+How To Keep our Local Environments Consistent
+--------------------------------------------------------------------------------
+database consistency-
+Something we'll run into is that our Databases may start to become different.
+Git will not 'know' anything about the sql server, so we have to manage it
+independently. For that reason, if one of us is working on the database in
+phpmyadmin, lets agree to export the database regularly to /db.sql
+
+you can export your database in phpmyadmin by going to the db, and clicking
+export. I'm using the quick settings. The export will have all the create
+statements.
+
+================================================================================
