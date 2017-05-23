@@ -24,6 +24,9 @@ index.php (I've done this already). Next we include a class of router which
 looks at the request uri, breaks it up at '/', and deciphers what php code to
 run (create new student, edit student, delete event).
 
+we'll need to consider some routes that aren't really resource related per se
+such as "/login" "/signup" "/about", but this is still handled by the router.
+
 files of concern: /includes/classes/router.inc, /.htacces
 
 ================================================================================
@@ -32,7 +35,8 @@ Connecting to the Database
 When you connect to a database using php, you can use a PDO (php data object)
 This is a class of object which connects to a database and runs queries using
 prepared statements which prevent sql injection (users typing in arbitrary sql.
-once we concatenate their input to our query, we actually run their code)
+once we concatenate their input to our query, we inadvertantly run their code,
+which could destroy the database, or retrieve all the passwords for them.)
 
 e.g.
 our query: "SELECT * from events WHERE id = [user-input]"
@@ -41,7 +45,26 @@ user input: "1 or 1 = 1; DROP * WHERE 1 = 1; #"
 note that the # is a comment in sql, so it will run their drop query and comment
 out the rest of our original query.
 
+prepared statements using a PDO would prevent this kind of attack.
+
+inside the extended PDO object we would have a list of transactions which could
+be called on the database.
+
 files of concern: /includes/classes/pdo.inc
+
+================================================================================
+Partial Views
+--------------------------------------------------------------------------------
+The application revolves around 'resources' which are things that can be created
+viewed, updated, or deleted (users, events, universities). There are five 
+general templates or partials to represent this ( create_form, update_form,
+delete_form, view, view_all)
+
+partials ending in 'form' contain an html form which sends its data to a
+corresponding script in the root directory (create.php, edit.php, delete.php).
+
+These scripts would instantiate an entity controller to perform the action in
+question. 
 
 ================================================================================
 Using a Class of Entity Controller
@@ -52,6 +75,7 @@ perform actions using the PDO object on the database.
 You can think of the controller as glue between the router and the pdo object
 
 files of concern: /includes/classes/controller.inc
+
 ================================================================================
 Other helpful files
 --------------------------------------------------------------------------------
