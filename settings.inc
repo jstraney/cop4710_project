@@ -6,7 +6,7 @@ global $configs;
 $configs = array();
 
 // used in request url's
-$configs['site_root'] = "http://localhost/cop4702_project/";
+$configs['site_root'] = "http://localhost/cop4710_project";
 
 // normally you'd want this outside the sites directory and modified
 // to have restricted permissions to the 'other' user (in octal 0700)

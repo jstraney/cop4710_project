@@ -7,6 +7,7 @@ class Router {
   $routes = array();
 
   // look at request url (e.g. https://oursite/customer-order/)
+  // $_SERVER
 
   // break url into tokens. determine if request is GET or POST
 
