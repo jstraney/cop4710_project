@@ -1,4 +1,9 @@
 <?php
+// to use a session, you must call session start at the beginning of a script.
+session_start();
+
+// user object 
+global $user;
 
 // TODOS:
 // get router class
@@ -23,7 +28,9 @@ $site_root = $configs['site_root'];
   <!-- these are in the includes/partials directory -->
   <div id="main-view">
   <?php 
-    // partials will be included here.
+  // the main view will be included here based on the routers interpretation
+  // of the url. I've actually 'cut' off the part of the url we need and put
+  // it in the script as GET parameters using the .htaccess file
     console_log($_GET);
   ?>
   </div>

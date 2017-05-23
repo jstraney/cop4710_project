@@ -1,17 +1,27 @@
 <?php
 // global configs associative array
 global $configs;
+global $user;
 
 // use the site root to construct the links in the header below
 // if we moved our site out of our local apache setup, the url would
 // change and so we have the base url in a configuration
 $site_root = $configs['site_root'];
+
 ?>
 <div id="header">
   <!-- These will login/logout actions -->
   <ul class="menu user">
-    <li><a href="<?php echo $site_root; ?>/login">Login</a></li>
-    <li><a href="<?php echo $site_root; ?>/account/create">New Account</a></li>
-    <li><a href="<?php echo $site_root; ?>/logout">Logout</a></li>
+    <?php
+    // check if user is anonymous, or 0
+    if (!isset($user)) {
+      // echo the login and create account links if the user is anonymous
+      echo '<li><a href="'.$site_root.'/login">Login</a></li>';
+      echo '<li><a href="'.$site_root.'/account/create">New Account</a></li>';
+    } else {
+      // echo links available to the user
+      echo '<li><a href="'.$site_root.'/logout">Logout</a></li>';
+    }
+    ?>
   </ul>
 </div>
