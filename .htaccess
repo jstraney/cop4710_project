@@ -1,0 +1,12 @@
+# This is an Htaccess file. It's basically a configuration file for apache that
+# tells it how to handle requests to this directory and 'downwards'
+
+# tell apache I want to rewrite the request if we have mod_rewrite
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    # rewrite the url, but take the original as GET request parameters.
+    RewriteRule (.*)|!\.(js|pdf|ico|jpg|gif|css|rar|zip|png|tar|\.gz)$ index.php?q=$1 [L]
+</IfModule>
