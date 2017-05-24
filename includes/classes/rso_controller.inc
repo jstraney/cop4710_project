@@ -2,7 +2,7 @@
 
 include "entity_controller.inc";
 
-class UserController extends EntityController {
+class RsoController extends EntityController {
 
   private $create_query = "";
   private $view_query = "";
@@ -39,8 +39,7 @@ class UserController extends EntityController {
 
   public function get_create_form () {
 
-    $form = '<h3>Create Account</h3>';
-    $form .= '<label>First Name</label>';
+    $form = '<label>First Name</label>';
     $form .= '<input id="first-name" type="text" name="first-name" value=""></input>';
     $form .= '<label>Last Name</label>';
     $form .= '<input id="last-name" type="text" name="last-name" value=""></input>';
@@ -59,8 +58,7 @@ class UserController extends EntityController {
 
   public function get_edit_form () {
 
-    $form = '<h3>Edit Account</h3>';
-    $form .= '<label>First Name</label>';
+    $form = '<label>First Name</label>';
     $form .= '<input id="first-name" type="text" name="first-name" value=""></input>';
     $form .= '<label>Last Name</label>';
     $form .= '<input id="last-name" type="text" name="last-name" value=""></input>';
@@ -80,15 +78,8 @@ class UserController extends EntityController {
 
   public function get_delete_form () {
 
-    $form = "<h3>Delete Account</h3>";
-    $form .= "<p>Deleting accounts is a permanent action.";
-    $form .= "enter and confirm your password to delete your account?</p>";
-    $form .= '<input id="password" type="password" name="password" value=""></input>';
-    $form .= '<label>Confirm Password<label>';
-    $form .= '<input id="confirm" type="password" name="confirm" value=""></input>';
-    $form .= '<input id="submit" type="submit" name="submit" value="Yes, delete my account"></input>';
-
-    return $form;
+    $text = "<p>Deleting accounts is a permanent action.";
+    $text .= "Are you sure you want to delete your account?</p>";
 
   }
 

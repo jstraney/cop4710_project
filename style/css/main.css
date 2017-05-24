@@ -112,3 +112,35 @@ a:hover {
   cursor: pointer;
   color: #AA7744;
 }
+
+/* basic form stuff */
+form {
+  margin: 0 auto;
+}
+
+input, form {
+  max-width: 500px;
+  display: block;
+}
+
+input[type=text], input[type=email], input[type=password] {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+input[type=submit] {
+  margin: 10px auto 20px;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border: none;
+  background-color: #FF6644;
+  color: #FFFFFF;
+  padding: 5px 8px;
+  font-size: 14px;
+}
+
+input[type=submit]:hover {
+  cursor: pointer;
+  background-color: #AA9944;
+}

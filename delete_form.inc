@@ -5,6 +5,8 @@
 // user with the id in the url).
 
 $site_root = $configs['site_root'];
+include "includes/classes/{$resource_name}_controller.inc";
+$controller = new $controller_class();
 
 ?>
 
@@ -15,12 +17,10 @@ its contents to. It is important that we use POST requests because they are not
 cached by browsers like GET requests.
 -->
 
-<h3>Delete [entity-type]</h3>
+<form method="POST" action="<?php echo $site_root ?>/delete.php">
 
-<form method="POST" action="<?php echo $site_root ?>delete.php">
-
-  <p>Deleting this is permananent and cannot be undone.</p>
-  
-  <input type="submit">Delete Permenantly</input>
+  <?php
+  echo $controller->get_delete_form(); 
+  ?>
 
 </form>

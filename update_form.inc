@@ -5,6 +5,8 @@
 // user with the id in the url).
 
 $site_root = $configs['site_root'];
+include "includes/classes/{$resource_name}_controller.inc";
+$controller = new $controller_class();
 
 ?>
 
@@ -14,14 +16,10 @@ php is echoed inot the action of the form, which tells the form which php script
 its contents to. It is important that we use POST requests because they are not
 cached by browsers like GET requests.
 -->
+<form method="POST" action="<?php echo $site_root ?>/update.php">
 
-<h3>Edit [entity-type]</h3>
-
-<form method="POST" action="<?php echo $site_root ?>update.php">
-  <!-- tricky part. get fields we can update for this entity -->
-
-  <!-- take those fields and echo them out as <input> tags in html -->
-  
-  <input type="submit">Commit Change!</input>
+  <?php
+  echo $controller->get_edit_form(); 
+  ?>
 
 </form>
