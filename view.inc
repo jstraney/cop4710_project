@@ -8,6 +8,6 @@
 
 <div class="entity-record">
 
-<!-- tricky part, use results from sql's query to populate this div -->
+  <?php  ?>
 
 </div>
