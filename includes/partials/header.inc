@@ -10,6 +10,9 @@ $site_root = $configs['site_root'];
 
 ?>
 <div id="header">
+  <a href="<?php echo $site_root; ?>/">
+    <img class="logo" src="<?php echo $site_root; ?>/res/icons/top_logo.png"></img>
+  </a>
   <!-- These will login/logout actions -->
   <ul class="menu user">
     <?php
