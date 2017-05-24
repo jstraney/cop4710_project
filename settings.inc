@@ -12,10 +12,11 @@ $configs['site_root'] = "http://localhost/cop4710_project";
 // to have restricted permissions to the 'other' user (in octal 0700)
 // This is a class project, so I don't care...
 $configs['connection'] = array(
-  'db' => 'example_database',
+  'db' => 'event',
+  'host' => 'localhost',
   'port' => '3600',
-  'user' => 'example_user',
-  'password' => 'password_here',
+  'user' => 'root',
+  'password' => '',
   'driver' => 'mysql',
 );
 
