@@ -28,6 +28,14 @@ body {
   z-index: 2;
 }
 
+#header > a > img.logo {
+  margin-top: 8px;
+  margin-left: 10px;
+  float: left;
+  height: 36px;
+  width: 36px;
+}
+
 #main-view {
   max-width: 800px;
   margin: 160px auto 10px;
@@ -69,12 +77,12 @@ ul.menu {
 
 ul.menu > li {
   display: inline;
-  padding-right: 5px;
+  padding-right: 10px;
 }
 
 ul.menu.user {
   float: right;
-  margin-top: 5px;
+  margin-top: 8px;
   margin-right: 5px;
 }
 
