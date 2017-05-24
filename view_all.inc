@@ -1,10 +1,15 @@
-<?php
-// present a list of entities in the database according to type.
-
-?>
-
 <div class="entity-record-list">
 
-<!-- tricky part, use results from sql's query to populate this div -->
+<?php
+
+include "includes/classes/{$resource_name}_controller.inc";
+
+$controller = new $controller_class();
+
+$content = $controller->view_all(array());
+
+echo $content;
+
+?>
 
 </div>

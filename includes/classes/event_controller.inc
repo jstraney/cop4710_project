@@ -1,12 +1,8 @@
 <?php
 
 include "entity_controller.inc";
-include "pdo.inc";
 
 class EventController extends EntityController {
-
-  protected $pdo;
-  protected $type = "user";
 
   private $create_query = "";
   private $view_query = "";
@@ -16,52 +12,66 @@ class EventController extends EntityController {
 
   public function __construct() {
 
-    $this->pdo = new SupPDO(); 
+    $this->pdo = new SupPDO();
 
   }
 
   public function create($params) {
-    // get fields from params
+
 
   }
 
-  public function view($params) { 
+  public function view($params) {
 
-    // get id from params 
-    if (isset($params['id'])) {
-      $id = $params['id'];
-    }
-  
   }
 
   public function view_all($params) {
-
-    if (isset($params['page_range'])) {
-      $pages = $params['page_range'];
-    }
 
   }
 
   public function update($params) {
 
-    // get the id and fields.
-    if (isset($params['id'])) {
-      $id = $params['id'];
-    }
-
-    if (isset($params['fields'])) {
-      $fields = $params['fields'];
-    }
-
-    // get each field from fields
-
   }
 
   public function delete($params) {
 
-    if (isset($params['id'])) {
-      $id = $params['id'];
-    }
+  }
+
+  public function get_create_form () {
+
+    $text = "<h3>Create Event</h3>";
+    $form = '<label>Event Title</label>';
+    $form .= '<input id="name" type="text" name="name" value=""></input>';
+    $form .= '<label>Location</label>';
+    $form .= '<p>{jquery location picker widget will go here}</p>';
+    $form .= '<label>Time</label>';
+    $form .= '<input id="org" type="text" name="org" value=""></input>';
+    $form .= '<input id="submit" type="submit" name="submit" value="Create Event!"></input>';
+
+    return $form;
+
+  }
+
+  public function get_edit_form () {
+
+    $text = "<h3>Edit Event</h3>";
+    $form = '<label>Event Title</label>';
+    $form .= '<input id="name" type="text" name="name" value=""></input>';
+    $form .= '<label>Location</label>';
+    $form .= '<p>{jquery location picker widget will go here}</p>';
+    $form .= '<label>Time</label>';
+    $form .= '<input id="org" type="text" name="org" value=""></input>';
+    $form .= '<input id="submit" type="submit" name="submit" value="Create Event!"></input>';
+
+    return $form;
+
+  }
+
+  public function get_delete_form () {
+
+    $text = "<h3>Delete Event</h3>";
+    $text .= "<p>Deleting events is a permanent action.";
+    $text .= "Are you sure you want to delete this event?</p>";
 
   }
 

@@ -1,55 +1,41 @@
 <?php
-// and passes parameters (e.g. ['type' => 'user', 'id'=> '12', 'action' => 'update'].
-// to the PDO object to perform a query. It's useful to separate the controller from
-// the PDO because we may want to perform queries on our database that do not involve
-// CRUD operations.
-class EntityController {
+
+include_once "pdo.inc";
+
+// the controller stores its own query strings and uses a pdo object to execute the
+// queries on the database.
+abstract class EntityController {
 
   // pdo object
-  private $pdo;
+  protected $pdo;
 
-  public function __construct() {
+  // entity type
+  protected $type;
 
-    // initiate the PDO
-
-
-  }
+  // each of the methods below takes an associative array called $params
 
   // the create, view, update, delete methods pass arguments to the PDO
-  public function create($type, $fields) {
 
-  }
+  // inserts an entity into the property table
+  abstract public function create($params);
 
   // selects a single entity of $type using $id
   // returns an associative array of its fields, as well as rendering instructions
-  public function view($type, $id) {
+  abstract public function view($params);
 
-    $render_array = array();
+  // selects a range of entities
+  abstract public function view_all($params);
 
-    return $render_array;
+  // updates an entity based on id
+  abstract public function update($params);
 
-  }
+  // deletes an entity record from the table.
+  abstract public function delete($params);
 
-  // selects a range of entities of $type. uses an array of size 2 $pages
-  // to select a range of entities
-  public function view_all($type, $pages) {
-
-    $render_array_list = array();
-
-    // use pdo to get list of entities
-    // append entity render array to list
-
-    return $render_array;
-
-  }
-
-  public function update($type, $id, $fields) {
-
-  }
-
-  public function delete($type, $id) {
-
-  }
+  // each entity provides a form for the actions
+  abstract public function get_create_form();
+  abstract public function get_edit_form();
+  abstract public function get_delete_form();
 
 }
 ?>

@@ -13,6 +13,9 @@ global $user;
 
 include "settings.inc";
 include "includes/helpers.inc";
+include "includes/classes/router.inc";
+
+$router = new Router();
 
 $site_root = $configs['site_root'];
 
@@ -31,7 +34,20 @@ $site_root = $configs['site_root'];
   // the main view will be included here based on the routers interpretation
   // of the url. I've actually 'cut' off the part of the url we need and put
   // it in the script as GET parameters using the .htaccess file
-    console_log($_GET);
+  $router->decode_requested_route();
+
+  if ($router->matches_route()) {
+
+    $partial = $router->get_partial();
+
+    $resource_name = $router->get_resource_name();
+
+    $controller_class = $router->get_controller_class();
+
+    include "{$partial}.inc";
+
+  }
+
   ?>
   </div>
   <?php include "includes/partials/footer.inc"; ?>

@@ -1,13 +1,17 @@
-<?php
-// partial template for viewing a single entity (e.g. university page, event, a student);
-// compare this to 'view_all' which will pull in a list.
-
-// define any necessary variables here.
-
-?>
-
 <div class="entity-record">
 
-  <?php  ?>
+<?php
+
+include "includes/classes/{$resource_name}_controller.inc";
+
+console_log($partial);
+
+$controller = new $controller_class();
+
+$content = $controller->view_all(array());
+
+echo $content;
+
+?>
 
 </div>
