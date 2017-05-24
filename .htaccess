@@ -6,5 +6,5 @@
     RewriteEngine On
     RewriteCond %{REQUEST_FILENAME} !-f
     # rewrite the url, but take the original as GET request parameters.
-    RewriteRule (.*)|!\.(js|pdf|ico|jpg|gif|css|rar|zip|png|tar|\.gz)$ index.php?q=$1 [L]
+    RewriteRule (.*)$ index.php?q=$1 [L]
 </IfModule>
