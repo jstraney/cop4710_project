@@ -20,11 +20,26 @@ class EntityController {
 
   }
 
+  // selects a single entity of $type using $id
+  // returns an associative array of its fields, as well as rendering instructions
   public function view($type, $id) {
+
+    $render_array = array();
+
+    return $render_array;
 
   }
 
-  public function view_all($type) {
+  // selects a range of entities of $type. uses an array of size 2 $pages
+  // to select a range of entities
+  public function view_all($type, $pages) {
+
+    $render_array_list = array();
+
+    // use pdo to get list of entities
+    // append entity render array to list
+
+    return $render_array;
 
   }
 
