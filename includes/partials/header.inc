@@ -19,7 +19,7 @@ $site_root = $configs['site_root'];
     // check if user is anonymous, or 0
     if (!isset($user)) {
       // echo the login and create account links if the user is anonymous
-      echo '<li><a href="'.$site_root.'/login">Login</a></li>';
+      echo '<li><a href="'.$site_root.'/sign-in">Sign In</a></li>';
       echo '<li><a href="'.$site_root.'/account/create">New Account</a></li>';
     } else {
       // echo links available to the user

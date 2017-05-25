@@ -12,14 +12,16 @@ function console_log($var) {
 // encrypts a plain-text password into a hash before inserting into database
 function encrypt_password($pw) {
 
+  $hash = password_hash($pw, PASSWORD_BCRYPT , array('cost' => 12));
+
   return $hash;
 
 }
 
-// decrypts a hashed password to check against a plain-text one.
-function decrypt_password($hash) {
+// checks a hashed password against a plain-text one.
+function check_password($pw, $hash) {
 
-  return $pw;
+  return password_verify($pw, $hash);
 
 }
 

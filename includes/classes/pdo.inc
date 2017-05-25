@@ -50,17 +50,17 @@ class SupPDO extends PDO {
   }
 
   // provide faster prepared statement. returns associative array.
-  public function preparedQuery () {
+  public function prepared_query ($query, $params) {
 
     $stmt = $this->prepare($query); 
 
-    foreach ($parameters as $key => $parameter) {
+    foreach ($params as $key => $parameter) {
 
       $stmt->bindParam($key, $parameter);
 
     }
 
-    $stmt->execute($parameters);
+    $stmt->execute($params);
 
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 
