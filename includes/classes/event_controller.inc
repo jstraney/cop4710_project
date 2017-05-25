@@ -1,6 +1,7 @@
 <?php
 
-include "entity_controller.inc";
+include_once "entity_controller.inc";
+include "comment_controller.inc";
 
 class EventController extends EntityController {
 
@@ -46,6 +47,7 @@ class EventController extends EntityController {
     $form .= '<p>{jquery location picker widget will go here}</p>';
     $form .= '<label>Time</label>';
     $form .= '<input id="org" type="text" name="org" value=""></input>';
+    $form .= '<input id="type" type="hidden" name="type" value="event"></input>';
     $form .= '<input id="submit" type="submit" name="submit" value="Create Event!"></input>';
 
     return $form;
@@ -61,6 +63,7 @@ class EventController extends EntityController {
     $form .= '<p>{jquery location picker widget will go here}</p>';
     $form .= '<label>Time</label>';
     $form .= '<input id="org" type="text" name="org" value=""></input>';
+    $form .= '<input id="type" type="hidden" name="type" value="event"></input>';
     $form .= '<input id="submit" type="submit" name="submit" value="Create Event!"></input>';
 
     return $form;
@@ -72,6 +75,8 @@ class EventController extends EntityController {
     $text = "<h3>Delete Event</h3>";
     $text .= "<p>Deleting events is a permanent action.";
     $text .= "Are you sure you want to delete this event?</p>";
+    $form .= '<input id="type" type="hidden" name="type" value="event"></input>';
+    $form .= '<input id="submit" type="submit" name="submit" value="Delete Event"></input>';
 
   }
 
