@@ -55,8 +55,8 @@ class EventController extends EntityController {
     $form .= '<label>Location</label>';
     $form .= '<input id="location" type="text" name="location" value=""></input>';
     $form .= '<div id="map"></div>';
-    $form .= '<input style="display:none "id="lon" type="text" name="lon" value=""></input>';
-    $form .= '<input style="display:none" id="lat" type="text" name="lat" value=""></input>';
+    $form .= '<input id="lon" type="text" name="lon" value=""></input>';
+    $form .= '<input id="lat" type="text" name="lat" value=""></input>';
     $form .= '<label>Time</label>';
     $form .= '<input id="org" type="text" name="org" value=""></input>';
     $form .= '<input id="type" type="hidden" name="type" value="event"></input>';
