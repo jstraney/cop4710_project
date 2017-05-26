@@ -144,3 +144,8 @@ input[type=submit]:hover {
   cursor: pointer;
   background-color: #AA9944;
 }
+
+div#map {
+  height: 400px;
+  width: 100%;
+}
