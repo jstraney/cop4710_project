@@ -1,6 +1,6 @@
 <?php
 
-include "entity_controller.inc";
+include_once "entity_controller.inc";
 
 class UserController extends EntityController {
 
@@ -9,6 +9,8 @@ class UserController extends EntityController {
   private $view_all_query = "";
   private $update_query = "";
   private $delete_query = "";
+
+  private $auth_query = "SELECT u.id, u.hash FROM users u WHERE e-mail = ? LIMIT 1;";
 
   public function __construct() {
 
@@ -89,6 +91,15 @@ class UserController extends EntityController {
     $form .= '<input id="submit" type="submit" name="submit" value="Yes, delete my account"></input>';
 
     return $form;
+
+  }
+
+  // this has its own method to get a users id and hash by email
+  public function get_auth_by_email($email) {
+
+    $query = $this->auth_query;
+
+    return $this->pdo->prepared_query($query, array(":email" => $email));
 
   }
 

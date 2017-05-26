@@ -22,8 +22,11 @@ $site_root = $configs['site_root'];
 ?>
 <!DOCTYPE html>
 <html>
+
   <?php include "includes/partials/head.inc"; ?>
+
   <body>
+
   <?php include "includes/partials/header.inc"; ?>
 
   <!-- conditionally call in content -->

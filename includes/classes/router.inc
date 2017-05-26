@@ -64,6 +64,10 @@ class Router {
 
     $this->routes['GET']['/universities/'] = array('view_all', 'UniversityController', 'university');;
 
+    // session controller isn't exactly resourceful (but it could be!)
+    $this->routes['GET']['/sign-in/'] = array('create_form', 'SessionController', 'session');
+    $this->routes['GET']['/sign-out/'] = array('delete_form', 'SessionController', 'session');
+
   }
 
   // break url into tokens. determine if request is GET or POST

@@ -1,6 +1,6 @@
 <?php
 
-include "entity_controller.inc";
+include_once "entity_controller.inc";
 
 class CommentController extends EntityController {
 
