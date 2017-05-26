@@ -1,5 +1,5 @@
 <?php
-
+session_start();
 include "settings.inc";
 include "includes/helpers.inc";
 
@@ -29,7 +29,20 @@ $params = array();
 
 $params += $_POST;
 
+// we need a type and an action to perform (e.g. user->create, event->delete)
+if (!isset($params['type']) || !isset($params['action'])) {
+
+  // redirect
+  header("location: $site_root ");
+
+}
+
+// name of the resource (e.g. user, event, rso)
 $resource_name = $params['type'];
+
+// name of the action or entity method (e.g. create, update, delete)
+$action = $params['action'];
+
 $controller_class = ucfirst($resource_name) . "Controller";
 
 // include the entity controller class
@@ -38,7 +51,7 @@ include "includes/classes/{$resource_name}_controller.inc";
 $controller = new $controller_class();
 
 // call the proper method on the object 
-$controller->create($params);
+$controller->{$action}($params);
 
 // do a redirect to somewhere...
 // header("location: $site_root ");
