@@ -16,14 +16,13 @@ abstract class EntityController {
 
   // the create, view, update, delete methods pass arguments to the PDO
 
-  // inserts an entity into the property table
+  // inserts an entity into the proper table
   abstract public function create($params);
 
-  // selects a single entity of $type using $id
-  // returns an associative array of its fields, as well as rendering instructions
+  // returns the view of a single entity
   abstract public function view($params);
 
-  // selects a range of entities
+  // returns the view of multiple entities in a list 
   abstract public function view_all($params);
 
   // updates an entity based on id
@@ -33,9 +32,9 @@ abstract class EntityController {
   abstract public function delete($params);
 
   // each entity provides a form for the actions
-  abstract public function get_create_form();
-  abstract public function get_edit_form();
-  abstract public function get_delete_form();
+  abstract public function get_create_form($params);
+  abstract public function get_edit_form($params);
+  abstract public function get_delete_form($params);
 
 }
 ?>

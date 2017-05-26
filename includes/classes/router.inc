@@ -25,12 +25,14 @@ class Router {
   // name of the resource to use. chosen from the routes
   private $resource_name;
 
-  // the router gets a partial (an edit form, a page with info, a deletion form)
-  private $partial;
+  // the router maps a route to an action, or method, on a controller class.
+  private $action;
 
-  // the partial uses a controller to populate it (different forms have different fields)
-  // for example, adding a new user will use a different form than a form to add an event.
+  // the controller which will call this action method.
   private $controller;
+
+  // simply the GET request split at the /. "user/12" is array("user", "12");
+  private $arguments;
 
   // helper method to generate resourceful routes.  makes 5 routes for the resource
   // new, view, view_all, delete, edit
@@ -39,9 +41,9 @@ class Router {
     $class = ucfirst($resource_name);
 
     return array(
-      "/$resource_name\/new/" => array('create_form', "{$class}Controller", $resource_name),
-      "/$resource_name\/([0-9]+)\/edit/" => array('update_form', "{$class}Controller", $resource_name),
-      "/$resource_name\/([0-9]+)\/delete/" => array('delete_form', "{$class}Controller", $resource_name),
+      "/$resource_name\/new/" => array('get_create_form', "{$class}Controller", $resource_name),
+      "/$resource_name\/([0-9]+)\/edit/" => array('get_edit_form', "{$class}Controller", $resource_name),
+      "/$resource_name\/([0-9]+)\/delete/" => array('get_delete_form', "{$class}Controller", $resource_name),
       "/$resource_name\/([0-9]+)/" => array('view', "{$class}Controller", $resource_name),
       "/{$resource_name}s/" => array('view_all', "{$class}Controller", $resource_name),
     );
@@ -65,8 +67,8 @@ class Router {
     $this->routes['GET']['/universities/'] = array('view_all', 'UniversityController', 'university');;
 
     // session controller isn't exactly resourceful (but it could be!)
-    $this->routes['GET']['/sign-in/'] = array('create_form', 'SessionController', 'session');
-    $this->routes['GET']['/sign-out/'] = array('delete_form', 'SessionController', 'session');
+    $this->routes['GET']['/sign-in/'] = array('get_create_form', 'SessionController', 'session');
+    $this->routes['GET']['/sign-out/'] = array('get_delete_form', 'SessionController', 'session');
 
   }
 
@@ -95,9 +97,10 @@ class Router {
 
         $this->found_match = TRUE;
 
-        $this->partial = $args[0];
+        $this->action = $args[0];
         $this->controller = $args[1];
         $this->resource_name = $args[2];
+        $this->arguments = explode('/', $route);
 
         break;
 
@@ -115,10 +118,13 @@ class Router {
 
   }
 
-  // perform action. possibly by handing parameters over to some other class
-  function get_partial () {
+  // gets the action or method of the controller that is mapped to the route
+  // for example (view, view_all, get_edit_form). This is usually something
+  // fullfilled by a GET request. For POSTing data, the controller will return
+  // a form through this action.
+  function get_action () {
 
-    return $this->partial; 
+    return $this->action; 
 
   }
 
@@ -131,6 +137,13 @@ class Router {
   function get_controller_class () {
 
     return $this->controller;
+
+  }
+
+
+  function get_arguments() {
+
+    return $this->arguments;
 
   }
 

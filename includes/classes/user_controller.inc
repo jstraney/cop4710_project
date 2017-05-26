@@ -20,14 +20,21 @@ class UserController extends EntityController {
 
   public function create($params) {
 
-
   }
 
   public function view($params) {
 
+    $txt = "<h3>User Profile!</h3>";    
+
+    return $txt;
+
   }
 
   public function view_all($params) {
+
+    $txt = "<h3>All Users</h3>";    
+
+    return $txt;
 
   }
 
@@ -39,9 +46,10 @@ class UserController extends EntityController {
 
   }
 
-  public function get_create_form () {
+  public function get_create_form ($params) {
 
-    $form = '<h3>Create Account</h3>';
+    $form = '<form>';
+    $form .= '<h3>Create Account</h3>';
     $form .= '<label>First Name</label>';
     $form .= '<input id="first-name" type="text" name="first-name" value=""></input>';
     $form .= '<label>Last Name</label>';
@@ -55,13 +63,16 @@ class UserController extends EntityController {
     $form .= '<label>Confirm Password<label>';
     $form .= '<input id="confirm" type="password" name="confirm" value=""></input>';
     $form .= '<input id="submit" type="submit" name="submit" value="Sign Up"></input>';
+    $form .= '</form>';
 
     return $form;
+
   }
 
-  public function get_edit_form () {
+  public function get_edit_form ($params) {
 
-    $form = '<h3>Edit Account</h3>';
+    $form = '<form>';
+    $form .= '<h3>Edit Account</h3>';
     $form .= '<label>First Name</label>';
     $form .= '<input id="first-name" type="text" name="first-name" value=""></input>';
     $form .= '<label>Last Name</label>';
@@ -75,20 +86,23 @@ class UserController extends EntityController {
     $form .= '<label>Confirm Password<label>';
     $form .= '<input id="confirm" type="password" name="confirm" value=""></input>';
     $form .= '<input id="submit" type="submit" name="submit" value="Change Info"></input>';
+    $form .= '</form>';
 
     return $form;
 
   }
 
-  public function get_delete_form () {
+  public function get_delete_form ($params) {
 
-    $form = "<h3>Delete Account</h3>";
+    $form = '<form>';
+    $form .= "<h3>Delete Account</h3>";
     $form .= "<p>Deleting accounts is a permanent action.";
-    $form .= "enter and confirm your password to delete your account?</p>";
+    $form .= " enter and confirm your password to delete your account.</p>";
     $form .= '<input id="password" type="password" name="password" value=""></input>';
     $form .= '<label>Confirm Password<label>';
     $form .= '<input id="confirm" type="password" name="confirm" value=""></input>';
     $form .= '<input id="submit" type="submit" name="submit" value="Yes, delete my account"></input>';
+    $form .= '</form>';
 
     return $form;
 

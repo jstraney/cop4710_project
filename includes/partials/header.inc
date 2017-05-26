@@ -10,9 +10,11 @@ $site_root = $configs['site_root'];
 
 ?>
 <div id="header">
+
   <a href="<?php echo $site_root; ?>/">
     <img class="logo" src="<?php echo $site_root; ?>/res/icons/top_logo.png"></img>
   </a>
+
   <!-- These will login/logout actions -->
   <ul class="menu user">
     <?php
@@ -20,7 +22,7 @@ $site_root = $configs['site_root'];
     if (!isset($user)) {
       // echo the login and create account links if the user is anonymous
       echo '<li><a href="'.$site_root.'/sign-in">Sign In</a></li>';
-      echo '<li><a href="'.$site_root.'/account/create">New Account</a></li>';
+      echo '<li><a href="'.$site_root.'/user/new">New Account</a></li>';
     } else {
       // echo links available to the user
       echo '<li><a href="'.$site_root.'/logout">Logout</a></li>';

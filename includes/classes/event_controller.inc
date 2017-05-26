@@ -38,7 +38,7 @@ class EventController extends EntityController {
 
   }
 
-  public function get_create_form () {
+  public function get_create_form ($params) {
 
     $text = "<h3>Create Event</h3>";
     $form = '<label>Event Title</label>';
@@ -54,7 +54,7 @@ class EventController extends EntityController {
 
   }
 
-  public function get_edit_form () {
+  public function get_edit_form ($params) {
 
     $text = "<h3>Edit Event</h3>";
     $form = '<label>Event Title</label>';
@@ -70,7 +70,7 @@ class EventController extends EntityController {
 
   }
 
-  public function get_delete_form () {
+  public function get_delete_form ($params) {
 
     $text = "<h3>Delete Event</h3>";
     $text .= "<p>Deleting events is a permanent action.";
