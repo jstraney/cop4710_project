@@ -5,18 +5,27 @@ session_start();
 // user object 
 global $user;
 
-// TODOS:
-// get router class
-// use it to determine the route
-// decipher the route and perform an action. 
-// end TODOS
+// check if the uid is set in the session
+if (isset($_SESSION['uid'])) {
 
+  $uid = $_SESSION['uid'];
+  // if it is, get the current user.
+  // get_user_by_id(); <-- this will be defined somewhere, maybe user_controller...
+
+}
+
+// include the apps settings
 include "settings.inc";
+// include helper functions 
 include "includes/helpers.inc";
+// include the router class 
 include "includes/classes/router.inc";
 
+// create a new router
 $router = new Router();
 
+// get site root. this is in configuration because if an app is ever deployed,
+// we can change it in just one place
 $site_root = $configs['site_root'];
 
 ?>
@@ -53,7 +62,7 @@ $site_root = $configs['site_root'];
     // UserController, EventController, UniversityController
     $controller_class = $router->get_controller_class();
 
-    // array('user', '12'), array('universities'). Note there is some redundancy here
+    // '/user/12' = array('user', '12'), '/universities' = array('universities'). Note there is some redundancy here
     // but I think it makes sense to use non-associative arrays here (order is implied)
     $arguments = $router->get_arguments();
 

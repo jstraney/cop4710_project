@@ -1,6 +1,20 @@
 <?php
+// This is the script that all the forms submit to. each form defines
+// a hidden 'type' and 'action' input. to tell this script the entity
+// controller and the method for it to call 
 session_start();
+
+global $user;
+
+if (isset($_SESSION['uid'])) {
+  $uid = $_SESSION['uid'];
+  // $user = get_user_by_id($uid) <-- define this somewhere, maybe in user_controller.
+}
+
+// get global configurations
 include "settings.inc";
+
+// get helper functions
 include "includes/helpers.inc";
 
 $site_root = $configs['site_root'];
@@ -20,6 +34,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 // redirect if the domain is incorrect, or if the method is GET
 if ($method !== "POST" || !$from_domain) {
 
+  // go to homepage
   header("location: /");
 
 }
@@ -43,14 +58,16 @@ $resource_name = $params['type'];
 // name of the action or entity method (e.g. create, update, delete)
 $action = $params['action'];
 
+// proper case the resource name to get class name. 'user' -> 'UserController'
 $controller_class = ucfirst($resource_name) . "Controller";
 
-// include the entity controller class
+// include the entity controller class file
 include "includes/classes/{$resource_name}_controller.inc";
 
+// instantiate an object of the class using class name string
 $controller = new $controller_class();
 
-// call the proper method on the object 
+// call the proper method on the object using the action string 
 $controller->{$action}($params);
 
 // do a redirect to somewhere...
