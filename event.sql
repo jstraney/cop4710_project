@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: May 29, 2017 at 09:54 PM
+-- Generation Time: May 29, 2017 at 10:05 PM
 -- Server version: 10.1.21-MariaDB
 -- PHP Version: 5.6.30
 
@@ -99,7 +99,8 @@ CREATE TABLE `users` (
   `user_id` int(11) NOT NULL,
   `university` varchar(30) NOT NULL,
   `hash` varchar(60) NOT NULL,
-  `user_name` varchar(30) NOT NULL DEFAULT 'NOT NULL'
+  `user_name` varchar(30) NOT NULL DEFAULT 'NOT NULL',
+  `role` enum('STU','ADM','SA','') NOT NULL DEFAULT 'STU'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
