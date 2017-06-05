@@ -40,9 +40,9 @@ class Router {
     $class = ucfirst($resource_name);
 
     return array(
-      "/$resource_name\/new/" => array('new', "{$class}Controller", $resource_name),
+      "/$resource_name\/new/" => array('make', "{$class}Controller", $resource_name),
       "/$resource_name\/([0-9]+)\/edit/" => array('edit', "{$class}Controller", $resource_name),
-      "/$resource_name\/([0-9]+)\/delete/" => array('delete', "{$class}Controller", $resource_name),
+      "/$resource_name\/([0-9]+)\/delete/" => array('drop', "{$class}Controller", $resource_name),
       "/$resource_name\/([0-9]+)/" => array('view', "{$class}Controller", $resource_name)
     );
 
@@ -78,8 +78,8 @@ class Router {
     $this->routes['GET']['/user\/verify\/[0-9a-f]{60}/'] = array('verify', 'UserController', 'user');
 
     // session controller isn't exactly resourceful (but it could be!)
-    $this->routes['GET']['/login/'] = array('new', 'SessionController', 'session');
-    $this->routes['GET']['/logout/'] = array('delete', 'SessionController', 'session');
+    $this->routes['GET']['/login/'] = array('make', 'SessionController', 'session');
+    $this->routes['GET']['/logout/'] = array('drop', 'SessionController', 'session');
 
     $this->routes['POST']['/session\/create/'] = array('create', 'SessionController', 'session');
     $this->routes['POST']['/session\/destroy/'] = array('destroy', 'SessionController', 'session');

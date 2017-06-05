@@ -35,9 +35,9 @@ class CommentController extends EntityController {
 
   }
 
-  public function new ($params) {
+  public function make($params) {
 
-    include get_entity_partial('comment','new');
+    include get_entity_partial('comment','make');
 
     return $template;
 
@@ -51,9 +51,9 @@ class CommentController extends EntityController {
 
   }
 
-  public function delete ($params) {
+  public function drop ($params) {
 
-    include get_entity_partial('comment','delete');
+    include get_entity_partial('comment','drop');
 
     return $template;
 

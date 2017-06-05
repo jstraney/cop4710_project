@@ -15,10 +15,6 @@ abstract class EntityController {
 
   }
 
-  // gets readable fields from entity. is rendered by an adapter
-  public function read ($params) {
-
-  }
 
   public function update ($params) {
 
@@ -28,7 +24,7 @@ abstract class EntityController {
 
   }
 
-  public function new ($params) {
+  public function make($params) {
 
   }
 
@@ -36,7 +32,7 @@ abstract class EntityController {
 
   }
 
-  public function delete ($params) {
+  public function drop ($params) {
 
   }
 }

@@ -1,6 +1,6 @@
 <?php
 $template = <<<EOT
-<h1>Whoops!</h1>
+<h2>Whoops!</h2>
 <p>No event was found matching that id.</p>
 EOT;
 ?>

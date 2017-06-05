@@ -88,7 +88,7 @@ class RSOController extends EntityController {
      
   }
 
-  public function new ($params) {
+  public function make ($params) {
 
     global $configs;
 
@@ -102,7 +102,7 @@ class RSOController extends EntityController {
     $role = $user->role;
      
 
-    include get_entity_partial('rso', 'new');
+    include get_entity_partial('rso', 'make');
 
     return $template;
 
@@ -124,9 +124,9 @@ class RSOController extends EntityController {
 
   }
 
-  public function delete ($params) {
+  public function drop ($params) {
 
-    include get_entity_partial("rso", "delete");
+    include get_entity_partial("rso", "drop");
 
     return $template;
 

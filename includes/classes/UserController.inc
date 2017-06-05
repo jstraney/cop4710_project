@@ -220,13 +220,13 @@ class UserController extends EntityController {
      
   }
 
-  public function new ($params) {
+  public function make ($params) {
 
     global $configs;
 
     $site_root = $configs['site_root'];
 
-    include get_entity_partial("user", "new");
+    include get_entity_partial("user", "make");
 
     return $template;
 
@@ -286,7 +286,7 @@ class UserController extends EntityController {
 
   }
 
-  public function delete ($params) {
+  public function drop ($params) {
 
     global $configs;
 
@@ -294,7 +294,7 @@ class UserController extends EntityController {
 
     $id = $params[1];
 
-    include get_entity_partial("user", "delete");
+    include get_entity_partial("user", "drop");
 
     return $template;
 

@@ -23,6 +23,55 @@ class EventController extends EntityController {
 
   public function create($params) {
 
+    global $configs;
+
+    $site_root = $configs['site_root'];
+
+    global $user;
+
+    // if no user is logged in
+    if (!isset($user)) {
+
+      // go to home page.
+      go_home();
+
+    }
+
+    $role = $user->role;
+
+    $event_name = isset($params['title'])? $params['event-title']: "";
+    $event_loc_name = isset($params['loc-name'])? $params['loc-name']: "";
+    $event_street = isset($params['street'])? $params['street']: ""; 
+    $event_zip = isset($params['zip'])? $params['zip']: "";
+    $event_city = isset($params['city'])? $params['city']: "";
+    $state = isset($params['state'])? $params['state']: ""; 
+
+    // calculate duration from start and end time.
+    $event_duration = isset($params['duration'])? $params['duration']: "";
+    $event_time = isset($params['time'])? $params['time']: "";
+    $event_long = isset($params['lon'])? $params['lon']: "";
+    $event_lat = isset($params['lat'])? $params['lat']: "";
+    $event_org = isset($params['organization'])? $params['organization']: "";
+    $hosted_by_rso;
+
+    $query = $this->create_query;
+
+    $this->db->prepared_statement($query, array(
+      ":event_name" => $event_name,
+      ":event_loc_name" => $event_loc_name,
+      ":event_street" => $event_street,
+      ":event_zip" => $event_zip,
+      ":event_city" => $event_city,
+      ":state" => $state,
+      ":event_duration" => $event_duration,
+      ":event_time" => $event_time,
+      ":event_long" => $event_long,
+      ":event_lat" => $event_lat,
+      ":event_org" => $event_org,
+    ));
+
+    // just go home for now... figure out a redirect later.
+    go_home();
 
   }
 
@@ -30,6 +79,53 @@ class EventController extends EntityController {
 
     global $configs;
 
+    global $user;
+
+    // if no user is set, redirect to home-page
+    if (!isset($user)) {
+
+      go_home();
+
+    }
+
+    $role = $user->role;
+
+    $event_id = $params[1];
+
+    $query = $this->view_query;
+
+    $result = $this->db->prepared_query($query, array(
+      ":event_id" => $event_id,
+    ));
+
+    // no event was found with this event id
+    if (empty($result)) {
+
+      // return a the 404 partial associated with events.
+      include get_entity_partial('event', '404');
+
+      return $template;
+
+    }
+
+    // get first row from result.
+    $result = $result[0];
+
+    $event_name = $result['event_name'];
+    $event_loc_name = isset($result['loc-name'])? $result['loc-name']: "";
+    $event_street = isset($result['street'])? $result['street']: ""; 
+    $event_zip = isset($result['zip'])? $result['zip']: "";
+    $event_city = isset($result['city'])? $result['city']: "";
+    $state = isset($result['state'])? $result['state']: ""; 
+
+    // calculate duration from start and end time.
+    $event_duration = isset($result['duration'])? $result['duration']: "";
+    $event_time = isset($result['time'])? $result['time']: "";
+    $event_long = isset($result['lon'])? $result['lon']: "";
+    $event_lat = isset($result['lat'])? $result['lat']: "";
+    $event_org = isset($result['organization'])? $result['organization']: "";
+
+    // return the partial using the variable defined above.
     include get_entity_partial('event', 'view');
 
     return $template;
@@ -75,7 +171,7 @@ class EventController extends EntityController {
      
   }
 
-  public function new ($params) {
+  public function make ($params) {
 
     global $configs;
 
@@ -109,7 +205,7 @@ class EventController extends EntityController {
 
     // check if the user deleting this is has the permissions. 
     
-    include get_entity_partial('event', 'new');
+    include get_entity_partial('event', 'make');
 
     return $template;
 
@@ -146,7 +242,7 @@ class EventController extends EntityController {
 
   }
 
-  public function delete ($params) {
+  public function drop ($params) {
 
     global $configs;
 
@@ -156,7 +252,7 @@ class EventController extends EntityController {
 
     // check if the user deleting this is has the permissions. 
 
-    include get_entity_partial("event", "delete");
+    include get_entity_partial("event", "drop");
 
     return $template;
 

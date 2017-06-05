@@ -2,7 +2,7 @@
 
 $template = <<<EOT
 
-<form method="POST" action="event/{$id}/destroy">
+<form method="POST" action="{$site_root}/event/{$id}/destroy">
 
   <h2>Delete Event</h2>
 
@@ -12,7 +12,7 @@ $template = <<<EOT
   event will be lost.
   </p>
 
-  <input type="submit" value="Delete Event." ></input>
+  <input type="submit" value="Delete Event" ></input>
 
 </form>
 

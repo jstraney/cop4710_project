@@ -88,7 +88,7 @@ class UniversityController extends EntityController {
      
   }
 
-  public function new ($params) {
+  public function make ($params) {
 
     global $configs;
 
@@ -102,7 +102,7 @@ class UniversityController extends EntityController {
     $role = $user->role;
      
 
-    include get_entity_partial('university', 'new');
+    include get_entity_partial('university', 'make');
 
     return $template;
 
@@ -124,9 +124,9 @@ class UniversityController extends EntityController {
 
   }
 
-  public function delete ($params) {
+  public function drop ($params) {
 
-    include get_entity_partial("university", "delete");
+    include get_entity_partial("university", "drop");
 
     return $template;
 

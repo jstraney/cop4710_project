@@ -99,9 +99,9 @@ class SessionController extends EntityController {
 
   }
 
-  public function new ($params) {
+  public function make ($params) {
 
-    include get_entity_partial('session', 'new');
+    include get_entity_partial('session', 'make');
 
     return $template;
 
@@ -113,9 +113,9 @@ class SessionController extends EntityController {
 
   }
 
-  public function delete ($params) {
+  public function drop ($params) {
 
-    include get_entity_partial('session', 'delete');
+    include get_entity_partial('session', 'drop');
 
     return $template;
 

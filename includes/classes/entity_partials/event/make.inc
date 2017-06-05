@@ -1,15 +1,15 @@
 <?php
 
 $template = <<<EOT
-<form method="POST" action="event/new">
+<form method="POST" action="{$site_root}/event/new">
 
-  <h3>Edit Event</h3>
+  <h3>Create a New Event</h3>
 
   <label>Title</label>
-  <input name="title" type="text" value="{$event_name}"></input>
+  <input name="title" type="text"></input>
 
   <label>Location</label>
-  <input id="location" name="loc-name" type="text" value="{$event_location}"></input>
+  <input id="location" name="loc-name" type="text"></input>
 
   <div id="map">
   </div>
@@ -17,20 +17,23 @@ $template = <<<EOT
   <script src="{$site_root}/js/lib/jquery-locationpicker-plugin/locationpicker.jquery.js"></script>
   <script>app.makePicker();</script>
 
-  <input name="lon" type="hidden" value="{$event_long}"></input>
-  <input name="lat" type="hidden" value="{$event_lat}"></input>
+  <input name="lon" type="hidden"></input>
+  <input name="lat" type="hidden"></input>
 
   <label>City</label>
-  <input name="city" type="text" value="{$event_city}"></input>
+  <input name="city" type="text"></input>
 
   <label>State</label>
-  <input name="state" type="text" value="{$state}"></input>
+  <input name="state" type="text"></input>
 
   <label>Street Address</label>
-  <input name="street" type="text" value="{$event_street}"></input>
+  <input name="street" type="text"></input>
 
   <label>Zipcode</label>
-  <input name="zip" type="text" value="{$event_zip}"></input>
+  <input name="zip" type="text"></input>
+
+  <label>Who is hosting the event?</label>
+  <input name="organization" placeholder="organization" type="text"></input>
 
   <!-- todo: check if user is administrator any RSO's. if so, include the fields below -->
   <!-- if the event is not hosted by an RSO, it is put into a 'pending' state, which is changed by-->
@@ -49,7 +52,7 @@ $template = <<<EOT
   <label>Which RSO is it?</label>
   <select>
     <!-- todo: populate with RSO's administrated by the current user. -->
-    {$users_rsos}
+    {$user_rsos}
   </select>
 
   <input type="submit" value="Create Event"></input>
