@@ -80,8 +80,16 @@ class Router {
     // session controller isn't exactly resourceful (but it could be!)
     $this->routes['GET']['/login/'] = array('new', 'SessionController', 'session');
     $this->routes['GET']['/logout/'] = array('delete', 'SessionController', 'session');
+
     $this->routes['POST']['/session\/create/'] = array('create', 'SessionController', 'session');
     $this->routes['POST']['/session\/destroy/'] = array('destroy', 'SessionController', 'session');
+
+    // page routes. due to time constraints. I don't want to make CRUD routes for pages.
+    $this->routes['GET']['/privacy/'] = array('privacy', 'PageController', 'page');
+    $this->routes['GET']['/terms/'] = array('terms', 'PageController', 'page');
+    $this->routes['GET']['/about/'] = array('about', 'PageController', 'page');
+    $this->routes['GET']['/help/'] = array('help', 'PageController', 'page');
+    $this->routes['GET']['/.*/'] = array('home', 'PageController', 'page');
 
   }
 

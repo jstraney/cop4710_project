@@ -9,6 +9,7 @@ $site_root = $configs['site_root'];
   <ul class="menu">
     <h4>Top</h4>
     <li><a href="<?php echo $site_root; ?>/">Home</a></li>
+    <li><a href="<?php echo $site_root; ?>/about">About</a></li>
     <?php
     if (isset($user)) {
       echo '<li><a href="'.$site_root.'/logout">Logout</a></li>';
