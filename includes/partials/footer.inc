@@ -9,10 +9,15 @@ $site_root = $configs['site_root'];
   <ul class="menu">
     <h4>Top</h4>
     <li><a href="<?php echo $site_root; ?>/">Home</a></li>
-    <li><a href="<?php echo $site_root; ?>/login">Login</a></li>
-    <li><a href="<?php echo $site_root; ?>/user/create">New Account</a></li>
-    <!-- choose some of these with conditionals -->
-    <li><a href="<?php echo $site_root; ?>/logout">Logout</a></li>
+    <?php
+    if (isset($user)) {
+      echo '<li><a href="'.$site_root.'/logout">Logout</a></li>';
+    }
+    else {
+      echo '<li><a href="'.$site_root.'/login">Login</a></li>';
+      echo '<li><a href="'.$site_root.'/user/create">New Account</a></li>';
+    }
+    ?>
   </ul>
   <ul class="menu">
     <h4>View</h4>
