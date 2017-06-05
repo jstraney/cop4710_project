@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: May 31, 2017 at 05:26 PM
+-- Generation Time: Jun 06, 2017 at 12:06 AM
 -- Server version: 10.1.21-MariaDB
 -- PHP Version: 5.6.30
 
@@ -32,7 +32,7 @@ CREATE TABLE `comments` (
   `user_id` int(11) UNSIGNED NOT NULL,
   `comment` varchar(140) NOT NULL,
   `event_id` int(11) UNSIGNED NOT NULL,
-  `comment_id` int(10) UNSIGNED NOT NULL
+  `comment_id` int(11) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -128,8 +128,8 @@ ALTER TABLE `events`
 --
 ALTER TABLE `RSOs`
   ADD PRIMARY KEY (`rso_id`),
-  ADD KEY `rso_admin_id` (`rso_admin_id`),
-  ADD KEY `uni_id` (`uni_id`);
+  ADD KEY `uni_id` (`uni_id`),
+  ADD KEY `admin_id` (`rso_admin_id`);
 
 --
 -- Indexes for table `universities`
@@ -142,8 +142,7 @@ ALTER TABLE `universities`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`user_id`),
-  ADD KEY `uni_id` (`uni_id`),
-  ADD KEY `rso_id` (`rso_id`) USING BTREE;
+  ADD KEY `uni_id` (`uni_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -153,7 +152,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `comment_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `comment_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `events`
 --
@@ -170,6 +169,11 @@ ALTER TABLE `RSOs`
 ALTER TABLE `universities`
   MODIFY `uni_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 --
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `user_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+--
 -- Constraints for dumped tables
 --
 
@@ -177,8 +181,7 @@ ALTER TABLE `universities`
 -- Constraints for table `comments`
 --
 ALTER TABLE `comments`
-  ADD CONSTRAINT `event_id` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`),
-  ADD CONSTRAINT `user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
+  ADD CONSTRAINT `event_id` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`);
 
 --
 -- Constraints for table `events`
@@ -190,7 +193,7 @@ ALTER TABLE `events`
 -- Constraints for table `RSOs`
 --
 ALTER TABLE `RSOs`
-  ADD CONSTRAINT `rso_admin_id` FOREIGN KEY (`rso_admin_id`) REFERENCES `users` (`user_id`),
+  ADD CONSTRAINT `admin_id` FOREIGN KEY (`rso_admin_id`) REFERENCES `users` (`user_id`),
   ADD CONSTRAINT `uni_id` FOREIGN KEY (`uni_id`) REFERENCES `universities` (`uni_id`);
 
 --
