@@ -4,18 +4,20 @@
 // controller and the method for it to call 
 session_start();
 
-global $user;
-
-if (isset($_SESSION['uid'])) {
-  $uid = $_SESSION['uid'];
-  // $user = get_user_by_id($uid) <-- define this somewhere, maybe in user_controller.
-}
-
 // get global configurations
 include "settings.inc";
 
 // get helper functions
 include "includes/helpers.inc";
+
+global $user;
+
+if (isset($_SESSION['uid'])) {
+
+  $uid = $_SESSION['uid'];
+  $user_controller = new UserController();
+  $user = $user_controller->get_current_user($uid);
+}
 
 $site_root = $configs['site_root'];
 
@@ -39,38 +41,26 @@ if ($method !== "POST" || !$from_domain) {
 
 }
 
+$router = new Router();
+
+// because it's a post request, I cannot get the url arguments from
+// the query string like in the GET. I'll have to break up the url
+// myself looking at the request URI
+$route = str_replace( "/".basename(getcwd())."/", "", $_SERVER['REQUEST_URI']);
+
+$router->decode_requested_route($route);
+
+$action = $router->get_action();
+
+$controller_class = $router->get_controller_class();
+
 // get the $_POST parameters
-$params = array();
+$params = $router->get_arguments();
 
 $params += $_POST;
 
-// we need a type and an action to perform (e.g. user->create, event->delete)
-if (!isset($params['type']) || !isset($params['action'])) {
-
-  // redirect
-  header("location: $site_root ");
-
-}
-
-// name of the resource (e.g. user, event, rso)
-$resource_name = $params['type'];
-
-// name of the action or entity method (e.g. create, update, delete)
-$action = $params['action'];
-
-// proper case the resource name to get class name. 'user' -> 'UserController'
-$controller_class = ucfirst($resource_name) . "Controller";
-
-// include the entity controller class file
-include "includes/classes/{$resource_name}_controller.inc";
-
-// instantiate an object of the class using class name string
 $controller = new $controller_class();
 
-// call the proper method on the object using the action string 
 $controller->{$action}($params);
-
-// do a redirect to somewhere...
-// header("location: $site_root ");
 
 ?>

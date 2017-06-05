@@ -2,6 +2,11 @@
 // to use a session, you must call session start at the beginning of a script.
 session_start();
 
+// include the apps settings
+include "settings.inc";
+// include helper functions 
+include "includes/helpers.inc";
+
 // user object 
 global $user;
 
@@ -9,17 +14,12 @@ global $user;
 if (isset($_SESSION['uid'])) {
 
   $uid = $_SESSION['uid'];
+
+  $user_controller = new UserController();
   // if it is, get the current user.
-  // get_user_by_id(); <-- this will be defined somewhere, maybe user_controller...
+  $user = $user_controller->get_current_user($uid);
 
 }
-
-// include the apps settings
-include "settings.inc";
-// include helper functions 
-include "includes/helpers.inc";
-// include the router class 
-include "includes/classes/router.inc";
 
 // create a new router
 $router = new Router();
@@ -35,7 +35,6 @@ $site_root = $configs['site_root'];
   <?php include "includes/partials/head.inc"; ?>
 
   <body>
-
   <?php include "includes/partials/header.inc"; ?>
 
   <!-- conditionally call in content -->
@@ -43,10 +42,13 @@ $site_root = $configs['site_root'];
   <!-- these are in the includes/partials directory -->
   <div id="main-view">
   <?php 
+
+  $route = $_GET['q'];
+
   // the main view will be included here based on the routers interpretation
   // of the url. I've actually 'cut' off the part of the url we need and put
   // it in the script as GET parameters using the .htaccess file
-  $router->decode_requested_route();
+  $router->decode_requested_route($route);
 
   // when matches_route is called, the first match in the router determines what
   // controller we want to use, what method (action) to call on the controller
@@ -65,9 +67,6 @@ $site_root = $configs['site_root'];
     // '/user/12' = array('user', '12'), '/universities' = array('universities'). Note there is some redundancy here
     // but I think it makes sense to use non-associative arrays here (order is implied)
     $arguments = $router->get_arguments();
-
-    // include that controller classes include file
-    include "includes/classes/{$resource_name}_controller.inc";
 
     // instantiate the controller class using a variable name
     $controller = new $controller_class();

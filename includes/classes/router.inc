@@ -17,9 +17,8 @@ class Router {
   private $resources = array(
     'user',
     'event',
-    'rso',
-    'comment',
     'university',
+    'rso',
   );
 
   // name of the resource to use. chosen from the routes
@@ -36,19 +35,32 @@ class Router {
 
   // helper method to generate resourceful routes.  makes 5 routes for the resource
   // new, view, view_all, delete, edit
-  private function create_resourceful_routes ($resource_name) {
+  private function create_resourceful_get_routes ($resource_name) {
 
     $class = ucfirst($resource_name);
 
     return array(
-      "/$resource_name\/new/" => array('get_create_form', "{$class}Controller", $resource_name),
-      "/$resource_name\/([0-9]+)\/edit/" => array('get_edit_form', "{$class}Controller", $resource_name),
-      "/$resource_name\/([0-9]+)\/delete/" => array('get_delete_form', "{$class}Controller", $resource_name),
-      "/$resource_name\/([0-9]+)/" => array('view', "{$class}Controller", $resource_name),
-      "/{$resource_name}s/" => array('view_all', "{$class}Controller", $resource_name),
+      "/$resource_name\/new/" => array('new', "{$class}Controller", $resource_name),
+      "/$resource_name\/([0-9]+)\/edit/" => array('edit', "{$class}Controller", $resource_name),
+      "/$resource_name\/([0-9]+)\/delete/" => array('delete', "{$class}Controller", $resource_name),
+      "/$resource_name\/([0-9]+)/" => array('view', "{$class}Controller", $resource_name)
     );
 
   }
+
+  // creates the resourceful POST routes which are create, update, destroy
+  private function create_resourceful_post_routes ($resource_name) {
+
+    $class = ucfirst($resource_name);
+
+    return array(
+      "/$resource_name\/create/" => array('create', "{$class}Controller", $resource_name),
+      "/$resource_name\/([0-9]+)\/update/" => array('update', "{$class}Controller", $resource_name),
+      "/$resource_name\/([0-9]+)\/destroy/" => array('destroy', "{$class}Controller", $resource_name),
+    );
+
+  }
+
 
   public function __construct() {
 
@@ -57,25 +69,24 @@ class Router {
     // auto generate resourceful routes from the resource names
     foreach ($this->resources as $resource_name) {
 
-      $this->routes['GET'] += $this->create_resourceful_routes($resource_name);
+      $this->routes['GET'] += $this->create_resourceful_get_routes($resource_name);
+      $this->routes['POST'] += $this->create_resourceful_post_routes($resource_name);
 
     }
 
-    // whoops. anything with unusual pluralization needs a special rewrite here...
-    unset($this->routes['GET']['/universitys/']);
-
-    $this->routes['GET']['/universities/'] = array('view_all', 'UniversityController', 'university');;
+    // route to verify users
+    $this->routes['GET']['/user\/verify\/[0-9a-f]{60}/'] = array('verify', 'UserController', 'user');
 
     // session controller isn't exactly resourceful (but it could be!)
-    $this->routes['GET']['/sign-in/'] = array('get_create_form', 'SessionController', 'session');
-    $this->routes['GET']['/sign-out/'] = array('get_delete_form', 'SessionController', 'session');
+    $this->routes['GET']['/login/'] = array('new', 'SessionController', 'session');
+    $this->routes['GET']['/logout/'] = array('delete', 'SessionController', 'session');
+    $this->routes['POST']['/session\/create/'] = array('create', 'SessionController', 'session');
+    $this->routes['POST']['/session\/destroy/'] = array('destroy', 'SessionController', 'session');
 
   }
 
   // break url into tokens. determine if request is GET or POST
-  public function decode_requested_route() {
-
-    $route = $_GET['q'];
+  public function decode_requested_route($route) {
 
     $method = $_SERVER['REQUEST_METHOD'];
 
@@ -98,8 +109,11 @@ class Router {
         $this->found_match = TRUE;
 
         $this->action = $args[0];
+
         $this->controller = $args[1];
+
         $this->resource_name = $args[2];
+
         $this->arguments = explode('/', $route);
 
         break;
