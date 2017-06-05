@@ -1,7 +1,5 @@
 <?php
 
-include_once "entity_controller.inc";
-
 class CommentController extends EntityController {
 
   private $create_query = "";
@@ -12,7 +10,7 @@ class CommentController extends EntityController {
 
   public function __construct() {
 
-    $this->pdo = new SupPDO();
+    $this->db = new Database();
 
   }
 
@@ -37,26 +35,27 @@ class CommentController extends EntityController {
 
   }
 
-  public function get_create_form ($params) {
+  public function new ($params) {
 
-    $form = '';
+    include get_entity_partial('comment','new');
 
-    return $form;
-  }
-
-  public function get_edit_form ($params) {
-
-    $form = '';
-
-    return $form;
+    return $template;
 
   }
 
-  public function get_delete_form ($params) {
+  public function edit ($params) {
 
-    $form = "";
+    include get_entity_partial('comment','edit');
 
-    return $form;
+    return $template;
+
+  }
+
+  public function delete ($params) {
+
+    include get_entity_partial('comment','delete');
+
+    return $template;
 
   }
 

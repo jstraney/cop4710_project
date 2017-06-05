@@ -4,7 +4,14 @@
 # tell apache I want to rewrite the request if we have mod_rewrite
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # redirect all post requests to action.php
+    RewriteCond %{REQUEST_METHOD} POST 
+    RewriteRule ^(.*)$ action.php
+
+    # redirect all get requests to index.php
     RewriteCond %{REQUEST_FILENAME} !-f
     # rewrite the url, but take the original as GET request parameters.
-    RewriteRule (.*)$ index.php?q=$1 [L]
+    RewriteRule ^(.*)$ index.php?q=$1 [L]
+
 </IfModule>

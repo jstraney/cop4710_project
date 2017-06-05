@@ -1,11 +1,6 @@
 <?php
 
-class SupPDO extends PDO {
-
-  // define white-list of tables 
-  private $white_list = array(
-  
-  );
+class CustomPDO extends PDO {
 
   // override __construct
   public function __construct ($options = array()) {
@@ -30,11 +25,12 @@ class SupPDO extends PDO {
 
     try {
 
-      parent::__construct($dsn, $user, $password, $options = NULL); 
+      parent::__construct($dsn, $user, $password, $options); 
 
     }
     catch (PDOException $e){
 
+      console_log($e);
       $this->connection = NULL;
       // handle the error somehow.
 
@@ -52,7 +48,7 @@ class SupPDO extends PDO {
   // provide faster prepared statement. returns associative array.
   public function prepared_query ($query, $params) {
 
-    $stmt = $this->prepare($query); 
+    $stmt = parent::prepare($query); 
 
     foreach ($params as $key => $parameter) {
 
@@ -60,10 +56,52 @@ class SupPDO extends PDO {
 
     }
 
-    $stmt->execute($params);
+    if (!$stmt->execute($params)) {
+
+      return FALSE;
+
+    }
 
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+  }
+
+}
+
+class Database {
+
+  private $pdo;
+
+  public function __construct () {
+
+    $this->pdo = new CustomPDO();
+
+  }
+
+  public function query ($query) {
+
+    return $this->pdo->query($query);
+
+  }
+
+  public function prepared_query ($query, $params) {
+
+    $result = $this->pdo->prepared_query($query, $params);
+
+    return $result;
+
+  }
+
+  public function beginTransaction () {
+
+    $this->pdo->beginTransaction();
+
+  }
+
+  public function commit () {
+  
+    $this->pdo->commit();
+    
   }
 
 }

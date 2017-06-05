@@ -20,7 +20,7 @@ class EventService {
   // instance of event controller to perform inserts
   private $event_controller;
 
-  private $url = "https://events.ucf.edu/feed.json";
+  private $url = "https://events.ucf.edu/this-week/feed.json";
 
   public function __construct() {
 
