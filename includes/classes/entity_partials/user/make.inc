@@ -5,23 +5,34 @@
 //
 $template = <<<EOT
 <form method="POST" action="user/create">
+    <h3>Create Account</h3>
+    <div class="form-group">
+        <label for="UserNameInput">User Name</label>
+        <input name="user-name" type="text" class="form-control" id="user-name" aria-describedby="UserNameHelp" placeholder="Enter a Username">
+    </div>
 
- <h3>Create Account</h3>
+    <div class="form-group">
+        <label for="FirstNameInput">First Name</label>
+        <input name="first-name" type="text" class="form-control" id="first-name" aria-describedby="FirstNameHelp" placeholder="First Name">
+    </div>
 
- <label>User Name</label>
- <input id="user-name" type="text" name="user-name" value=""></input>
+    <div class="form-group">
+        <label for="LastNameInput">Last Name</label>
+        <input name="last-name" type="text" class="form-control" id="last-name" aria-describedby="LastNameHelp" placeholder="Last Name">
+    </div>
 
- <label>First Name</label>
- <input id="first-name" type="text" name="first-name" value=""></input>
+    <div class="form-group">
+        <label for="EmailInput">E-mail</label>
+        <input name="e-mail" type="email" class="form-control" id="e-mail" aria-describedby="EmailHelp" placeholder="Email">
+    </div>
 
- <label>Last Name</label>
- <input id="last-name" type="text" name="last-name" value=""></input>
+    <div class="form-group">
+        <label for="UniversityInput">College or University</label>
+        <input name="university" type="text" class="form-control" id="university" aria-describedby="UniversityHelp" placeholder="University">
 
- <label>E-mail</label>
- <input id="e-mail" type="email" name="e-mail" value=""></input>
 
- <label>University</label>
- <input id="university" type="text" name="university" value=""></input>
+
+
 
  <label>Password<label>
  <input id="password" type="password" name="password" value=""></input>
