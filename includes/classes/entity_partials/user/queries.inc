@@ -8,15 +8,15 @@
 // heredoc syntax uses <<<EOT to begin a multi line string
 // the ending EOT must be left justified (no spaces or tabs proceding it.)
 $create_query = <<<EOT
-INSERT INTO users (user_name, first_name, last_name, email, university, hash)
-VALUES (:user_name, :first_name, :last_name, :email, :university, :hash);
+INSERT INTO users (user_name, first_name, last_name, email, uni_id, hash)
+VALUES (:user_name, :first_name, :last_name, :email, :uni_id, :hash);
 EOT;
 
 // updates the fields on a profile when someone submits the user/edit form.
 $update_query = <<<EOT
 UPDATE users
 SET user_name = :user_name, first_name = :first_name,
- last_name = :last_name, email = :email, university = :university, hash = :hash;
+ last_name = :last_name, email = :email, uni_id = :uni_id, hash = :hash;
 EOT;
 
 // destroys a user using their :uid
@@ -27,9 +27,9 @@ EOT;
 
 // returns all the fields used on a users profile page.
 $view_query = <<<EOT
-SELECT user_name, first_name, last_name, university, email 
-FROM users
-WHERE user_id = :uid;
+SELECT u.user_name, u.first_name, u.last_name, u.uni_id, u.email, n.uni_name
+FROM users u, universities n
+WHERE u.user_id = :uid AND n.uni_id = u.uni_id;
 EOT;
 
 // gets credentials for user trying to edit a profile.
@@ -52,7 +52,7 @@ EOT;
 // get the current user logged into the website. uses $_SESSION['uid']
 // to get the current user from database.
 $current_user_query = <<<EOT
-SELECT user_name, first_name, last_name, university, email, role 
+SELECT user_name, first_name, last_name, email, role, uni_id
 FROM users
 WHERE user_id = :uid;
 EOT;

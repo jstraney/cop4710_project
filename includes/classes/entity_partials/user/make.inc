@@ -28,10 +28,18 @@ $template = <<<EOT
 
     <div class="form-group">
         <label for="UniversityInput">College or University</label>
-        <input name="university" type="text" class="form-control" id="university" aria-describedby="UniversityHelp" placeholder="University">
+        <select name="uni-id" type="text" class="form-control" id="uni-id" aria-describedby="UniversityHelp" placeholder="University">
+            <option value="0">Select a University</option>
+EOT;
 
+// concatenate all university options here
+foreach ($universities as $university) {
+  $template .= '<option value="'.$university['uni_id'].'">'.$university['uni_name'].'</option>';
+}
 
-
+$template .= <<<EOT
+        </select>
+    </div>
 
 
  <label>Password<label>

@@ -9,6 +9,10 @@ class UserController extends EntityController {
   private $update_query;
   private $delete_query;
 
+  // university controller gets all the possible universities
+  // to select when filling out the new user form.
+  private $university_controller;
+
   // verification
   /* leaving this out for now. we can add it if we have time
   private $verify_query;
@@ -24,6 +28,9 @@ class UserController extends EntityController {
   public function __construct() {
 
     $this->db = new Database();
+
+    // used to help build form options.
+    $this->university_controller = new UniversityController();
 
     // the file with the queries is included. varaibles below
     // such as ${x}_query are in the queries.inc file
@@ -51,12 +58,12 @@ class UserController extends EntityController {
 
   public function create($params) {
 
-    $user_name = $params['user-name']; 
-    $first_name = $params['first-name']; 
-    $last_name = $params['last-name']; 
-    $email = $params['e-mail']; 
-    $password = $params['password']; 
-    $university = $params['university']; 
+    $user_name = isset($params['user-name'])? $params['user-name']: FALSE;
+    $first_name = isset($params['first-name'])? $params['first-name']: FALSE; 
+    $last_name = isset($params['last-name'])? $params['last-name']: FALSE; 
+    $email = isset($params['e-mail'])? $params['e-mail']: FALSE; 
+    $password = isset($params['password'])? $params['password']: FALSE; 
+    $uni_id = isset($params['uni-id'])? $params['uni-id']: FALSE; 
 
     $hash = encrypt_password($password);
 
@@ -66,7 +73,7 @@ class UserController extends EntityController {
       ":first_name" => $first_name,
       ":last_name" => $last_name,
       ":user_name" => $user_name,
-      ":university" => $university,
+      ":uni_id" => $uni_id,
     ));
 
     if ($result === FALSE) {
@@ -118,7 +125,8 @@ class UserController extends EntityController {
     $first_name = isset($viewed_user['first_name'])? $viewed_user['first_name']: "";
     $last_name = isset($viewed_user['last_name'])? $viewed_user['last_name']: "";
     $email = isset($viewed_user['email'])? $viewed_user['email']: "";
-    $university = isset($viewed_user['university'])? $viewed_user['university']: "";
+    $uni_id = isset($viewed_user['uni_id'])? $viewed_user['uni_id']: "";
+    $uni_name = isset($viewed_user['uni_name'])? $viewed_user['uni_name']: "";
 
     include get_entity_partial('user', 'view');
 
@@ -138,11 +146,12 @@ class UserController extends EntityController {
 
     $id = $params[1];
 
+
     $user_name = $params['user-name']; 
     $first_name = $params['first-name']; 
     $last_name = $params['last-name']; 
     $email = $params['e-mail']; 
-    $university = $params['university']; 
+    $uni_id = $params['uni-id']; 
     $password = $params['password']; 
 
     $credentials = $this->get_credentials_by_id($id);
@@ -169,7 +178,7 @@ class UserController extends EntityController {
         ":first_name" => $first_name,
         ":last_name" => $last_name,
         ":email" => $email,
-        ":university" => $university,
+        ":university" => $uni_id,
         ":hash" => $hash,
       ));
 
@@ -226,6 +235,9 @@ class UserController extends EntityController {
 
     $site_root = $configs['site_root'];
 
+    // list of universities a student can register to
+    $universities = $this->university_controller->get_list();
+
     include get_entity_partial("user", "make");
 
     return $template;
@@ -239,6 +251,7 @@ class UserController extends EntityController {
     // current user logged in.
     global $user;
 
+    $universities = $this->university_controller->get_list();
 
     $site_root = $configs['site_root'];
 
@@ -278,7 +291,7 @@ class UserController extends EntityController {
     $first_name = $viewed_user['first_name'];
     $last_name = $viewed_user['last_name'];
     $email = $viewed_user['email'];
-    $university = $viewed_user['university'];
+    $uni_id = $viewed_user['uni_id'];
 
     include get_entity_partial("user", "edit");
 
@@ -344,7 +357,7 @@ class UserController extends EntityController {
     $user->user_name = $result['user_name'];
     $user->first_name = $result['first_name'];
     $user->last_name = $result['last_name'];
-    $user->university = $result['university'];
+    $user->uni_id = $result['uni_id'];
     $user->role = $result['role'];
 
     return $user; 

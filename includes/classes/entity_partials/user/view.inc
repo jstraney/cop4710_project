@@ -1,7 +1,7 @@
 <?php
 $template = <<<EOT
 <h2>{$user_name}'s Profile</h2>
-<div>Currently attending: {$university}</div>
+<div>Currently attending: <a href="{$site_root}/university/{$uni_id}">{$uni_name}</a></div>
 <div>E-mail: {$email} </div>
 <div>Name: {$first_name} {$last_name}</div>
 <div><a href="{$site_root}/user/{$uid}/edit">Change Info &raquo;</a></div>

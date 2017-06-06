@@ -20,6 +20,8 @@ class UniversityController extends EntityController {
     $this->update_query = $update_query;
     $this->destroy_query = $destroy_query;
 
+    $this->select_all_query = $select_all_query;
+
   }
 
   public function create($params) {
@@ -129,6 +131,16 @@ class UniversityController extends EntityController {
     include get_entity_partial("university", "drop");
 
     return $template;
+
+  }
+
+  public function get_list () {
+
+    $query = $this->select_all_query;
+
+    $results = $this->db->query($query);
+
+    return $results;
 
   }
 
