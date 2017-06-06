@@ -41,7 +41,7 @@ class CustomPDO extends PDO {
   // override query. returns associative array.
   public function query ($query) {
 
-    return parent::query($query)->fetch_all(PDO::FETCH_ASSOC);
+    return parent::query($query)->fetchAll(PDO::FETCH_ASSOC);
 
   }
 
