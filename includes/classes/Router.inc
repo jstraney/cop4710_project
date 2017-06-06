@@ -43,7 +43,8 @@ class Router {
       "/$resource_name\/new/" => array('make', "{$class}Controller", $resource_name),
       "/$resource_name\/([0-9]+)\/edit/" => array('edit', "{$class}Controller", $resource_name),
       "/$resource_name\/([0-9]+)\/delete/" => array('drop', "{$class}Controller", $resource_name),
-      "/$resource_name\/([0-9]+)/" => array('view', "{$class}Controller", $resource_name)
+      "/$resource_name\/([0-9]+)/" => array('view', "{$class}Controller", $resource_name),
+      "/{$resource_name}s\/([0-9]+)-([0-9]+)/" => array('view_all', "{$class}Controller", $resource_name)
     );
 
   }

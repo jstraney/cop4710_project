@@ -43,6 +43,11 @@ $site_root = $configs['site_root'];
   <div id="main-view">
   <?php 
 
+  // echo the site message if it exists.
+  $message = get_message_html();
+
+  echo $message;
+
   $route = $_GET['q'];
 
   // the main view will be included here based on the routers interpretation

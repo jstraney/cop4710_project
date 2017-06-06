@@ -1,9 +1,9 @@
 <?php
 $create_query = <<<EOT
 INSERT INTO events (event_name, event_street, event_time, event_org, event_long, event_lat,
-event_loc_name, event_city, event_zip, event_duration)
+event_loc_name, event_city, event_zip, event_duration, state)
 VALUES (:event_name, :event_street, :event_time, :event_org, :event_long, :event_lat,
-:event_loc_name, :event_city, :event_zip, :event_duration);
+:event_loc_name, :event_city, :event_zip, :event_duration, :state);
 EOT;
 
 $update_query = <<<EOT
@@ -25,7 +25,7 @@ EOT;
 $view_all_query = <<<EOT
 SELECT event_name, event_street, event_time, event_org,
 event_long, event_lat, event_loc_name, event_city, event_zip, event_duration,
-event_id, university_id, state FROM events WHERE event_id = :event_id LIMIT 10; 
+event_id, university_id, state FROM events LIMIT :start, :end; 
 EOT;
 
 $destroy_query = <<<EOT
