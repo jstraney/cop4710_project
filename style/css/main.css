@@ -149,3 +149,15 @@ div#map {
   height: 400px;
   width: 100%;
 }
+
+div.message {
+  text-align: center;
+}
+
+div.message.error {
+  color: #FF0022;
+}
+
+div.message.info {
+  color: #33cc44;
+}
