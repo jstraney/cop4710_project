@@ -178,7 +178,7 @@ class UserController extends EntityController {
         ":first_name" => $first_name,
         ":last_name" => $last_name,
         ":email" => $email,
-        ":university" => $uni_id,
+        ":uni_id" => $uni_id,
         ":hash" => $hash,
       ));
 
