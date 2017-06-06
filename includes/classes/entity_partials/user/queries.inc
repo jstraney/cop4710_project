@@ -16,7 +16,8 @@ EOT;
 $update_query = <<<EOT
 UPDATE users
 SET user_name = :user_name, first_name = :first_name,
- last_name = :last_name, email = :email, uni_id = :uni_id, hash = :hash;
+last_name = :last_name, email = :email, uni_id = :uni_id, hash = :hash
+WHERE user_id = :uid;
 EOT;
 
 // destroys a user using their :uid

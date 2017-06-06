@@ -180,6 +180,7 @@ class UserController extends EntityController {
         ":email" => $email,
         ":uni_id" => $uni_id,
         ":hash" => $hash,
+        ":uid" => $id,
       ));
 
     }
