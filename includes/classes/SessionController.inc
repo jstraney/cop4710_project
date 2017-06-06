@@ -66,8 +66,15 @@ class SessionController extends EntityController {
       go_home();
 
     }
-
     // not a match, set error message and go home. 
+    else {
+
+      set_message("The credentials are incorrect.", "error");
+
+      redirect_to_url("login");
+
+    }
+
 
   }
 

@@ -79,6 +79,71 @@ function redirect_entity_view($resource_name, $id) {
 
 }
 
+// User message. Appears at the top of the screen after a redirect.
+// is set using the session global and is cleared after it is retrieved.
+// the 'type' is used for styling purposes.
+function set_message ($message, $message_type = "info") {
+
+  // return false if there is no session
+  if (!isset($_SESSION)) {
+    return FALSE;
+  }
+
+  // set the message and type to be used on the next page.
+  $_SESSION['message'] = $message;
+
+  $_SESSION['message_type'] = $message_type;
+
+
+}
+
+// clears message so the message doesn't persist over multiple page requests.
+function clear_message () {
+  unset($_SESSION['message']);
+  unset($_SESSION['message_type']);
+}
+
+function get_message_html () {
+
+  if (!isset($_SESSION['message'])) {
+    return "";
+  }
+
+  $message = $_SESSION["message"];
+  $message_type = $_SESSION["message_type"];
+
+  include "partials/message.inc";
+
+  // clear message info from the session;
+  clear_message();
+
+  // return template defined in the include file.
+  return $template;
+
+}
+
+// redirects to a path relative to the site root.
+// you could user "login" for example and the "http://cop4710_project/" part is included.
+function redirect_to_url ($url) {
+
+  global $configs;
+
+  $site_root = $configs['site_root'];
+
+  header("location: $site_root/$url");
+
+}
+
+function get_pagination_from_id ($id, $inc) {
+  // calculates the start and end on an id.
+  $start = (int)((int)$id / $inc) * $inc;
+  $end = ($start / $inc + 1) * $inc;
+
+  return array($start, $end);
+
+}
+
+
 /*
   _____             _ _   _          _   _             
  / ____|           (_) | (_)        | | (_)            
