@@ -144,6 +144,16 @@ class UniversityController extends EntityController {
 
   }
 
+  public function get_list_json () {
+
+    $query = $this->select_all_query;
+
+    $results = $this->db->query($query);
+
+    echo json_encode($results);
+
+  }
+
 }
 
 ?>

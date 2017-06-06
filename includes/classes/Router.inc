@@ -82,6 +82,11 @@ class Router {
     $this->routes['GET']['/login/'] = array('make', 'SessionController', 'session');
     $this->routes['GET']['/logout/'] = array('drop', 'SessionController', 'session');
 
+    // whoops autogenerating the routes doesn't always work for unusual pluralizations.
+    // here I make an exception for universities
+    unset($this->routes['GET']["/universitys\/([0-9]+)-([0-9]+)/"]);
+    $this->routes['GET']["/universities\/([0-9]+)-([0-9]+)/"] = array('view_all', 'UniversityController', 'university');
+
     $this->routes['POST']['/session\/create/'] = array('create', 'SessionController', 'session');
     $this->routes['POST']['/session\/destroy/'] = array('destroy', 'SessionController', 'session');
 
@@ -91,6 +96,28 @@ class Router {
     $this->routes['GET']['/about/'] = array('about', 'PageController', 'page');
     $this->routes['GET']['/help/'] = array('help', 'PageController', 'page');
     $this->routes['GET']['/.*/'] = array('home', 'PageController', 'page');
+
+    // API endpoints. gives a response in JSON. will be useful for creating a sleek front end.
+    // for example. we can use this create autocomplete widgets and allow a 'real time' feel.
+    $this->routes['POST']['/users\/json/'] = array('get_list_json', 'UserController', 'users');
+
+    // get all students from a university by uni_id.
+    $this->routes['POST']['/users\/university=([0-9]+)\/json/'] = array('get_students_json', 'UserController', 'users');
+    $this->routes['POST']['/rsos\/json/'] = array('get_list_json', 'RSOController', 'rso');
+
+    // get all rsos from a university by uni_id.
+    $this->routes['POST']['/rsos\/university=([0-9]+)\/json/'] = array('get_rsos_json', 'RSOController', 'rso');
+
+    $this->routes['POST']['/comments\/json/'] = array('get_list_json', 'EventController', 'event');
+    // get comments on a specific event. based on id.
+    $this->routes['POST']['/comments\/event=([0-9]+)\/json/'] = array('get_event_comments_json', 'CommentController', 'comment');
+
+    $this->routes['POST']['/events\/json/'] = array('get_list_json', 'EventController', 'event');
+    // all events hosted by an rso
+    $this->routes['POST']['/events\/rso=([0-9]+)\/json/'] = array('get_list_json', 'EventController', 'event');
+    // all events hosted at a university 
+    $this->routes['POST']['/events\/university=([0-9]+)\/json/'] = array('get_list_json', 'EventController', 'event');
+    $this->routes['POST']['/universities\/json/'] = array('get_list_json', 'UniversityController', 'university');
 
   }
 
