@@ -38,9 +38,9 @@ foreach ($universities as $university) {
 }
 
 $template .= <<<EOT
+
         </select>
     </div>
-
 
  <label>Password<label>
  <input id="password" type="password" name="password" value=""></input>
