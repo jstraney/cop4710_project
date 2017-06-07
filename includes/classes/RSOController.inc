@@ -97,7 +97,7 @@ class RSOController extends EntityController {
     // user who is signed in.
     global $user;
 
-    $uid = $user->id;
+    $uid = $user->user_id;
 
     $role = $user->role;
      
