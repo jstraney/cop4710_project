@@ -113,6 +113,7 @@ class UserController extends EntityController {
     if (isset($user)) {
 
       $role = $user->role;
+      $current_uid = $user->user_id;;
 
     }
     else {
@@ -126,6 +127,14 @@ class UserController extends EntityController {
     $query = $this->view_query;
 
     $uid = $params[1];
+
+    $my_account = FALSE;
+
+    if ($current_uid == $uid) {
+      // this is the current users profile
+      $my_account = TRUE;
+
+    }
 
     $result = $this->db->prepared_query($query, array(":uid" => $uid));
 
