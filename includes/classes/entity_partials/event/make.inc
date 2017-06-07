@@ -41,30 +41,31 @@ $template = <<<EOT
   <input id="end-time" name="end-time" type="text"></input>
   <script>$("#end-time").datetimepicker()</script>
 
-  <label>Who is hosting the event?</label>
-  <input name="organization" placeholder="organization" type="text"></input>
-
   <!-- todo: check if user is administrator any RSO's. if so, include the fields below -->
   <!-- if the event is not hosted by an RSO, it is put into a 'pending' state, which is changed by-->
   <!-- the super admin -->
   <label>Is the organization an RSO (recognized student organization)?</label>
   <div>
-  No <input type="radio" value="0" name="rso-hosted"></input> 
-  Yes <input type="radio" value="1" name="rso-hosted"></input> 
+    No <input id="is-rso" type="radio" value="0" name="rso-hosted"></input> 
+    Yes <input id="not-rso" type="radio" value="1" name="rso-hosted"></input> 
   </div>
 
-  <!-- If the event is not an RSO, allow a plain text field.-->
-  <label>Who is hosting the event?</label>
-  <input name="organization" placeholder="organization" type="text"></input>
-
   <!-- if the event is an RSO, put the following fields below -->
-  <label>Which RSO is it?</label>
-  <select>
+  <div style="display: none;" class="selection rso">
+    <label>Which RSO is it?</label>
     <!-- todo: populate with RSO's administrated by the current user. -->
-    {$user_rsos}
-  </select>
+    <input type="text" name="organization" placeholder="Name of RSO" value="">
+  </div>
+
+  <!-- If the event is not an RSO, allow the following.-->
+  <div style="display:none;" class="selection organization">
+    <label>Who is hosting the event?</label>
+    <input name="organization" placeholder="organization" type="text"></input>
+  </div>
 
   <input type="submit" value="Create Event"></input>
+
+  <script src="{$site_root}/js/event_form.js"></script>
 
 </form>
 EOT;

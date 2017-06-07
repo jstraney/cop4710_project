@@ -2,14 +2,14 @@
 // todo: find a way to pass a parameter here to choose
 // how to aggregate the users (e.g. by university, by rso)
 $template = <<<EOT
-<div class="event-list">
+<div class="entity-list events">
 <h2>Events</h2>
 EOT;
 // events queried by event controller. passed into this template
 // by the context of the 'view_all' method.
 foreach ($events as $event) {
 
-  $template .= '<div class="event-record">';
+  $template .= '<div class="entity-record">';
   $template .= '<a href="'.$site_root.'/event/'.$event['event_id'].'">';
   $template .= '<h3>'.$event['event_name'].'</h3>';
   $template .= '</a>';

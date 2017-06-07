@@ -9,9 +9,7 @@ class UserController extends EntityController {
   private $update_query;
   private $delete_query;
 
-  // university controller gets all the possible universities
-  // to select when filling out the new user form.
-  private $university_controller;
+  private $user_university_query;
 
   // verification
   /* leaving this out for now. we can add it if we have time
@@ -24,6 +22,10 @@ class UserController extends EntityController {
 
   // gets the current user
   private $current_user_query;
+
+  // university controller gets all the possible universities
+  // to select when filling out the new user form.
+  private $university_controller;
 
   public function __construct() {
 
@@ -41,6 +43,8 @@ class UserController extends EntityController {
     $this->view_query = $view_query;
     $this->update_query = $update_query;
     $this->destroy_query = $destroy_query;
+
+    $this->user_university_query = $user_university_query;
 
     /* excluded for now unless we have time to work on verification.
     $this->verify_query = $verify_query;
@@ -65,6 +69,14 @@ class UserController extends EntityController {
     $password = isset($params['password'])? $params['password']: FALSE; 
     $uni_id = isset($params['uni-id'])? $params['uni-id']: FALSE; 
 
+    $requirements_met = TRUE;
+    $requirements_met = $user_name && $first_name && $last_name;
+    $requirements_met = $requirements_met && $email && $password && $uni_id;
+
+    if (!$requirements_met) {
+      set_message('One or more field was missing when creating your account. Please fill all required fields', 'error');
+    }
+
     $hash = encrypt_password($password);
 
     $result = $this->db->prepared_query($this->create_query, array(
@@ -78,22 +90,15 @@ class UserController extends EntityController {
 
     if ($result === FALSE) {
 
+      set_message("There has been an error in creating your account. Contact our administrative team for assistance.", "error");
+
       go_home();
+
+      return;
 
     } 
 
-    //send_auth_email($user_name, $email, $auth_url);
-    
-    $file_root = $configs['site_file_root'];
-
-    // set up user resource directory for images/files
-    if (!file_exists("$file_root/res/users/$username/portrait")) {
-
-      mkdir("$file_root/res/users/$username/portrait");
-
-    }
-
-    copy("$file_root/res/users/default.png", "$file_root/res/users/portrait/default.png");
+    set_message("You have successfully created an account! Log in to get started.");
 
     go_home();
 
@@ -102,6 +107,19 @@ class UserController extends EntityController {
   public function view($params) {
 
     global $configs;
+
+    global $user;
+
+    if (isset($user)) {
+
+      $role = $user->role;
+
+    }
+    else {
+
+      $role = FALSE;
+
+    }
 
     $site_root = $configs['site_root'];
 
@@ -363,6 +381,19 @@ class UserController extends EntityController {
 
     return $user; 
     
+  }
+
+  public function get_students_json ($params) {
+
+    // university id from url
+    $uni_id = explode("=", $params[1])[1];
+
+    $query = $this->user_university_query;
+
+    $results = $this->db->prepared_query($query, array(":uni_id" => $uni_id));
+
+    echo json_encode($results);
+
   }
 
   /* leaving out verification unless we have time.

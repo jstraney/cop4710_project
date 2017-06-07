@@ -11,7 +11,17 @@ $template = <<<EOT
 <div class="user-aggregate events">
 <h3>Events {$user_name} is attending</h3>
 </div>
+EOT;
+if ($role === "ADM") {
+  $template .= <<<EOT
+<h3>Admin Panel</h3>
+<div><a href="{$site_root}/rso/new">Create an RSO</a></div>
+EOT;
 
+}
+
+$template .= <<<EOT
+<div><a href="{$site_root}/event/new">Create an Event</a></div>
 <div><a href="{$site_root}/user/{$uid}/delete">Delete Account &raquo;</a></div>
 EOT;
 ?>

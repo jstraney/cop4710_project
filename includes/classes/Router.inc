@@ -82,6 +82,11 @@ class Router {
     $this->routes['GET']['/login/'] = array('make', 'SessionController', 'session');
     $this->routes['GET']['/logout/'] = array('drop', 'SessionController', 'session');
 
+    // whoops autogenerating the routes doesn't always work for unusual pluralizations.
+    // here I make an exception for universities
+    unset($this->routes['GET']["/universitys\/([0-9]+)-([0-9]+)/"]);
+    $this->routes['GET']["/universities\/([0-9]+)-([0-9]+)/"] = array('view_all', 'UniversityController', 'university');
+
     $this->routes['POST']['/session\/create/'] = array('create', 'SessionController', 'session');
     $this->routes['POST']['/session\/destroy/'] = array('destroy', 'SessionController', 'session');
 
@@ -91,6 +96,42 @@ class Router {
     $this->routes['GET']['/about/'] = array('about', 'PageController', 'page');
     $this->routes['GET']['/help/'] = array('help', 'PageController', 'page');
     $this->routes['GET']['/.*/'] = array('home', 'PageController', 'page');
+
+    // API endpoints. gives a response in JSON. will be useful for creating a sleek front end.
+    // for example. we can use this create autocomplete widgets and allow a 'real time' feel.
+
+    // get all students from a university by uni_id.
+    // user endpoints
+    $this->routes['POST']['/users\/university=([0-9]+)\/json/'] = array('get_students_json', 'UserController', 'users');
+
+    // RSO endpoints
+    $this->routes['POST']['/rsos\/json/'] = array('get_list_json', 'RSOController', 'rso');
+    // get all rsos from a university by uni_id.
+    $this->routes['POST']['/rsos\/university=([0-9]+)\/json/'] = array('get_rsos_json', 'RSOController', 'rso');
+
+
+    // comments endpoints
+    // note that to give the app a 'real world' feel, all routes for comments will be done with post requests.
+    // reasoning: you wouldn't want to have to go to a separate page just to 'make' a comment, or 'edit' it.
+    // for that reason, we'll just have a form on an events page which allow comments to be created. We'll have
+    // a timeout in javascript which polls the database for new comments and updates the page asynchronously.
+    $this->routes['POST']['/comment\/read/'] = array('read', 'CommentController', 'comment');
+    $this->routes['POST']['/comment\/create/'] = array('create', 'CommentController', 'comment');
+    $this->routes['POST']['/comment\/destroy/'] = array('destroy', 'CommentController', 'comment');
+    $this->routes['POST']['/comment\/update/'] = array('update', 'CommentController', 'comment');
+
+    // get comments on a specific event. based on id. this url will poll the database for new events and update the page.
+    $this->routes['POST']['/comments\/event=([0-9]+)\/json/'] = array('get_event_comments_json', 'CommentController', 'comment');
+
+    // events endpoints
+    $this->routes['POST']['/events\/json/'] = array('get_list_json', 'EventController', 'event');
+    // all events hosted by an rso
+    $this->routes['POST']['/events\/rso=([0-9]+)\/json/'] = array('get_list_json', 'EventController', 'event');
+    // all events hosted at a university 
+    $this->routes['POST']['/events\/university=([0-9]+)\/json/'] = array('get_list_json', 'EventController', 'event');
+
+    // university endpoints
+    $this->routes['POST']['/universities\/json/'] = array('get_list_json', 'UniversityController', 'university');
 
   }
 

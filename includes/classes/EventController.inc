@@ -40,6 +40,13 @@ class EventController extends EntityController {
 
     $role = $user->role;
 
+    if ($role !== "SA" || $role !== "ADM") {
+
+      // simply redirect home.
+      go_home();
+
+    }
+
     $event_name = isset($params['title'])? $params['title']: "";
     $event_loc_name = isset($params['loc-name'])? $params['loc-name']: "";
     $event_street = isset($params['street'])? $params['street']: ""; 
@@ -171,10 +178,23 @@ class EventController extends EntityController {
 
   public function update($params) {
 
+    global $configs;
+
+    $site_root = $configs['site_root'];
+
     // user who is signed in.
     global $user;
 
     $uid = $user->id;
+
+    $role = $user->role;
+
+    if ($role !== "SA" || $role !== "ADM") {
+
+      // simply redirect home.
+      go_home();
+
+    }
 
     $event_name = isset($params['event-name'])? $params['event-name']: "";
     $event_loc_name = isset($params['loc-name'])? $params['loc-name']: "";

@@ -38,7 +38,7 @@ body {
 
 #main-view {
   max-width: 800px;
-  margin: 160px auto 10px;
+  margin: 160px auto 50px;
   padding: 5px 10px 10px;
 }
 
@@ -126,6 +126,8 @@ input, form {
 input[type=text], input[type=email], input[type=password] {
   width: 100%;
   margin-bottom: 15px;
+  text-indent: .5em;
+  padding: .3em 0;
 }
 
 input[type=submit] {
@@ -145,12 +147,27 @@ input[type=submit]:hover {
   background-color: #AA9944;
 }
 
+textarea {
+  resize: none;
+  display: block;
+  min-height: 200px;
+  width: 100%;
+  font-family: "Open Sans", sans-serif;
+  font-size: 14px;
+  text-indent: .5em;
+  border: solid 1px #BBBBBB;
+}
+
 div#map {
   height: 400px;
   width: 100%;
 }
 
 div.message {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  width: 100%;
   text-align: center;
 }
 

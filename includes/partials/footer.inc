@@ -22,10 +22,10 @@ $site_root = $configs['site_root'];
   </ul>
   <ul class="menu">
     <h4>View</h4>
-    <li><a href="<?php echo $site_root; ?>/university">Universities</a></li>
-    <li><a href="<?php echo $site_root; ?>/rso">RSO's</a></li>
-    <li><a href="<?php echo $site_root; ?>/event">Events</a></li>
-    <li><a href="<?php echo $site_root; ?>/student">Students</a></li>
+    <li><a href="<?php echo $site_root; ?>/universities/0-10">Universities</a></li>
+    <li><a href="<?php echo $site_root; ?>/rsos/0-10">RSO's</a></li>
+    <li><a href="<?php echo $site_root; ?>/events/0-10">Events</a></li>
+    <li><a href="<?php echo $site_root; ?>/users/0-10">Students</a></li>
   </ul>
   <ul class="menu">
     <h4>Technical</h4>

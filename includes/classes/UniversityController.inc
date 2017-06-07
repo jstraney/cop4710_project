@@ -17,6 +17,7 @@ class UniversityController extends EntityController {
 
     $this->create_query = $create_query;
     $this->view_query = $view_query;
+    $this->view_all_query = $view_all_query;
     $this->update_query = $update_query;
     $this->destroy_query = $destroy_query;
 
@@ -42,6 +43,8 @@ class UniversityController extends EntityController {
 
     global $configs;
 
+    global $user;
+
     $site_root = $configs['site_root'];
 
     // view query for university 
@@ -51,7 +54,7 @@ class UniversityController extends EntityController {
     $id = $params[1];
 
     // result of querying the university 
-    $result = $this->db->prepared_query($query, array(":id" => $uid));
+    $result = $this->db->prepared_query($query, array(":uni_id" => $id));
 
     if (empty($result)) {
 
@@ -61,6 +64,16 @@ class UniversityController extends EntityController {
 
     }
 
+    // get first record.
+    $result = $result[0];
+
+    // get fields set defaults.
+    $uni_name = isset($result['uni_name']) ? $result['uni_name']: "";
+    $uni_street = isset($result['uni_street']) ? $result['uni_street']: "";
+    $uni_state = isset($result['uni_state']) ? $result['uni_state']: "";
+    $uni_zip = isset($result['uni_zip']) ? $result['uni_zip']: "";
+    $uni_num_students = isset($result['uni_num_students']) ? $result['uni_num_students']: "";
+
     include get_entity_partial('university', 'view');
 
     return $template;
@@ -68,11 +81,29 @@ class UniversityController extends EntityController {
   }
 
   public function view_all($params) {
+
+    // get range of universities to show. e.g. 10-20
+    $range = explode('-', $params[1]);
+    $start = $range[0];
+    $end = $range[1];
+
+    $query = $this->view_all_query;
+
+    $universities = $this->db->prepared_query($query, array(
+      ':start' => $start, 
+      ':end' => $end, 
+    ));
+
+    if (empty($universities)) {
+
+      $template = "No universities found.";
+
+      return $template;
+
+    }
+
+    include get_entity_partial('university', 'view_all');
     
-    $txt = "";
-
-    return $txt;
-
   }
 
   public function update($params) {
@@ -141,6 +172,16 @@ class UniversityController extends EntityController {
     $results = $this->db->query($query);
 
     return $results;
+
+  }
+
+  public function get_list_json () {
+
+    $query = $this->select_all_query;
+
+    $results = $this->db->query($query);
+
+    echo json_encode($results);
 
   }
 

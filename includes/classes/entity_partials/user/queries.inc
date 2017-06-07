@@ -33,6 +33,13 @@ FROM users u, universities n
 WHERE u.user_id = :uid AND n.uni_id = u.uni_id;
 EOT;
 
+// gets student by university id.
+$user_university_query = <<<EOT
+SELECT u.user_name, u.first_name, u.last_name, u.uni_id
+FROM users u
+WHERE u.uni_id = :uni_id;
+EOT;
+
 // gets credentials for user trying to edit a profile.
 // checks if the user is super admin or is the user.
 $credentials_id_query = <<<EOT
