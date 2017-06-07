@@ -135,4 +135,15 @@ var app = app || {};
   
   }
 
+  // do some global effects on DOM load.
+  $(function () {
+
+    $('.message').fadeIn();
+
+    window.setTimeout(function () {
+      $('.message').fadeOut();
+    }, 5000);
+
+  });
+
 })(app);
