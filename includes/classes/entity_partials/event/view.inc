@@ -1,6 +1,5 @@
 <?php
-
-// calculates the start and end on an id.
+// calculates the start and end on an id for the 'back' link.
 $back_range = get_pagination_from_id($event_id, 10);
 $start = $back_range[0];
 $end = $back_range[1];
@@ -22,6 +21,20 @@ $template = <<<EOT
 <div>Duration: {$event_duration}</div>
 
 <div>Hosted by: {$event_org}</div>
+
+<div>People Attending this Event:</div>
+
+<div>Comment Section</div>
+<div class="entity-list comment">
+<!-- comments loaded with AJAX -->
+
+<!-- form will be positioned below div using absolute positioning, top:100% -->
+<form id="new-comment" method="POST" action="{$site_root}/comment/create">
+  <textarea id="comment-body" name="comment-body">
+  </textarea>
+  <input type="submit" value="Post"/>
+</form>
+</div>
 
 EOT;
 
