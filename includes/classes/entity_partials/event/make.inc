@@ -46,8 +46,8 @@ $template = <<<EOT
   <!-- the super admin -->
   <label>Is the organization an RSO (recognized student organization)?</label>
   <div>
-    No <input id="is-rso" type="radio" value="0" name="rso-hosted"></input> 
-    Yes <input id="not-rso" type="radio" value="1" name="rso-hosted"></input> 
+    No <input id="not-rso" type="radio" value="0" name="rso-hosted"></input> 
+    Yes <input id="is-rso" type="radio" value="1" name="rso-hosted"></input> 
   </div>
 
   <!-- if the event is an RSO, put the following fields below -->
