@@ -9,7 +9,7 @@ $site_root = $configs['site_root'];
 // being performed by .htaccess
 ?>
 <head>
-  <title>COP4701 Project</title>
+  <title>COP4710 Project</title>
   <meta name="description" content=""/>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
   <link rel="stylesheet" type="text/css" href="<?php echo $site_root; ?>/style/css/main.css">
