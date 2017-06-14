@@ -4,6 +4,20 @@ var app = app || {};
 // add methods to the app object to build a front-end controller
 (function (a) {
 
+  var makeTarantula = function () {
+
+    var t = $('div.tarantula');
+
+    t.position({left: "-50px", top: "-50px"});
+
+    $(document).append(t);
+
+    window.setTimeout(function () {
+      t.left
+    });
+
+  }
+
   // global variables.
   var site_root = "/cop4710_project/";
 
@@ -76,7 +90,10 @@ var app = app || {};
 
   }
 
-  function apiEndpoint (url, callback, error) {
+  function apiEndpoint (params, url, callback, error) {
+
+    params = params || {};
+
     error = error || function (err) {
       console.error(err);
     };
@@ -86,6 +103,7 @@ var app = app || {};
       method: "POST",
       success: callback,
       failure: error,
+      data: params
     });
 
   };
@@ -93,9 +111,9 @@ var app = app || {};
   // API endpoints. each of these methods will return the JSON encoded text of the entity data.
   
   // get all universities
-  a.getUniversityList = function (callback, error) {
+  a.getUniversityList = function (params, callback, error) {
 
-    return apiEndpoint("universities/json", callback, error);
+    return apiEndpoint(params, "universities/like/json", callback, error);
 
   }
 
