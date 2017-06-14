@@ -47,35 +47,33 @@ class EventController extends EntityController {
 
     }
 
-    $event_name = isset($params['title'])? $params['title']: "";
-    $event_loc_name = isset($params['loc-name'])? $params['loc-name']: "";
-    $event_street = isset($params['street'])? $params['street']: ""; 
-    $event_zip = isset($params['zip'])? $params['zip']: "";
-    $event_city = isset($params['city'])? $params['city']: "";
+    $name = isset($params['title'])? $params['title']: "";
+    $location = isset($params['location'])? $params['location']: "";
+    $street = isset($params['street'])? $params['street']: ""; 
+    $zip = isset($params['zip'])? $params['zip']: "";
+    $city = isset($params['city'])? $params['city']: "";
     $state = isset($params['state'])? $params['state']: ""; 
 
     // calculate duration from start and end time.
-    $event_duration = isset($params['duration'])? $params['duration']: "";
-    $event_time = isset($params['time'])? $params['time']: "";
-    $event_long = isset($params['lon'])? $params['lon']: "";
-    $event_lat = isset($params['lat'])? $params['lat']: "";
-    $event_org = isset($params['organization'])? $params['organization']: "";
-    $hosted_by_rso;
+    $duration = isset($params['duration'])? $params['duration']: "";
+    $start_time = isset($params['start-time'])? $params['start-time']: "";
+    $end_time = isset($params['end-time'])? $params['end-time']: "";
+    $long = isset($params['lon'])? $params['lon']: "";
+    $lat = isset($params['lat'])? $params['lat']: "";
 
     $query = $this->create_query;
 
     $this->db->prepared_query($query, array(
-      ":event_name" => $event_name,
-      ":event_loc_name" => $event_loc_name,
-      ":event_street" => $event_street,
-      ":event_zip" => $event_zip,
-      ":event_city" => $event_city,
+      ":name" => $name,
+      ":location" => $location,
+      ":street" => $street,
+      ":zip" => $zip,
+      ":city" => $city,
       ":state" => $state,
-      ":event_duration" => $event_duration,
-      ":event_time" => $event_time,
-      ":event_long" => $event_long,
-      ":event_lat" => $event_lat,
-      ":event_org" => $event_org,
+      ":start_time" => $start_time,
+      ":end_time" => $end_time,
+      ":long" => $long,
+      ":lat" => $lat,
     ));
 
     // just go home for now... figure out a redirect later.
@@ -121,19 +119,19 @@ class EventController extends EntityController {
     // get first row from result.
     $result = $result[0];
 
-    $event_name = isset($result['event_name'])? $result['event_name']: "";
-    $event_loc_name = isset($result['event_loc_name'])? $result['event_loc_name']: "";
-    $event_street = isset($result['event_street'])? $result['event_street']: ""; 
-    $event_zip = isset($result['event_zip'])? $result['event_zip']: "";
-    $event_city = isset($result['event_city'])? $result['event_city']: "";
+    $name = isset($result['name'])? $result['name']: "";
+    $loc_name = isset($result['loc_name'])? $result['loc_name']: "";
+    $street = isset($result['street'])? $result['street']: ""; 
+    $zip = isset($result['zip'])? $result['zip']: "";
+    $city = isset($result['city'])? $result['city']: "";
     $state = isset($result['state'])? $result['state']: ""; 
 
     // calculate duration from start and end time.
-    $event_duration = isset($result['event_duration'])? $result['event_duration']: "";
-    $event_time = isset($result['event_time'])? $result['event_time']: "";
-    $event_long = isset($result['event_long'])? $result['event_long']: "";
-    $event_lat = isset($result['event_lat'])? $result['event_lat']: "";
-    $event_org = isset($result['event_org'])? $result['event_org']: "";
+    $start_time = isset($result['start_time'])? $result['start_time']: "";
+    $end_time = isset($result['end_time'])? $result['end_time']: "";
+    $long = isset($result['long'])? $result['long']: "";
+    $lat = isset($result['lat'])? $result['lat']: "";
+    $org = isset($result['org'])? $result['org']: "";
 
     // return the partial using the variable defined above.
     include get_entity_partial('event', 'view');
@@ -196,19 +194,18 @@ class EventController extends EntityController {
 
     }
 
-    $event_name = isset($params['event-name'])? $params['event-name']: "";
-    $event_loc_name = isset($params['loc-name'])? $params['loc-name']: "";
-    $event_street = isset($params['street'])? $params['street']: ""; 
-    $event_zip = isset($params['zip'])? $params['zip']: "";
-    $event_city = isset($params['city'])? $params['city']: "";
+    $name = isset($params['event-name'])? $params['event-name']: "";
+    $location = isset($params['location'])? $params['location']: "";
+    $street = isset($params['street'])? $params['street']: ""; 
+    $zip = isset($params['zip'])? $params['zip']: "";
+    $city = isset($params['city'])? $params['city']: "";
     $state = isset($params['state'])? $params['state']: ""; 
 
     // calculate duration from start and end time.
-    $event_duration = isset($params['duration'])? $params['duration']: "";
-    $event_time = isset($params['time'])? $params['time']: "";
-    $event_long = isset($params['lon'])? $params['lon']: "";
-    $event_lat = isset($params['lat'])? $params['lat']: "";
-    $event_org = isset($params['organization'])? $params['organization']:
+    $time = isset($params['time'])? $params['time']: "";
+    $long = isset($params['lon'])? $params['lon']: "";
+    $lat = isset($params['lat'])? $params['lat']: "";
+    $org = isset($params['organization'])? $params['organization']:
 
     $query = $this->update_query;
 

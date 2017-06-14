@@ -132,6 +132,7 @@ class Router {
 
     // university endpoints
     $this->routes['POST']['/universities\/json/'] = array('get_list_json', 'UniversityController', 'university');
+    $this->routes['POST']['/universities\/like\/json/'] = array('get_autocomplete_json', 'UniversityController', 'university');
 
   }
 

@@ -32,10 +32,7 @@
     $('input', orgSelection).autocomplete({
       source: function (req, res) {
 
-        orgQuery = req.term;
 
-        // use api endpoint
-        
 
       },
     });

@@ -4,6 +4,7 @@
 // variable below becomes part of that functions scope.
 //
 $template = <<<EOT
+<script src="{$site_root}/js/user_form.js"></script>
 <form method="POST" action="user/create">
     <h3>Create Account</h3>
     <div class="form-group">
@@ -28,18 +29,8 @@ $template = <<<EOT
 
     <div class="form-group">
         <label for="UniversityInput">College or University</label>
-        <select name="uni-id" type="text" class="form-control" id="uni-id" aria-describedby="UniversityHelp" placeholder="University">
-            <option value="0">Select a University</option>
-EOT;
-
-// concatenate all university options here
-foreach ($universities as $university) {
-  $template .= '<option value="'.$university['uni_id'].'">'.$university['uni_name'].'</option>';
-}
-
-$template .= <<<EOT
-
-        </select>
+        <input id="uni-name" name="uni-name" type="text"></input>
+        <input id="uni-id" name="uni-id" type="hidden"></input>
     </div>
 
  <label>Password<label>

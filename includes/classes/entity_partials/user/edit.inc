@@ -1,6 +1,7 @@
 <?php
 $template = <<<EOT
 
+<script src="{$site_root}/js/user_form.js"></script>
 <div><a href="{$site_root}/user/{$id}">Back to profile &raquo;</a></div>
 
 <form method="POST" action="{$site_root}/user/{$id}/update">
@@ -21,22 +22,12 @@ $template = <<<EOT
 
   <label>University</label>
   <div>
-    <select id="uni-id" name="uni-id"> 
-      <option value="0">Select a University</option>
-EOT;
-
-foreach ($universities as $university) {
-
-  // check if the uni_id matches the one on the student.
-  $selected = $university['uni_id'] === $uni_id ? "selected": "not-selecte";
-
-  $template .= '<option '.$selected.'="'.$selected.'" value="'.$university['uni_id'].'">'.$university['uni_name'].'</option>';
-
-}
-
-$template .= <<<EOT
-    </select>
+    <input id="uni-name" name="uni-name" type="text"></input>
+    <input id="uni-id" name="uni-id" type="hidden"></input>
   </div>
+  <p>
+  Please enter your password to change your information.
+  </p>
   <label>Password</label>
   <input id="password" type="password" name="password" value=""></input>
 

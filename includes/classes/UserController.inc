@@ -2,8 +2,7 @@
 
 class UserController extends EntityController {
 
-  private $create_query ;
-
+  private $create_query;
   private $view_query;
   private $view_all_query;
   private $update_query;
@@ -68,6 +67,7 @@ class UserController extends EntityController {
     $email = isset($params['e-mail'])? $params['e-mail']: FALSE; 
     $password = isset($params['password'])? $params['password']: FALSE; 
     $uni_id = isset($params['uni-id'])? $params['uni-id']: FALSE; 
+    $user_role = isset($params['role'])? $params['role']: "STU"; 
 
     $requirements_met = TRUE;
     $requirements_met = $user_name && $first_name && $last_name;
@@ -79,13 +79,16 @@ class UserController extends EntityController {
 
     $hash = encrypt_password($password);
 
-    $result = $this->db->prepared_query($this->create_query, array(
+    $query = $this->create_query;
+
+    $result = $this->db->prepared_query($query, array(
       ":email" => $email,
       ":hash" => $hash,
       ":first_name" => $first_name,
       ":last_name" => $last_name,
       ":user_name" => $user_name,
       ":uni_id" => $uni_id,
+      ":role" => $user_role,
     ));
 
     if ($result === FALSE) {
@@ -113,10 +116,13 @@ class UserController extends EntityController {
     if (isset($user)) {
 
       $role = $user->role;
+      $current_uid = $user->user_id;;
 
     }
     else {
 
+      // id's start from 1
+      $current_uid = 0;
       $role = FALSE;
 
     }
@@ -127,7 +133,15 @@ class UserController extends EntityController {
 
     $uid = $params[1];
 
-    $result = $this->db->prepared_query($query, array(":uid" => $uid));
+    $my_account = FALSE;
+
+    if ($current_uid == $uid) {
+      // this is the current users profile
+      $my_account = TRUE;
+
+    }
+
+    $result = $this->db->prepared_query($query, array(":uid" => $uid, ":uid1" => $uid));
 
     if (empty($result)) {
 
@@ -164,13 +178,13 @@ class UserController extends EntityController {
 
     $id = $params[1];
 
-
     $user_name = $params['user-name']; 
     $first_name = $params['first-name']; 
     $last_name = $params['last-name']; 
     $email = $params['e-mail']; 
     $uni_id = $params['uni-id']; 
     $password = $params['password']; 
+    $user_role = isset($params['role'])? $params['role'] : "STU"; 
 
     $credentials = $this->get_credentials_by_id($id);
 
@@ -198,7 +212,8 @@ class UserController extends EntityController {
         ":email" => $email,
         ":uni_id" => $uni_id,
         ":hash" => $hash,
-        ":uid" => $id,
+        ":role" => $user_role,
+        ":user_id" => $id,
       ));
 
     }
@@ -254,9 +269,6 @@ class UserController extends EntityController {
 
     $site_root = $configs['site_root'];
 
-    // list of universities a student can register to
-    $universities = $this->university_controller->get_list();
-
     include get_entity_partial("user", "make");
 
     return $template;
@@ -269,8 +281,6 @@ class UserController extends EntityController {
 
     // current user logged in.
     global $user;
-
-    $universities = $this->university_controller->get_list();
 
     $site_root = $configs['site_root'];
 
@@ -293,7 +303,7 @@ class UserController extends EntityController {
 
     }
 
-    $result = $this->db->prepared_query($query, array(":uid" => $id));
+    $result = $this->db->prepared_query($query, array(":uid" => $id, ":uid1" => $id));
 
     // if there's no user to edit, return a 404 message.
     if (empty($result)) {
@@ -347,6 +357,7 @@ class UserController extends EntityController {
     return $this->db->prepared_query($query, array(":user_id" => $id));
 
   }
+
   public function get_current_user ($uid) {
 
     global $user;
@@ -376,7 +387,6 @@ class UserController extends EntityController {
     $user->user_name = $result['user_name'];
     $user->first_name = $result['first_name'];
     $user->last_name = $result['last_name'];
-    $user->uni_id = $result['uni_id'];
     $user->role = $result['role'];
 
     return $user; 
@@ -396,24 +406,6 @@ class UserController extends EntityController {
 
   }
 
-  /* leaving out verification unless we have time.
-  public function verify ($params) {
-
-    $auth_url = $params[2];
-
-    // do query to check if valid.
-    $this->db->beginTransaction();
-    // first verify and move to user table
-    $this->db->prepared_query($this->verify_query, array(":auth_url" => $auth_url));
-    // then drop temp user.
-    $this->db->prepared_query($this->drop_temp_query, array(":auth_url" => $auth_url));
-
-    $this->db->commit();
-    
-    // if valid move from temp table to user table.
-
-  }
-  */
 }
 
 ?>
