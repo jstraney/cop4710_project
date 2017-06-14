@@ -22,6 +22,7 @@ class UniversityController extends EntityController {
     $this->destroy_query = $destroy_query;
 
     $this->select_all_query = $select_all_query;
+    $this->match_name_query = $match_name_query;
 
   }
 
@@ -175,7 +176,7 @@ class UniversityController extends EntityController {
 
   }
 
-  public function get_list_json () {
+  public function get_list_json ($params) {
 
     $query = $this->select_all_query;
 
@@ -184,6 +185,19 @@ class UniversityController extends EntityController {
     echo json_encode($results);
 
   }
+
+  public function get_autocomplete_json ($params) {
+
+    $name = (isset($params['name']))? $params['name'] : '';
+
+    $query = $this->match_name_query;
+
+    $results = $this->db->prepared_query($query, array(":name" => $name."%")); 
+
+    echo json_encode($results);
+
+  }
+
 
 }
 
