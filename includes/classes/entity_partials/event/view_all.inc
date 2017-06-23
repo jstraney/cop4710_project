@@ -1,27 +1,54 @@
 <?php
-// todo: find a way to pass a parameter here to choose
-// how to aggregate the users (e.g. by university, by rso)
 $template = <<<EOT
+<script>
+(function () {
+  app.scope.user_id = {$user_id};
+  app.scope.uni_id = {$uni_id};
+})();
+</script>
+<script src="{$site_root}/js/view_all_events.js"></script>
 <div class="entity-list events">
-<h2>Events</h2>
-EOT;
-// events queried by event controller. passed into this template
-// by the context of the 'view_all' method.
-foreach ($events as $event) {
+<h2>Browse Events</h2>
 
-  $template .= '<div class="entity-record">';
-  $template .= '<a href="'.$site_root.'/event/'.$event['event_id'].'">';
-  $template .= '<h3>'.$event['event_name'].'</h3>';
-  $template .= '</a>';
-  $template .= '<div>'.$event['event_loc_name'].'</div>';
-  $template .= '<div>time:'.$event['event_time'].'</div>';
-  $template .= '<div>duration:'.$event['event_duration'].'</div>';
-  $template .= '<div>hosted by:'.$event['event_org'].'</div>';
-  $template .= '</div>';
+<form id="event-search">
 
-}
+<!-- scope of the event search -->
+<div class="scope">
+  <label>See Events:</label>
+  <select id="scope" name="select-by">
+  <option value="my-uni">Near my university</option>
+  <option value="other-uni">At another university</option>
+  </select>
+</div>
 
-$template .= <<<EOT
+
+<!-- autocomplete university search -->
+<div style="display:none" class="search-uni">
+  <label>University</label>
+  <input type="text" name="uni-name" value=""></input>
+  <input type="hidden" name="uni-id" value=""></input>
+</div>
+
+<div class="sort">
+  <label>Sort By:</label>
+  <input id="sort-by date" type="radio" name="sort-by" value="date"> Date
+  <input id="sort-by location" type="radio" name="sort-by" value="location"> Location 
+</div>
+
+<div class="access">
+  <label>Event Types:</label>
+  <input type="checkbox" name="accessibility[]" value="PUB"> Public |
+  <input type="checkbox" name="accessibility[]" value="PRI"> Private |
+  <input type="checkbox" name="accessibility[]" value="RSO"> RSOs |
+</div>
+
+</form>
+
+<div id="map">
+<!-- use ajax to populate the map with events -->
+</div>
+
+<div class="records"></div>
 </div>
 EOT;
 ?>

@@ -5,32 +5,71 @@ $start = $back_range[0];
 $end = $back_range[1];
 
 $template = <<<EOT
-<div><a href="{$site_root}/events/{$start}-{$end}">&laquo; Back to events</a></div>
+<script src="{$site_root}/js/view_event.js"></script>
 
-<h2>{$event_name}</h2>
+<script>
 
-<div>Location: {$event_loc_name}. {$event_city}, {$state}. {$event_zip}</div>
-<input type="hidden" id="location" value="{$event_loc_name}"></input>
-<input type="hidden" id="lon" value="{$event_long}"></input>
-<input type="hidden" id="lat" value="{$event_lat}"></input>
+  app.scope.event_id = {$event_id};
+
+  app.scope.current_user_id = {$user_id};
+
+</script>
+
+<div><a href="{$site_root}/events">&laquo; Back to events</a></div>
+
+EOT;
+
+// if the current user is the owner, show the link to edit.
+if ($is_owner) {
+
+  $template .= "<div><a href=\"{$site_root}/event/{$event_id}/edit\">&laquo; Edit Event</a></div>";
+
+}
+
+$template .= <<<EOT
+<h2>{$name}</h2>
+
+<div>Location: {$location}</div>
+<input type="hidden" id="location" value="{$location}"></input>
+<input type="hidden" id="lon" value="{$lon}"></input>
+<input type="hidden" id="lat" value="{$lat}"></input>
 <div id="map"></div>
 <script type="text/javascript" src="https://maps.google.com/maps/api/js?key=AIzaSyBGfGPKeqJZRoQSInY5LXqvZt7lZwihCPA&libraries=places"></script>
 <script src="{$site_root}/js/lib/jquery-locationpicker-plugin/locationpicker.jquery.js"></script>
 <script>app.makeMapPresentation()</script>
-<div>Start time: {$event_time}</div>
-<div>Duration: {$event_duration}</div>
+<div>Start time: {$start_time}</div>
+<div>End Time: {$end_time}</div>
+<div>Description: {$description}</div>
 
-<div>Hosted by: {$event_org}</div>
+<div class="event-page aggregate events">
+<h4>People Attending this Event:</h4>
 
-<div>People Attending this Event:</div>
+</div>
 
-<div>Comment Section</div>
-<div class="entity-list comment">
+<div class="event-page aggregate participants">
+<!-- populate with ajax -->
+</div>
+
+<!-- particpate form. populated with JS if user is not attending. -->
+<div class="participate">
+</div>
+
+<h4>Average Rating: <span id="total-rating">{$rating}</span>/5.00</h4>
+
+<h4>Rate this event!</h4>
+<div id="rating">
+
+</div>
+
+<h4>Comment Section</h4>
+<div class="event-view aggregate comment">
 <!-- comments loaded with AJAX -->
+</div>
 
+<div>
 <!-- form will be positioned below div using absolute positioning, top:100% -->
-<form id="new-comment" method="POST" action="{$site_root}/comment/create">
-  <textarea id="comment-body" name="comment-body">
+<form id="new-comment" class="lefty" method="POST" action="{$site_root}/comment/create">
+  <textarea id="comment-body" name="content">
   </textarea>
   <input type="submit" value="Post"/>
 </form>

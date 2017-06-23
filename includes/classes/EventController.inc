@@ -4,9 +4,18 @@ class EventController extends EntityController {
 
   private $create_query ;
   private $view_query;
-  private $view_all_query;
   private $update_query;
   private $destroy_query;
+
+  private $attend_event_query;
+  private $unattend_event_query;
+  private $rate_event_query;
+
+  private $event_participants_query;
+
+  private $search_events_query;
+
+  private $get_rso_events_query;
 
   public function __construct() {
 
@@ -16,9 +25,15 @@ class EventController extends EntityController {
 
     $this->create_query = $create_query;
     $this->view_query = $view_query;
-    $this->view_all_query = $view_all_query;
     $this->update_query = $update_query;
     $this->destroy_query = $destroy_query;
+    $this->attend_event_query = $attend_event_query;
+    $this->unattend_event_query = $unattend_event_query;
+    $this->rate_event_query = $rate_event_query;
+    $this->search_events_query = $search_events_query;
+    $this->event_participants_query = $event_participants_query;
+
+    $this->get_rso_events_query = $get_rso_events_query;
 
   }
 
@@ -33,51 +48,72 @@ class EventController extends EntityController {
     // if no user is logged in
     if (!isset($user)) {
 
-      // go to home page.
+      // must be logged in as user. go to home page.
       go_home();
 
     }
+
+    $user_id = $user->user_id;
 
     $role = $user->role;
 
-    if ($role !== "SA" || $role !== "ADM") {
-
-      // simply redirect home.
-      go_home();
-
-    }
-
-    $name = isset($params['title'])? $params['title']: "";
+    $name = isset($params['name'])? $params['name']: "";
+    $description = isset($params['description'])? $params['description']: "";
     $location = isset($params['location'])? $params['location']: "";
-    $street = isset($params['street'])? $params['street']: ""; 
-    $zip = isset($params['zip'])? $params['zip']: "";
-    $city = isset($params['city'])? $params['city']: "";
-    $state = isset($params['state'])? $params['state']: ""; 
 
     // calculate duration from start and end time.
-    $duration = isset($params['duration'])? $params['duration']: "";
     $start_time = isset($params['start-time'])? $params['start-time']: "";
     $end_time = isset($params['end-time'])? $params['end-time']: "";
-    $long = isset($params['lon'])? $params['lon']: "";
+    $telephone = isset($params['telephone'])? $params['telephone']: "";
+    $email = isset($params['email'])? $params['email']: "";
+    $lon = isset($params['lon'])? $params['lon']: "";
     $lat = isset($params['lat'])? $params['lat']: "";
+
+    $categories = isset($params['categories'])? $params['categories']: ""; 
+    $accessibility = isset($params['accessibility'])? $params['accessibility']: ""; 
+
+    // allow user to set the rso from the list of rso's they administrate.
+    // If none was selected, set to 0 to set event to PND -> pending
+    $rso_id = isset($params['rso-id'])? $params['rso-id']: 0; 
+
+    // always use the users university
+    $uni_id = isset($user->uni_id)? $user->uni_id: 0; 
 
     $query = $this->create_query;
 
-    $this->db->prepared_query($query, array(
+    // returns id of created event for redirect purposes
+    $result = $this->db->prepared_query($query, array(
       ":name" => $name,
+      ":description" => $description,
       ":location" => $location,
-      ":street" => $street,
-      ":zip" => $zip,
-      ":city" => $city,
-      ":state" => $state,
       ":start_time" => $start_time,
       ":end_time" => $end_time,
-      ":long" => $long,
+      ":telephone" => $telephone,
+      ":email" => $email,
       ":lat" => $lat,
+      ":lon" => $lon,
+      ":accessibility" => $accessibility,
+      ":categories" => $categories,
+      ":user_id" => $user_id,
+      ":rso_id" => $rso_id,
+      ":uni_id" => $uni_id,
     ));
 
-    // just go home for now... figure out a redirect later.
-    go_home();
+    // something went wrong. PDO most likely has set error message
+    if (empty($result)) {
+
+      // just go home for now. change to go_back once we are positive this works.
+      go_home();
+      return;
+
+    }
+
+    // get id of event just created.
+    $result = $result[0];
+    $event_id = $result['event_id'];
+    $event_id = $result['event_id'];
+    set_message("You've successfully created the event " . $name . ". Try inviting friends!");
+    redirect_entity_view('event', $event_id);
 
   }
 
@@ -96,6 +132,10 @@ class EventController extends EntityController {
 
     }
 
+    $user_id = $user->user_id;
+
+    $uni_id = isset($user->uni_id)? $user->uni_id: 0;
+
     $role = $user->role;
 
     $event_id = $params[1];
@@ -104,6 +144,9 @@ class EventController extends EntityController {
 
     $result = $this->db->prepared_query($query, array(
       ":event_id" => $event_id,
+      ":user_id" => $user_id,
+      ":role" => $role,
+      ":uni_id" => $uni_id,
     ));
 
     // no event was found with this event id
@@ -120,18 +163,19 @@ class EventController extends EntityController {
     $result = $result[0];
 
     $name = isset($result['name'])? $result['name']: "";
-    $loc_name = isset($result['loc_name'])? $result['loc_name']: "";
-    $street = isset($result['street'])? $result['street']: ""; 
-    $zip = isset($result['zip'])? $result['zip']: "";
-    $city = isset($result['city'])? $result['city']: "";
-    $state = isset($result['state'])? $result['state']: ""; 
+    $location = isset($result['location'])? $result['location']: "";
+    $description = isset($result['description'])? $result['description']: "";
 
-    // calculate duration from start and end time.
     $start_time = isset($result['start_time'])? $result['start_time']: "";
     $end_time = isset($result['end_time'])? $result['end_time']: "";
-    $long = isset($result['long'])? $result['long']: "";
+    
+    $telephone = isset($result['telephone'])? $result['telephone']: "";
+    $email = isset($result['email'])? $result['email']: "";
+    $lon = isset($result['lon'])? $result['lon']: "";
     $lat = isset($result['lat'])? $result['lat']: "";
-    $org = isset($result['org'])? $result['org']: "";
+    $is_owner = isset($result['is_owner'])? $result['is_owner']: 0;
+    $is_participating = isset($result['is_participating'])? $result['is_participating']: 0;
+    $rating = isset($result['rating'])? $result['rating']: "";
 
     // return the partial using the variable defined above.
     include get_entity_partial('event', 'view');
@@ -148,25 +192,21 @@ class EventController extends EntityController {
 
     global $user;
 
+    if ($user == NULL) {
+
+      go_home();
+
+    }
+
+    $user_id = $user->user_id;
+    $role = $user->role;
+    $uni_id = isset($user->uni_id)? $user->uni_id: 0;
+
     $events = array(); 
 
-    $range = explode("-", $params[1]);
-
-    $start = $range[0];
-    $end= $range[1];
-
-    $query = $this->view_all_query;
-
-    $results = $this->db->prepared_query($query, array(
-      ":start" => $start,
-      ":end" => $end,
-    ));
-
     if (empty($results)) {
-      $events = FALSE;
-    }  
 
-    $events = $results;
+    }  
 
     include get_entity_partial('event', 'view_all');
 
@@ -183,37 +223,62 @@ class EventController extends EntityController {
     // user who is signed in.
     global $user;
 
-    $uid = $user->id;
+    $event_id = $params[1];
 
+    $user_id = $user->user_id;
+    $uni_id = isset($user->uni_id)? $user->uni_id: 0;
     $role = $user->role;
+ 
+    $name = isset($params['name'])? $params['name']: "";
+    $description = isset($params['description'])? $params['description']: "";
+    $location = isset($params['location'])? $params['location']: "";
 
-    if ($role !== "SA" || $role !== "ADM") {
+    // calculate duration from start and end time.
+    $start_time = isset($params['start-time'])? $params['start-time']: "";
+    $end_time = isset($params['end-time'])? $params['end-time']: "";
+    $telephone = isset($params['telephone'])? $params['telephone']: "";
+    $email = isset($params['email'])? $params['email']: "";
+    $lon = isset($params['lon'])? $params['lon']: "";
+    $lat = isset($params['lat'])? $params['lat']: "";
+    $state = isset($params['state'])? $params['state']: ""; 
 
-      // simply redirect home.
+    $accessibility = isset($params['accessibility'])? $params['accessibility']: "PUB"; 
+    
+    $rso_id = isset($params['rso-id'])? $params['rso-id']: 0; 
+
+    $categories = isset($params['categories'])? $params['categories']: ""; 
+
+    $query = $this->update_query;
+
+    $result = $this->db->prepared_query($query, array(
+      ":event_id" => $event_id,
+      ":name" => $name,
+      ":location" => $location,
+      ":description" => $description,
+      ":start_time" => $start_time,
+      ":end_time" => $end_time,
+      ":telephone" => $telephone,
+      ":email" => $email,
+      ":lon" => $lon,
+      ":lat" => $lat,
+      ":user_id" => $user_id,
+      ":rso_id" => $rso_id,
+      ":uni_id" => $uni_id,
+      ":accessibility" => $accessibility,
+      ":categories" => $categories,
+    ));
+
+    // redirect to event page.
+    if (empty($result)) {
+
       go_home();
 
     }
 
-    $name = isset($params['event-name'])? $params['event-name']: "";
-    $location = isset($params['location'])? $params['location']: "";
-    $street = isset($params['street'])? $params['street']: ""; 
-    $zip = isset($params['zip'])? $params['zip']: "";
-    $city = isset($params['city'])? $params['city']: "";
-    $state = isset($params['state'])? $params['state']: ""; 
+    $result = $result[0];
 
-    // calculate duration from start and end time.
-    $time = isset($params['time'])? $params['time']: "";
-    $long = isset($params['lon'])? $params['lon']: "";
-    $lat = isset($params['lat'])? $params['lat']: "";
-    $org = isset($params['organization'])? $params['organization']:
-
-    $query = $this->update_query;
-
-    // perform the query
-    // $this->db->prepared_query($query, array());
-         
-    // redirect to event page.
-
+    set_message('Succesfully changed ' . $name);
+    redirect_entity_view('event', $event_id);
 
   }
 
@@ -239,32 +304,15 @@ class EventController extends EntityController {
     // current user logged in.
     global $user;
 
-    if (!isset($user)) {
+    if ($user == NULL) {
 
-
-
-    }
-
-    //$role = $user->role;
-
-    // if the user is not an admin.
-    /*
-    if ($role !== "ADM") {
-
-      // just get home page.
       go_home();
 
-      return;
-
     }
-    */
-    $user_rsos = "";
 
     $id = $params[1];
 
     $site_root = $configs['site_root'];
-
-    // check if the user deleting this is has the permissions. 
     
     include get_entity_partial('event', 'make');
 
@@ -276,26 +324,55 @@ class EventController extends EntityController {
 
     global $configs;
 
+    $site_root = $configs['site_root'];
+
     // current user
     global $user;
 
-    // assume user can't edit
-    $can_edit = FALSE;
-    // if the user is not an admin.
-    /*
-    // if they're an admin they can, though.
-    $can_edit = $can_edit || $role === "ADM";
+    if ($user == NULL) {
 
-    // if they're an admin they can, though.
-    $can_edit = $can_edit || $role === "ADM";
-    
-    */
+      go_home();
 
-    $id = $params[1];
+    }
+
+    $user_id = $user->user_id;
+
+    $role = $user->role;
+
+    $uni_id = isset($user->uni_id)? $user->uni_id: 0;
+
+    $event_id = $params[1];
 
     $site_root = $configs['site_root'];
 
-    // check if the user editing this is has the permissions. 
+    $query = $this->view_query;
+
+    $result = $this->db->prepared_query($query, array(
+      ":event_id" => $event_id,
+      ":user_id" => $user_id,
+      ":role" => $role,
+      ":uni_id" => $uni_id,
+    ));
+
+    if (empty($result)) {
+
+      include get_entity_partial('event', '404');
+
+      return $template;
+
+    }
+
+    $result = $result[0];
+
+    $name = isset($result['name'])? $result['name']: "";
+    $location = isset($result['location'])? $result['location']: "";
+    $description = isset($result['description'])? $result['description']: "";
+
+    // calculate duration from start and end time.
+    $start_time = isset($result['start_time'])? $result['start_time']: "";
+    $end_time = isset($result['end_time'])? $result['end_time']: "";
+    $lon = isset($result['lon'])? $result['lon']: "";
+    $lat = isset($result['lat'])? $result['lat']: "";
     
     include get_entity_partial("event", "edit");
 
@@ -307,6 +384,14 @@ class EventController extends EntityController {
 
     global $configs;
 
+    global $user;
+
+    if ($user == NULL) {
+
+      go_home();
+
+    }
+
     $id = $params[1];
 
     $site_root = $configs['site_root'];
@@ -316,6 +401,172 @@ class EventController extends EntityController {
     include get_entity_partial("event", "drop");
 
     return $template;
+
+  }
+
+  public function attend_event ($params) {
+
+    global $user;
+
+    $user_id = $user->user_id;
+    $uni_id = isset($user->uni_id)? $user->uni_id: 0;
+    $role = $user->role;
+
+    $event_id = $params['event_id'];
+
+    $query = $this->attend_event_query;
+
+    $result = $this->db->prepared_query($query, array(
+      ":event_id" => $event_id,
+      ":user_id" => $user_id,
+      ":uni_id" => $uni_id,
+    ));
+
+    die();
+
+  }
+
+  public function unattend_event ($params) {
+
+    global $user;
+
+    if ($user == NULL) {
+
+      die();
+
+    }
+
+    $user_id = $user->user_id;
+
+    $uni_id = isset($user->uni_id)? $user->uni_id: 0;
+
+    $event_id = $params['event_id'];
+
+    $query = $this->unattend_event_query;
+
+    $result = $this->db->prepared_query($query, array(
+      ":event_id" => $event_id,
+      ":user_id" => $user_id
+    ));
+
+    die();
+
+  }
+
+  public function rate_event ($params) {
+
+    global $user;
+
+    $user_id = $user->user_id;
+    $uni_id = isset($user->uni_id)? $user->uni_id: 0;
+    $event_id = $params['event_id'];
+    $rating = isset($params['rating'])? $params['rating']: NULL;
+
+    $query = $this->rate_event_query;
+
+    $result = $this->db->prepared_query($query, array(
+      ":event_id" => $event_id,
+      ":user_id" => $user_id,
+      ":rating" => $rating
+    ));
+
+    $result = $result[0];
+
+    // print out the new user rating and events total rating in JSON.
+    echo json_encode($result);
+
+    die();
+
+  }
+
+  public function event_participants_json ($params) {
+
+    $event_id = isset($params['event_id'])? $params['event_id']: 0;
+
+    $query = $this->event_participants_query;
+
+    $results = $this->db->prepared_query($query, array(
+      ":event_id" => $event_id,
+    ));
+
+    echo json_encode($results);
+
+  }
+
+  // search for events and print results out to JSON
+  public function get_events_json ($params) {
+
+    global $user;
+
+    if ($user == NULL) {
+
+      die();
+
+    }
+
+    $user_id = $user->user_id;
+
+    $scope = isset($params['scope']) ? $params['scope']: "my-uni";
+
+    if ($scope == "my-uni") {
+
+      $uni_id = isset($user->uni_id)? $user->uni_id: 0;
+
+    }
+    else if ($scope == "other-uni") {
+
+      $uni_id = isset($params['uni-id'])? $params['uni_id']: 0;
+
+    }
+
+    $sort_by = isset($params['sort-by']) ? $params['sort-by'] : "date";
+
+    $accessibility = isset($params['accessibility'])? $params['accessibility']: 'PUB';
+
+    $query = $this->search_events_query;
+
+    $results = $this->db->prepared_query($query, array(
+      ":user_id" => $user_id,
+      ":uni_id" => $uni_id,
+      ":scope" => $scope,
+      ":sort_by" => $sort_by,
+      ":accessibility" => $accessibility
+    ));
+
+    if (empty($results)) {
+
+      die();
+
+    }
+
+    echo json_encode($results);
+
+    die();
+
+  }
+
+
+  public function get_rso_events_json ($params) {
+
+    global $user;
+
+    if ($user == NULL) {
+
+      die();
+
+    }
+
+    $rso_id = isset($params['rso_id'])? $params['rso_id']: 0;
+
+    $query = $this->get_rso_events_query;
+
+    $results = $this->db->prepared_query($query, array(
+      ":rso_id" => $rso_id,
+    ));
+
+    echo json_encode($results);
+
+    die();
 
   }
 
