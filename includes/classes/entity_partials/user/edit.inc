@@ -2,9 +2,9 @@
 $template = <<<EOT
 
 <script src="{$site_root}/js/user_form.js"></script>
-<div><a href="{$site_root}/user/{$id}">Back to profile &raquo;</a></div>
+<div><a href="{$site_root}/user/{$user_id}">Back to profile &raquo;</a></div>
 
-<form method="POST" action="{$site_root}/user/{$id}/update">
+<form method="POST" action="{$site_root}/user/{$user_id}/update">
 
   <h3>Edit Account</h3>
 

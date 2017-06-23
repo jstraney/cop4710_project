@@ -69,11 +69,13 @@ class UniversityController extends EntityController {
     $result = $result[0];
 
     // get fields set defaults.
-    $uni_name = isset($result['uni_name']) ? $result['uni_name']: "";
-    $uni_street = isset($result['uni_street']) ? $result['uni_street']: "";
-    $uni_state = isset($result['uni_state']) ? $result['uni_state']: "";
-    $uni_zip = isset($result['uni_zip']) ? $result['uni_zip']: "";
-    $uni_num_students = isset($result['uni_num_students']) ? $result['uni_num_students']: "";
+    $name = isset($result['name']) ? $result['name']: "";
+    $description = isset($result['description']) ? $result['description']: "";
+    $location = isset($result['location']) ? $result['location']: "";
+    $lat = isset($result['lat']) ? $result['lat']: "";
+    $lon = isset($result['lon']) ? $result['lon']: "";
+    $website_url = isset($result['website_url']) ? $result['website_url']: "";
+    $num_students = isset($result['num_students']) ? $result['num_students']: 0;
 
     include get_entity_partial('university', 'view');
 
@@ -109,6 +111,14 @@ class UniversityController extends EntityController {
 
   public function update($params) {
 
+    $name = isset($result['name']) ? $result['name']: "";
+    $description = isset($result['description']) ? $result['description']: "";
+    $location = isset($result['location']) ? $result['location']: "";
+    $lat = isset($result['lat']) ? $result['lat']: "";
+    $lon = isset($result['lon']) ? $result['lon']: "";
+    $website_url = isset($result['website_url']) ? $result['website_url']: "";
+
+
   }
 
   public function destroy ($params) {
@@ -116,7 +126,7 @@ class UniversityController extends EntityController {
     // user who is signed in.
     global $user;
 
-    $uid = $user->id;
+    $user_id = $user->user_id;
 
     $role = $user->role;
      
@@ -131,10 +141,21 @@ class UniversityController extends EntityController {
     // user who is signed in.
     global $user;
 
-    $uid = $user->id;
+    if ($user == NULL) {
+
+      go_home();
+
+    }
+
+    $uid = $user->user_id;
 
     $role = $user->role;
      
+    if ($role !== "SA") {
+
+      go_home();
+
+    }
 
     include get_entity_partial('university', 'make');
 
@@ -147,10 +168,36 @@ class UniversityController extends EntityController {
     // user who is signed in.
     global $user;
 
-    $uid = $user->id;
+    if ($user == NULL) {
+
+      go_home();
+
+    }
+
+    $uid = $user->user_id;
 
     $role = $user->role;
-     
+
+    if ($role !== "SA") {
+
+      go_home();
+
+    }
+
+    $uni_id = isset($params['uni_id'])? $params['uni_id']: 0;
+
+    $query = $this->view_query;
+
+    $result = $this->db->prepared_query($query, array (
+      ":uni_id" => $uni_id
+    ));
+
+    $name = isset($result['name']) ? $result['name']: "";
+    $description = isset($result['description']) ? $result['description']: "";
+    $location = isset($result['location']) ? $result['location']: "";
+    $lat = isset($result['lat']) ? $result['lat']: "";
+    $lon = isset($result['lon']) ? $result['lon']: "";
+    $website_url = isset($result['website_url']) ? $result['website_url']: "";
 
     include get_entity_partial("university", "edit");
 
@@ -159,6 +206,25 @@ class UniversityController extends EntityController {
   }
 
   public function drop ($params) {
+
+    // user who is signed in.
+    global $user;
+
+    if ($user == NULL) {
+
+      go_home();
+
+    }
+
+    $uid = $user->user_id;
+
+    $role = $user->role;
+
+    if ($role !== "SA") {
+
+      go_home();
+
+    }
 
     include get_entity_partial("university", "drop");
 

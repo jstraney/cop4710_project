@@ -5,6 +5,11 @@ html {
   width: 100%;
 }
 
+h2, h3, h4 {
+  margin-top: 1.5em;
+  margin-bottom: .8em;
+}
+
 body {
   font-family: "Open Sans", arial, sans-serif;
   color: #333333;
@@ -39,7 +44,9 @@ body {
 #main-view {
   max-width: 800px;
   margin: 160px auto 50px;
-  padding: 5px 10px 10px;
+  padding: 5px 20px 25px;
+  position: relative;
+
 }
 
 #content {
@@ -115,7 +122,7 @@ a:hover {
 
 /* basic form stuff */
 form {
-  margin: 0 auto;
+  margin: 15px auto 25px;
 }
 
 input, form {
@@ -123,7 +130,8 @@ input, form {
   display: block;
 }
 
-input[type=text], input[type=email], input[type=password] {
+input[type=text], input[type=email], input[type=password],
+input[type=tel]{
   width: 100%;
   margin-bottom: 15px;
   text-indent: .5em;
@@ -142,6 +150,15 @@ input[type=submit] {
   font-size: 14px;
 }
 
+form.lefty {
+  max-width: none;
+}
+
+form.lefty input[type=submit]{
+  margin-left: 0px;
+  margin-right: 10px;
+}
+
 input[type=submit]:hover {
   cursor: pointer;
   background-color: #AA9944;
@@ -156,6 +173,166 @@ textarea {
   font-size: 14px;
   text-indent: .5em;
   border: solid 1px #BBBBBB;
+}
+
+input[type=checkbox], input[type=radio] {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 5px;
+}
+
+/* general entity css */
+
+div.button:hover {
+  opacity: .8; 
+  cursor: pointer;
+}
+
+
+
+div.aggregate {
+  margin-bottom: 10px;
+}
+
+div.record {
+  display: inline-block;
+  margin-right: 25px;
+}
+
+div.entity-actions {
+  margin: 20px auto;
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+}
+
+div.entity-actions > a {
+  margin-right: 25px;
+  padding: 5px;
+  border: 1px solid #BBB;
+  border-bottom: none;
+  border-top-right-radius: 15px;
+}
+
+p.form-prompt {
+  color: #888888;
+  font-size: 14px;
+}
+
+/* RSO pages */
+div.record.event {
+  display: block;
+  border-bottom: solid 1px #BBBBBB;
+  padding-bottom: 15px;
+  position: relative;
+}
+
+div.record.event > span.time {
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: #666666;
+  font-size: 14px;
+}
+
+div.record.member {
+  position: relative;
+  vertical-align: top;
+  margin-top: 10px;
+}
+
+div.record.member.marked-administrator,
+div.record.member.marked-administrator > a {
+  color: #33AA66;
+}
+
+
+div.rso-view.aggregate.members > div.record.member.marked-administrator:before {
+  content: "\2666";
+  display: inline-block;
+  padding: 0 5px 0 0;
+  color: #CC8833;
+}
+
+div.record.member > .remove {
+  position: absolute;
+  top: -20px;
+  right: 0;
+}
+
+div.record.member > .make-admin {
+  position: absolute;
+  top: -20px;
+  right: 20px;
+}
+
+/* Event Page */
+
+/* attendees */
+div.record.participant {
+  position: relative;
+  display: inline-block;
+  
+}
+
+div.participant > div.button.unattend{
+  position: absolute;
+  bottom: 0px;
+  right: -15px;
+  font-size: 14px;
+}
+
+/* ratings */
+div#rating {
+  white-space: nowrap;
+}
+
+div.star {
+  display: inline-block;
+  color: #FF6622;
+  margin-right: 5px;
+}
+
+div.star.rated ~ div.star {
+  color: #775555;
+}
+
+div.star:hover ~ div.star {
+  color: #775555 !important;;
+}
+
+div.star:hover {
+  cursor: pointer;
+  color: #aaCC22 !important;
+}
+
+div.star.rate-0 {
+  color: #555555;
+}
+
+/* comments */
+div.record.event.comment {
+  display: block;
+  position: relative;
+  margin-bottom: 40px;
+}
+
+div.record.event.comment > .button {
+  color: #888888;
+}
+
+div.record.event.comment > .button.destroy {
+  display: block;
+  position: absolute;
+  bottom: -30px;
+  left: 0;
+}
+
+div.record.event.comment > .button.update {
+  display: block;
+  position: absolute;
+  bottom: -30px;
+  left: 70px;
 }
 
 div#map {

@@ -31,10 +31,7 @@ EOT;
 
 // returns all the fields used on a users profile page.
 $view_query = <<<EOT
-SELECT u.user_name, u.first_name, u.last_name, n.uni_id, u.email, n.name AS uni_name
-FROM users u, attending a, universities n
-WHERE u.user_id = :uid AND (:uid1 = a.user_id AND a.uni_id = n.uni_id)
-LIMIT 1;
+CALL view_user(:user_id);
 EOT;
 
 // gets student by university id.
@@ -42,6 +39,32 @@ $user_university_query = <<<EOT
 SELECT u.user_name, u.first_name, u.last_name, a.uni_id
 FROM users u, attending a
 WHERE u.user_id = a.user_id AND a.uni_id = :uni_id;
+EOT;
+
+// gets users at a university by matching username
+$get_students_like_query = <<<EOT
+SELECT u.user_id AS value, u.user_name AS label
+FROM users u, attending a
+WHERE u.role = "STU"
+AND u.user_id = a.user_id
+AND a.uni_id = :uni_id
+AND u.user_name LIKE CONCAT(:name, "%");
+EOT;
+
+$user_participating_query = <<<EOT
+SELECT e.event_id, e.name
+FROM participating p, events e
+WHERE p.user_id = :user_id
+AND p.event_id = e.event_id
+LIMIT :start, :end;
+EOT;
+
+$user_membership_query = <<<EOT
+SELECT r.rso_id, r.name 
+FROM is_member m, rsos r 
+WHERE m.user_id = :user_id
+AND m.rso_id = r.rso_id
+LIMIT :start, :end;
 EOT;
 
 // gets credentials for user trying to edit a profile.
@@ -62,10 +85,14 @@ WHERE email = :email;
 EOT;
 
 // get the current user logged into the website. uses $_SESSION['uid']
-// to get the current user from database.
+// uses a procedure which will return a different object depending on role
+// SA for example has no association with attending a school
 $current_user_query = <<<EOT
-SELECT user_name, first_name, last_name, email, role
-FROM users
-WHERE user_id = :uid;
+CALL get_current_user(:uid);
 EOT;
+/*
+SELECT u.user_name, u.first_name, u.last_name, u.email, u.role, a.uni_id
+FROM users u, attending a
+WHERE user_id = :uid;
+*/
 ?>
