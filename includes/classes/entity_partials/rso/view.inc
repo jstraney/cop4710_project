@@ -1,0 +1,49 @@
+<?php
+$template = <<<EOT
+<script>
+// scope set by php
+(function (a) {
+  a.scope.rso_id = {$rso_id};
+  a.scope.user_id = {$user_id};
+  a.scope.rso_administrator = {$rso_administrator};
+}) (app);
+</script>
+
+<script src="{$site_root}/js/view_rso.js"></script>
+<h2>{$name}</h2>
+
+<h3>About {$name}:</h3>
+<p>{$description}</p>
+
+<h3>Events Hosted by {$name}:</h3>
+<div class="rso-view aggregate events">
+<!-- populated with AJAX -->
+</div>
+
+<h3>Members in {$name}:</h3>
+<div class="rso-view aggregate members">
+<!-- populated with AJAX -->
+</div>
+
+<form id="join" class="lefty" method="POST" action="{$site_root}/rso/{$rso_id}/join">
+  <input type="submit" value="Join {$name}!"/>
+</form>
+
+EOT;
+
+if ($viewed_by_admin) {
+
+  // include special links to edit and delete
+  $template .= '<div class="entity-actions">';
+  $template .= "<a href=\"{$site_root}/rso/{$rso_id}/delete\">Delete RSO</a>";
+  $template .= "<a href=\"{$site_root}/rso/{$rso_id}/edit\">Edit RSO</a>";
+  $template .= "<a href=\"{$site_root}/event/new\">New Event</a>";
+  $template .= '</div>';
+
+}
+
+$template .= <<<EOT
+
+</div>
+EOT;
+?>

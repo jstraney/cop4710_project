@@ -2,14 +2,16 @@
 
 class UserController extends EntityController {
 
-  private $create_query ;
-
+  private $create_query;
   private $view_query;
   private $view_all_query;
   private $update_query;
   private $delete_query;
 
   private $user_university_query;
+  private $user_participating_query;
+  private $user_membership_query;
+  private $get_students_like_query;
 
   // verification
   /* leaving this out for now. we can add it if we have time
@@ -45,6 +47,9 @@ class UserController extends EntityController {
     $this->destroy_query = $destroy_query;
 
     $this->user_university_query = $user_university_query;
+    $this->get_students_like_query = $get_students_like_query;
+    $this->user_participating_query = $user_participating_query;
+    $this->user_membership_query = $user_membership_query;
 
     /* excluded for now unless we have time to work on verification.
     $this->verify_query = $verify_query;
@@ -68,6 +73,7 @@ class UserController extends EntityController {
     $email = isset($params['e-mail'])? $params['e-mail']: FALSE; 
     $password = isset($params['password'])? $params['password']: FALSE; 
     $uni_id = isset($params['uni-id'])? $params['uni-id']: FALSE; 
+    $user_role = isset($params['role'])? $params['role']: "STU"; 
 
     $requirements_met = TRUE;
     $requirements_met = $user_name && $first_name && $last_name;
@@ -79,13 +85,16 @@ class UserController extends EntityController {
 
     $hash = encrypt_password($password);
 
-    $result = $this->db->prepared_query($this->create_query, array(
+    $query = $this->create_query;
+
+    $result = $this->db->prepared_query($query, array(
       ":email" => $email,
       ":hash" => $hash,
       ":first_name" => $first_name,
       ":last_name" => $last_name,
       ":user_name" => $user_name,
       ":uni_id" => $uni_id,
+      ":role" => $user_role,
     ));
 
     if ($result === FALSE) {
@@ -113,10 +122,13 @@ class UserController extends EntityController {
     if (isset($user)) {
 
       $role = $user->role;
+      $current_uid = $user->user_id;;
 
     }
     else {
 
+      // id's start from 1
+      $current_uid = 0;
       $role = FALSE;
 
     }
@@ -125,9 +137,17 @@ class UserController extends EntityController {
 
     $query = $this->view_query;
 
-    $uid = $params[1];
+    $user_id = $params[1];
 
-    $result = $this->db->prepared_query($query, array(":uid" => $uid));
+    $my_account = FALSE;
+
+    if ($current_uid == $user_id) {
+      // this is the current users profile
+      $my_account = TRUE;
+
+    }
+
+    $result = $this->db->prepared_query($query, array(":user_id" => $user_id));
 
     if (empty($result)) {
 
@@ -145,6 +165,7 @@ class UserController extends EntityController {
     $email = isset($viewed_user['email'])? $viewed_user['email']: "";
     $uni_id = isset($viewed_user['uni_id'])? $viewed_user['uni_id']: "";
     $uni_name = isset($viewed_user['uni_name'])? $viewed_user['uni_name']: "";
+    $user_role = isset($viewed_user['role'])? $viewed_user['role']: "";
 
     include get_entity_partial('user', 'view');
 
@@ -164,13 +185,13 @@ class UserController extends EntityController {
 
     $id = $params[1];
 
-
     $user_name = $params['user-name']; 
     $first_name = $params['first-name']; 
     $last_name = $params['last-name']; 
     $email = $params['e-mail']; 
     $uni_id = $params['uni-id']; 
     $password = $params['password']; 
+    $user_role = isset($params['role'])? $params['role'] : "STU"; 
 
     $credentials = $this->get_credentials_by_id($id);
 
@@ -198,7 +219,8 @@ class UserController extends EntityController {
         ":email" => $email,
         ":uni_id" => $uni_id,
         ":hash" => $hash,
-        ":uid" => $id,
+        ":role" => $user_role,
+        ":user_id" => $id,
       ));
 
     }
@@ -254,9 +276,6 @@ class UserController extends EntityController {
 
     $site_root = $configs['site_root'];
 
-    // list of universities a student can register to
-    $universities = $this->university_controller->get_list();
-
     include get_entity_partial("user", "make");
 
     return $template;
@@ -270,21 +289,24 @@ class UserController extends EntityController {
     // current user logged in.
     global $user;
 
-    $universities = $this->university_controller->get_list();
+    if ($user == NULL) {
+
+      go_home();
+
+    }
 
     $site_root = $configs['site_root'];
 
     // get the current users fields. This allows us to set
     // default values in the fields, otherwise, anything left blank
     // will be overwritten in DB as blank
-    $query = $this->view_query;
 
     // id of user being edited.
-    $id = $params[1];
+    $user_id = $params[1];
 
     // current user cannot edit this user if they are not super admin, or
     // are the user that is being edited.
-    if (!$user->role !== "SA" && $user->user_id != $id) {
+    if (!$user->role !== "SA" && $user->user_id != $user_id) {
 
       // redirect to 'not found'
       include get_entity_partial('user', '404');
@@ -293,7 +315,9 @@ class UserController extends EntityController {
 
     }
 
-    $result = $this->db->prepared_query($query, array(":uid" => $id));
+    $query = $this->view_query;
+
+    $result = $this->db->prepared_query($query, array(":user_id" => $user_id));
 
     // if there's no user to edit, return a 404 message.
     if (empty($result)) {
@@ -324,6 +348,14 @@ class UserController extends EntityController {
 
     $site_root = $configs['site_root'];
 
+    global $user;
+
+    if ($user == NULL) {
+
+      go_home();
+
+    }
+
     $id = $params[1];
 
     include get_entity_partial("user", "drop");
@@ -347,6 +379,7 @@ class UserController extends EntityController {
     return $this->db->prepared_query($query, array(":user_id" => $id));
 
   }
+
   public function get_current_user ($uid) {
 
     global $user;
@@ -374,15 +407,19 @@ class UserController extends EntityController {
 
     $user->user_id = $uid;
     $user->user_name = $result['user_name'];
+    $user->email = $result['email'];
     $user->first_name = $result['first_name'];
     $user->last_name = $result['last_name'];
-    $user->uni_id = $result['uni_id'];
     $user->role = $result['role'];
+
+    // users with SA role do not have a university.
+    $user->uni_id = isset($result['uni_id']) ? $result['uni_id'] : NULL;
 
     return $user; 
     
   }
 
+  // gets list of students at university in JSON format. used in 'view students attending' lists
   public function get_students_json ($params) {
 
     // university id from url
@@ -396,24 +433,75 @@ class UserController extends EntityController {
 
   }
 
-  /* leaving out verification unless we have time.
-  public function verify ($params) {
+  public function get_peers_json ($params) {
 
-    $auth_url = $params[2];
+    global $user;
 
-    // do query to check if valid.
-    $this->db->beginTransaction();
-    // first verify and move to user table
-    $this->db->prepared_query($this->verify_query, array(":auth_url" => $auth_url));
-    // then drop temp user.
-    $this->db->prepared_query($this->drop_temp_query, array(":auth_url" => $auth_url));
+    $uni_id = $user->uni_id;
 
-    $this->db->commit();
-    
-    // if valid move from temp table to user table.
+    $name = isset($params['name']) ? $params['name'] : '';
+
+    $query = $this->get_students_like_query;
+
+    $results = $this->db->prepared_query($query, array(":uni_id" => $uni_id,":name" => $name));
+
+    echo json_encode($results);
 
   }
-  */
+
+  public function user_participating_json ($params) {
+
+    $user_id = $params['user_id'];
+    $start = isset($params['start'])? $params['start']: 0;
+    $end = isset($params['end'])? $params['end']: 10;
+
+    $query = $this->user_participating_query;
+
+    $results = $this->db->prepared_query($query, array(
+      ":user_id" => $user_id,
+      ":start" => $start,
+      ":end" => $end,
+
+    ));
+
+    if (empty($results)) {
+
+      die();
+
+    }
+
+    echo json_encode($results);
+
+    die();
+
+  }
+
+  public function user_membership_json ($params) {
+
+    $user_id = $params['user_id'];
+    $start = isset($params['start'])? $params['start']: 0;
+    $end = isset($params['end'])? $params['end']: 10;
+
+    $query = $this->user_membership_query;
+
+    $results = $this->db->prepared_query($query, array(
+      ":user_id" => $user_id,
+      ":start" => $start,
+      ":end" => $end,
+    ));
+
+    if (empty($results)) {
+
+      die();
+
+    }
+
+    echo json_encode($results);
+
+    die();
+
+  }
+
 }
 
 ?>

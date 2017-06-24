@@ -1,18 +1,19 @@
 <?php
 
 $template = <<<EOT
-<h2>{$uni_name}</h2>
+<h2>{$name}</h2>
 
-<h3>Students at {$uni_name}</h3>
+<h3>Students at {$name}</h3>
 <div class="related-resource-box"></div>
 
-<h3>RSOs at {$uni_name}</h3>
+<h3>RSOs at {$name}</h3>
 <div class="related-resource-box"></div>
 
-<h3>Events at {$uni_name}</h3>
-<div class="related-resource-box"></div>
+<h3>Events at {$name}</h3>
+<div class="university-view aggregate events"></div>
 
-<div>address: {$uni_street}. {$uni_state}, {$uni_zip}.</div>
+<div>address: {$location}</div>
+
 EOT;
 
 ?>

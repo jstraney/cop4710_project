@@ -65,6 +65,24 @@ function go_home () {
 
 }
 
+// goes back to the refering page. useful for errors arising from
+// submitting a form (e.g. submitting a new user. if a PDO exception
+// is thrown, this function is called sending the user back to
+// the form with an error message)
+function go_back () {
+
+  if (!isset($_SERVER['HTTP_REFERER'])) {
+
+    go_home;
+
+  }
+
+  $referer = $_SERVER['HTTP_REFERER'];
+
+  header("location: $referer");
+
+}
+
 // all entities with a 'view' action will usually follow the
 // url pattern of 'resource/[id]', this just performs a redirect
 // to the entity type with the following id.

@@ -7,10 +7,10 @@ $template = <<<EOT
   <h3>Create a New Event</h3>
 
   <label>Title</label>
-  <input name="title" type="text"></input>
+  <input name="name" type="text"></input>
 
   <label>Location</label>
-  <input id="location" name="loc-name" type="text"></input>
+  <input id="location" name="location" type="text"></input>
 
   <input style="display:none;" id="lon" name="lon" type="text" val=""></input>
   <input style="display:none;" id="lat" name="lat" type="text" val=""></input>
@@ -20,26 +20,40 @@ $template = <<<EOT
   <script src="{$site_root}/js/lib/jquery-locationpicker-plugin/locationpicker.jquery.js"></script>
   <script>app.makePicker();</script>
 
+  <label>Description</label>
+  <textarea id="description" name="description" placeholder="Enter a description"></textarea>
 
-  <label>City</label>
-  <input name="city" type="text"></input>
+  <div class="event-make contact">
+    <h4>Contact Info</h4>
+    <label>phone number</label>
+    <input name="phone-number" type="tel" pattern="^[0-9]{3}-[0-9]{3}-[0-9]{4}" title="format: 123-444-5555"></input>
+    <label>e-mail</label>
+    <input name="e-mail" type="email" value="{$user->email}"></input>
+  </div>
 
-  <label>State</label>
-  <input name="state" type="text"></input>
-
-  <label>Street Address</label>
-  <input name="street" type="text"></input>
-
-  <label>Zipcode</label>
-  <input name="zip" type="text"></input>
 
   <label>Start Time</label>
   <input id="start-time" name="start-time" type="text"></input>
-  <script>$("#start-time").datetimepicker()</script>
+  <div class="start-time-picker"></div>
 
   <label>End Time</label>
   <input id="end-time" name="end-time" type="text"></input>
-  <script>$("#end-time").datetimepicker()</script>
+  <div class="end-time-picker"></div>
+  <script>
+  $("#start-time, #end-time").datetimepicker({
+
+    onGenerate: function (current_time, \$input) {
+
+      var self = \$(this);
+
+      var top = self.position().top - 150;
+
+      self.css({top: top + "px"});
+
+    }
+
+  });
+  </script>
 
   <!-- todo: check if user is administrator any RSO's. if so, include the fields below -->
   <!-- if the event is not hosted by an RSO, it is put into a 'pending' state, which is changed by-->
@@ -54,13 +68,27 @@ $template = <<<EOT
   <div style="display: none;" class="selection rso">
     <label>Which RSO is it?</label>
     <!-- todo: populate with RSO's administrated by the current user. -->
-    <input type="text" name="organization" placeholder="Name of RSO" value="">
+    <input type="text" id="rso-input" name="rso-input" placeholder="Name of RSO" value="">
+    <input type="hidden" id="rso-id" name="rso-id" value="">
   </div>
 
-  <!-- If the event is not an RSO, allow the following.-->
-  <div style="display:none;" class="selection organization">
-    <label>Who is hosting the event?</label>
-    <input name="organization" placeholder="organization" type="text"></input>
+  <div class="selection">
+    <label>Who can see this event?</label>
+    <select id="accessibility" name="accessibility">
+      <option id="access-pub"value="PUB">Public</option>
+      <option id="access-pri"value="PRI">Private</option>
+      <option id="access-rso" value="RSO">RSO</option>
+    </select>
+    <p class="field-prompt">
+    Events marked as public can be seen by anyone. Events marked as private can only be
+    seen by members of the same university. RSO events can only be seen by the RSO specified
+    (If any).
+    </p>
+  </div>
+
+  <div class="selection">
+    <label>Pick a Category</label>
+    <input id="category" name="category" type="text"></input>
   </div>
 
   <input type="submit" value="Create Event"></input>

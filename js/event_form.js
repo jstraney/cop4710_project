@@ -1,45 +1,55 @@
-(function () {
+(function (a) {
 
   $(function () {
 
     var rsoSelection = $('div.rso.selection');
-    var orgSelection = $('div.organization.selection');
     
-    $('#is-rso').click(function () {
+    $('#is-rso').change(function () {
 
       rsoSelection.slideToggle();
-      orgSelection.slideUp();
       
     });
 
-    $('#not-rso').click(function () {
+    rsoInput = $("#rso-input");
 
-      orgSelection.slideToggle();
+    rsoId = $("#rso-id");
+
+    $('#not-rso').change(function () {
+
       rsoSelection.slideUp();
 
     });
 
-    $('input', rsoSelection).autocomplete({
+    rsoInput.autocomplete({
       source: function (req, res) {
 
-        rsoQuery = req.term;
+        var name = req.term;
 
         // use api endpoint
+        a.getRsosByAdministrator(name, function (data) {
 
-      },
-    });
+          console.log(JSON.parse(data));
 
-    $('input', orgSelection).autocomplete({
-      source: function (req, res) {
-
-        orgQuery = req.term;
-
-        // use api endpoint
+          res(JSON.parse(data));
+          
+        });
         
 
       },
+      select: function (event, ui) {
+
+        ui = ui || {};
+
+        var item = ui.item;        
+
+        rsoId.val(item.value); 
+
+        ui.item.value = ui.item.label;
+
+      }
+
     });
 
   });
 
-})();
+})(app);

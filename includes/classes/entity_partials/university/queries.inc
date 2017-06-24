@@ -13,19 +13,23 @@ $destroy_query = <<<EOT
 EOT;
 
 $view_query = <<<EOT
-SELECT uni_id, uni_name, uni_street, uni_state, uni_zip, uni_num_students
-FROM universities
-WHERE uni_id = :uni_id;
+SELECT n.uni_id, n.name, n.description, n.location, n.lat, n.lon, n.website_url, count(a.user_id)
+FROM universities n, attending a
+WHERE n.uni_id = :uni_id AND a.uni_id = n.uni_id;
 EOT;
 
 $view_all_query = <<<EOT
-SELECT uni_id, uni_name, uni_street, uni_state, uni_zip, uni_num_students
+SELECT uni_id, name, description, location, lat, lon, website_url
 FROM universities LIMIT :start, :end;
 EOT;
 
 // gets a list of all universities. used when building select elements for forms
 // like in the 'new user' form.
 $select_all_query = <<<EOT
-SELECT uni_id, uni_name FROM universities;
+SELECT uni_id, name FROM universities;
+EOT;
+
+$match_name_query= <<<EOT
+SELECT name AS 'label', uni_id AS 'value' FROM universities WHERE name LIKE :name;
 EOT;
 ?>

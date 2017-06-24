@@ -62,7 +62,18 @@ class CustomPDO extends PDO {
 
     }
 
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if ($stmt->rowCount() > 0) {
+
+      return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    }
+
+    else {
+
+      return array();
+
+    }
 
   }
 
@@ -86,9 +97,42 @@ class Database {
 
   public function prepared_query ($query, $params) {
 
-    $result = $this->pdo->prepared_query($query, $params);
+    try {
+      $result = $this->pdo->prepared_query($query, $params);
 
-    return $result;
+      return $result;
+    }
+    catch (PDOException $e) {
+
+      // uncomment two statement below to debug
+      console_log($e);
+      console_log($e->getMessage());
+      die();
+
+      $msg = $e->getMessage();
+
+      set_message($msg, 'error');
+      // go back to last page.
+      go_back();
+
+      die();
+
+    }
+    catch (Exception $e) {
+
+      // uncomment two statement below to debug
+      console_log($e->getMessage());
+      die();
+      
+      $msg = $e->getMessage();
+
+      set_message($msg, 'error');
+      // go back to last page.
+      go_back();
+
+      die();
+
+    }
 
   }
 
