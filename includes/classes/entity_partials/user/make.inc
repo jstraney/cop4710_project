@@ -5,42 +5,63 @@
 //
 $template = <<<EOT
 <script src="{$site_root}/js/user_form.js"></script>
-<form method="POST" action="user/create">
-    <h3>Create Account</h3>
-    <div class="form-group">
-        <label for="UserNameInput">User Name</label>
-        <input name="user-name" type="text" class="form-control" id="user-name" aria-describedby="UserNameHelp" placeholder="Enter a Username">
-    </div>
-
-    <div class="form-group">
-        <label for="FirstNameInput">First Name</label>
-        <input name="first-name" type="text" class="form-control" id="first-name" aria-describedby="FirstNameHelp" placeholder="First Name">
-    </div>
-
-    <div class="form-group">
-        <label for="LastNameInput">Last Name</label>
-        <input name="last-name" type="text" class="form-control" id="last-name" aria-describedby="LastNameHelp" placeholder="Last Name">
-    </div>
-
-    <div class="form-group">
-        <label for="EmailInput">E-mail</label>
-        <input name="e-mail" type="email" class="form-control" id="e-mail" aria-describedby="EmailHelp" placeholder="Email">
-    </div>
-
-    <div class="form-group">
-        <label for="UniversityInput">College or University</label>
-        <input id="uni-name" name="uni-name" type="text"></input>
-        <input id="uni-id" name="uni-id" type="hidden"></input>
-    </div>
-
- <label>Password<label>
- <input id="password" type="password" name="password" value=""></input>
-
- <label>Confirm Password<label>
- <input id="confirm" type="password" name="confirm" value=""></input>
-
- <input id="submit" type="submit" name="submit" value="Sign Up"></input>
-
-</form>
+<div class="row">
+    <form method="POST" action="user/create" class="col s12 ">
+	  <div class="row">
+	  </div>
+	  <div class="row">
+		<div class="input-field col s4 offset-s2 ">
+			<h5>Create an Account</h5>
+		</div>
+	  </div>
+	  <div class="row">
+		<div class="input-field col s4 offset-s2 ">
+		  <input name="user-name" id="user-name" type="text" class="validate">
+		  <label for="user_name">Username</label>
+		</div>
+	  </div>
+      <div class="row">
+        <div class="input-field col s4 offset-s2">
+          <input name="first-name" id="first-name" type="text" class="validate">
+          <label for="first_name">First Name</label>
+        </div>
+        <div class="input-field col s4 ">
+          <input name="last-name" id="last-name" type="text" class="validate">
+          <label for="last_name">Last Name</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s4 offset-s2">
+          <input name="e-mail" id="e-mail" type="email" class="validate">
+          <label for="email">Email</label>
+        </div>
+	  </div>
+	  <div class="row">
+        <div class="input-field col s4 offset-s2">
+          <label for="UniversityInput">College or University</label>
+          <input id="uni-name" type="text" name="uni-name" class="validate">
+		  <input id="uni-id" name="uni-id" type="hidden">
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s4 offset-s2">
+          <input name="password" id="password" type="password" class="validate">
+          <label for="password">Password</label>
+        </div>
+        <div class="input-field col s4 ">
+          <input name="confirm" id="confirm" type="password" class="validate">
+          <label for="confirm">Confirm Password</label>
+        </div>
+	  </div>
+	  <div class="row">
+	  	<div class="col s4 offset-s2">
+			  <button class="btn waves-effect waves-light" type="submit" name="action">Submit
+				<i class="material-icons right">send</i>
+			  </button>
+		</div>
+	  </div>
+      </div>
+    </form>
+  </div>
 EOT;
 ?>

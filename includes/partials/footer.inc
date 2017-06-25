@@ -4,33 +4,46 @@ global $configs;
 $site_root = $configs['site_root'];
 
 ?>
-<div id="footer">
-  <!-- put in some links? -->
-  <ul class="menu">
-    <h4>Top</h4>
-    <li><a href="<?php echo $site_root; ?>/">Home</a></li>
-    <li><a href="<?php echo $site_root; ?>/about">About</a></li>
-    <?php
-    if (isset($user)) {
-      echo '<li><a href="'.$site_root.'/logout">Logout</a></li>';
-    }
-    else {
-      echo '<li><a href="'.$site_root.'/login">Login</a></li>';
-      echo '<li><a href="'.$site_root.'/user/create">New Account</a></li>';
-    }
-    ?>
-  </ul>
-  <ul class="menu">
-    <h4>View</h4>
-    <li><a href="<?php echo $site_root; ?>/universities/0-10">Universities</a></li>
-    <li><a href="<?php echo $site_root; ?>/rsos/0-10">RSO's</a></li>
-    <li><a href="<?php echo $site_root; ?>/events/0-10">Events</a></li>
-    <li><a href="<?php echo $site_root; ?>/users/0-10">Students</a></li>
-  </ul>
-  <ul class="menu">
-    <h4>Technical</h4>
-    <li><a href="<?php echo $site_root; ?>/help">Help</a></li>
-    <li><a href="<?php echo $site_root; ?>/terms">Terms</a></li>
-    <li><a href="<?php echo $site_root; ?>/privacy">Privacy</a></li>
-  </ul>
-</div>
+<footer class="page-footer amber darken-4">
+    <div class="container">
+      <div class="row center">
+        <div class="col s4 ">
+          <h5 class="white-text">Top</h5>
+          <ul>
+    		<li><a class="white-text" href="<?php echo $site_root; ?>/">Home</a></li>
+    		<li><a class="white-text" href="<?php echo $site_root; ?>/about">About</a></li>
+			<?php
+			if (isset($user)) {
+			  echo '<li><a class="white-text" href="'.$site_root.'/logout">Logout</a></li>';
+			}
+			else {
+			  echo '<li><a class="white-text" href="'.$site_root.'/login">Login</a></li>';
+			  echo '<li><a class="white-text" href="'.$site_root.'/user/new">New Account</a></li>';
+			}
+			?>
+          </ul>
+        </div>
+        <div class="col s4 ">
+          <h5 class="white-text">View</h5>
+          <ul>
+			<li><a class="white-text" href="<?php echo $site_root; ?>/universities/0-10">Universities</a></li>
+			<li><a class="white-text" href="<?php echo $site_root; ?>/rsos/0-10">RSO's</a></li>
+			<li><a class="white-text" href="<?php echo $site_root; ?>/events/0-10">Events</a></li>
+			<li><a class="white-text" href="<?php echo $site_root; ?>/users/0-10">Students</a></li>
+          </ul>
+        </div>
+        <div class="col s4 ">
+          <h5 class="white-text">Technical</h5>
+          <ul>
+			<li><a class="white-text" href="<?php echo $site_root; ?>/help">Help</a></li>
+			<li><a class="white-text" href="<?php echo $site_root; ?>/terms">Terms</a></li>
+			<li><a class="white-text" href="<?php echo $site_root; ?>/privacy">Privacy</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-copyright">
+      <div class="container">
+      </div>
+    </div>
+</footer>
