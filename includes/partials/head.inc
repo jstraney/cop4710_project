@@ -12,9 +12,17 @@ $site_root = $configs['site_root'];
   <title>COP4701 Project</title>
   <meta name="description" content=""/>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-  <link rel="stylesheet" type="text/css" href="<?php echo $site_root; ?>/style/css/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.99.0/css/materialize.min.css">
+  <link rel="stylesheet" type="text/css" href="<?php echo $site_root; ?>/style/css/main2.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+ <!-- <link rel="stylesheet" type="text/css" href="<?php echo $site_root; ?>/style/css/main.css">-->
   <link rel="stylesheet" type="text/css" href="<?php echo $site_root; ?>/js/lib/jquery-ui/jquery-ui.css">
   <script type="application/javascript" src="<?php echo $site_root; ?>/js/lib/jquery/jquery-3.2.0.js"></script>
   <script type="application/javascript" src="<?php echo $site_root; ?>/js/lib/jquery-ui/jquery-ui.js"></script>
   <script type="application/javascript" src="<?php echo $site_root; ?>/js/app.js"></script>
+  <script type="application/javascript" src="<?php echo $site_root; ?>/js/extras.js"></script>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.99.0/js/materialize.min.js"></script>
+
 </head>
