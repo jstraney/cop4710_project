@@ -13,14 +13,14 @@ ALTER TABLE rsos AUTO_INCREMENT = 1;
 -- It would be cool to write an 'install script' with the option of test records
 -- but for now, you can just copy this query and paste it into phpMyadmin under the
 -- SQL tab of the proper table.
-INSERT INTO universities (name, location, lat, lon, email_domain, website_url)
+INSERT INTO universities (name, location, lat, lon, email_domain, website_url, population)
 VALUES
-("University of Central Florida", "4000 Central Florida Blvd, Orlando, FL 32816", 28.602427, -81.200060, "@knights.ucf.edu", "http://www.ucf.edu"),
-("Florida State University", "600 W College Ave, Tallahassee, FL 32306", 30.441878, -84.298489, "@noles.fsu.edu", "http://www.fsu.edu"),
-("University of Kansas", "1450 Jayhawk Blvd, Lawrence, KS 66045", 38.954344, -95.255796, "@kansas.ppl.edu", "http://www.kans.edu"),
-("University of Michigan", "500 S State St, Ann Arbor, MI 48109", 42.278044, -83.738224, "@mich.ppl.edu", "http://www.mich.edu"),
-("Cornell University", "Ithaca, NY 14850", 42.453449 , -76.473503, "@corn.ppl.edu", "http://www.corn.edu"),
-("Yale University", "New Haven, CT 06520", 41.316324, -72.922343, "@yale.ppl.edu", "http://www.yale.edu");
+("University of Central Florida", "4000 Central Florida Blvd, Orlando, FL 32816", 28.602427, -81.200060, "@knights.ucf.edu", "http://www.ucf.edu", 64318),
+("Florida State University", "600 W College Ave, Tallahassee, FL 32306", 30.441878, -84.298489, "@noles.fsu.edu", "http://www.fsu.edu", 41867),
+("University of Kansas", "1450 Jayhawk Blvd, Lawrence, KS 66045", 38.954344, -95.255796, "@kansas.ppl.edu", "http://www.kans.edu", 28401),
+("University of Michigan", "500 S State St, Ann Arbor, MI 48109", 42.278044, -83.738224, "@mich.ppl.edu", "http://www.mich.edu", 44718),
+("Cornell University", "Ithaca, NY 14850", 42.453449 , -76.473503, "@corn.ppl.edu", "http://www.corn.edu", 21904),
+("Yale University", "New Haven, CT 06520", 41.316324, -72.922343, "@yale.ppl.edu", "http://www.yale.edu", 12385);
 
 -- all users have a password of 1234
 INSERT INTO users (first_name, last_name, email, hash, user_name, role)
