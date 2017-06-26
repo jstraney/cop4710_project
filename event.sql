@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jun 22, 2017 at 03:33 PM
+-- Generation Time: Jun 27, 2017 at 12:18 AM
 -- Server version: 10.1.13-MariaDB
 -- PHP Version: 7.0.5
 
@@ -28,8 +28,11 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `attend_event` (IN `_event_id` INT(1
 
   DECLARE _accessibility ENUM('PUB','PRI','RSO');
   DECLARE _not_participating INT(1);
+  DECLARE _status ENUM('PND','ACT');
 
-  SET _accessibility = (SELECT e.accessibility FROM events e WHERE e.event_id = _event_id);
+  SELECT e.accessibility, e.status INTO _accessibility, _status
+  FROM events e
+  WHERE e.event_id = _event_id;
 
   
   IF EXISTS (
@@ -47,13 +50,13 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `attend_event` (IN `_event_id` INT(1
   END IF;
 
   
-  IF _accessibility = "PUB" AND _not_participating THEN
+  IF _status = "ACT" AND _accessibility = "PUB" AND _not_participating THEN
     INSERT INTO participating (user_id, event_id)
     VALUES (_user_id, _event_id);
 
-  ELSEIF _accessibility = "PRI" AND _not_participating THEN
+  ELSEIF _status = "ACT" AND _accessibility = "PRI" AND _not_participating THEN
     INSERT INTO participating (user_id, event_id)
-    SELECT u.user_id
+    SELECT u.user_id, _event_id
     FROM users u, attending a, universities n, private_events pe
     WHERE _user_id = u.user_id
     AND u.user_id = a.user_id
@@ -61,7 +64,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `attend_event` (IN `_event_id` INT(1
     AND n.uni_id = pe.uni_id
     AND pe.event_id = _event_id LIMIT 1;
 
-  ELSEIF _accessibility = "RSO" AND _not_participating THEN
+  ELSEIF _status = "ACT" AND _accessibility = "RSO" AND _not_participating THEN
     INSERT INTO participating (user_id, event_id)
     SELECT u.user_id, _event_id
     FROM users u, is_member m, rso_events re
@@ -74,26 +77,33 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `attend_event` (IN `_event_id` INT(1
 
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `change_event_access` (IN `_event_id` INT(11), IN `_uni_id` INT(11), IN `_rso_id` INT(11), IN `_accessibility` ENUM('PUB','PRI','RSO'), IN `old_type` ENUM('PUB','PRI','RSO'))  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `change_event_access` (IN `_event_id` INT(11), IN `_uni_id` INT(11), IN `_rso_id` INT(11), IN `_accessibility` ENUM('PUB','PRI','RSO'), IN `_old_type` ENUM('PUB','PRI','RSO'))  BEGIN
   
   
 
   
   
-  DELETE FROM public_events WHERE event_id = _event_id;
-  DELETE FROM private_events WHERE event_id = _event_id;
-  DELETE FROM rso_events WHERE event_id = _event_id;
+  IF _old_type = 'PUB' THEN 
+    DELETE FROM public_events WHERE event_id = _event_id;
+  ELSEIF _old_type = 'PRI' THEN 
+    DELETE FROM private_events WHERE event_id = _event_id;
+  ELSEIF _old_type = 'RSO' THEN 
+    DELETE FROM rso_events WHERE event_id = _event_id;
+    DELETE FROM r_created_e WHERE event_id = _event_id;
+  END IF;
 
   
   IF _accessibility = 'RSO' THEN
     BEGIN
       
+
       IF NOT EXISTS (SELECT rso_id FROM rsos WHERE rso_id = _rso_id) THEN
         
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "The rso specified cannot be found.";
+
       ELSE
-        INSERT INTO rso_events (event_id, rso_id)
-        VALUES (_event_id, _rso_id);
+        INSERT INTO rso_events (event_id, rso_id, uni_id)
+        VALUES (_event_id, _rso_id, _uni_id);
         
       END IF;
     END;
@@ -110,10 +120,16 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `change_event_access` (IN `_event_id
     END;
   ELSE 
     BEGIN
-        INSERT INTO public_events (event_id)
-        VALUES (_event_id);
+        INSERT INTO public_events (event_id, uni_id)
+        VALUES (_event_id, _uni_id);
     END;
   END IF;
+
+  
+  UPDATE events SET
+  accessibility = _accessibility
+  WHERE event_id = _event_id;
+
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `comment_on_event` (IN `_content` TINYTEXT, IN `_event_id` INT(11), IN `_user_id` INT(11), IN `_uni_id` INT(11))  BEGIN
@@ -148,7 +164,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `comment_on_event` (IN `_content` TI
   END IF;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `create_event` (IN `_name` VARCHAR(60), IN `_start_time` TIMESTAMP, IN `_end_time` TIMESTAMP, IN `_description` TINYTEXT, IN `_location` VARCHAR(60), IN `_street` VARCHAR(60), IN `_city` VARCHAR(60), IN `_state` TINYTEXT, IN `_zip` TINYTEXT, IN `_lat` DECIMAL(9,6), IN `_lon` DECIMAL(9,6), IN `_accessibility` ENUM('PUB','PRI','RSO'), IN `_categories` VARCHAR(60), IN `_rso_id` INT(11), IN `_uni_id` INT(11))  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `create_event` (IN `_name` VARCHAR(60), IN `_start_time` TIMESTAMP, IN `_end_time` TIMESTAMP, IN `_telephone` VARCHAR(12), IN `_email` VARCHAR(60), IN `_description` TINYTEXT, IN `_location` VARCHAR(60), IN `_lat` DECIMAL(9,6), IN `_lon` DECIMAL(9,6), IN `_accessibility` ENUM('PUB','PRI','RSO'), IN `_categories` VARCHAR(60), IN `_user_id` INT(11), IN `_rso_id` INT(11), IN `_uni_id` INT(11))  BEGIN
 
   
   DECLARE _event_id INT(11);
@@ -173,10 +189,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `create_event` (IN `_name` VARCHAR(6
 
   
   
-  INSERT INTO events (name, start_time, end_time, description, location,
-  street, city, state, zip, lat, lon, accessibility)
-  VALUES (_name, _start_time, _end_time, _description, _location,
-  _street, _city, _state, _zip, _lat, _lon, _accessibility);
+  INSERT INTO events (name, start_time, end_time, telephone, email, description, location, lat, lon, accessibility)
+  VALUES (_name, _start_time, _end_time, _telephone, _email, _description, _location, _lat, _lon, _accessibility);
 
   
   SET _event_id = LAST_INSERT_ID();
@@ -189,43 +203,55 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `create_event` (IN `_name` VARCHAR(6
   
   
   IF _rso_id > 0 THEN
+
     
     SET _status = 'ACT';
+
     
     INSERT INTO r_created_e (rso_id, event_id)
     VALUES (_rso_id, _event_id);
+
   
   ELSE
+
     
     SET _status = 'PND';
-    
-    INSERT INTO u_created_e (user_id, event_id)
-    VALUES (_user_id, _rso_id);
 
   END IF;
+      
+  
+  
+  INSERT INTO u_created_e (user_id, event_id)
+  VALUES (_user_id, _event_id);
 
   
   UPDATE events SET status = _status WHERE event_id = _event_id;
 
   
   IF _accessibility = 'RSO' THEN
+
     BEGIN
       
       IF NOT EXISTS (SELECT r.rso_id FROM rsos r WHERE r.rso_id = _rso_id) THEN
+
         
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "The rso specified cannot be found.";
+
       ELSE
         
-        INSERT INTO rso_events (event_id, rso_id)
-        VALUES (_event_id, _rso_id);
+        INSERT INTO rso_events (event_id, rso_id, uni_id)
+        VALUES (_event_id, _rso_id, _uni_id);
+
       END IF;
     END;
   ELSEIF _accessibility = 'PRI' THEN
     BEGIN
+
       
       IF NOT EXISTS (SELECT uni_id FROM universities WHERE uni_id = _uni_id) THEN
         
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "The university specified cannot be found.";
+
       ELSE
         
         INSERT INTO private_events (event_id, uni_id)
@@ -234,8 +260,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `create_event` (IN `_name` VARCHAR(6
     END;
   ELSE
     BEGIN
-        INSERT INTO public_events (event_id)
-        VALUES (_event_id);
+        INSERT INTO public_events (event_id, uni_id)
+        VALUES (_event_id, _uni_id);
     END;
   END IF;
 
@@ -276,6 +302,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `create_rso` (IN `_role` ENUM('SA','
     AND a.uni_id = n.uni_id
     AND n.uni_id = _uni_id) THEN
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "You may only create an RSO at a university you're affiliated with";
+
   END IF;
 
   
@@ -298,26 +325,12 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `create_rso` (IN `_role` ENUM('SA','
   DROP TABLE temp_members;
 
   
-  
-  IF _role = "SA" OR _role = "ADM" THEN
-    BEGIN
-    
-    END;
-  
-  
-  ELSEIF _role = "STU" THEN
-    BEGIN
-    
-    
-    END;
-  END IF;
-
-  
   SELECT _rso_id AS rso_id FROM rsos LIMIT 1; 
 
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `create_user` (IN `_user_name` VARCHAR(30), IN `_first_name` VARCHAR(60), IN `_last_name` VARCHAR(60), IN `_email` VARCHAR(60), IN `_role` ENUM("SA","ADM","STU"), IN `_hash` VARCHAR(60), IN `_uni_id` INT(11))  BEGIN
+
 
 IF (_role = "STU" OR _role = "ADM") AND (check_uni_emails(_email, _uni_id) < 1) THEN
   SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'e-mail must match university selected.';
@@ -410,39 +423,73 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `rate_event` (IN `_user_id` INT(11),
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `search_events` (IN `_user_id` INT(11), IN `_uni_id` INT(11), IN `_scope` TINYTEXT, IN `_sort_by` TINYTEXT, IN `_accessibility` ENUM('PUB','PRI','RSO'))  BEGIN
+
   DECLARE _is_owner INT(1);
   DECLARE _is_participating INT(1);
 
-  SET _is_owner = get_is_owner(_user_id, _event_id);
-  SET _is_participating = get_is_participating(_user_id, _event_id);
+  
+  DECLARE _uni_lat DECIMAL(9, 6);
+  DECLARE _uni_lon DECIMAL(9, 6);
+
+  SELECT n.lat, n.lon
+  INTO _uni_lat, _uni_lon
+  FROM universities n
+  WHERE n.uni_id = _uni_id;
 
   
-  IF _scope = "other-uni" THEN
-    SELECT e.name, e.start_time, e.end_time, e.description, e.location, e.street,
-    e.city, e.state, e.zip, e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-    _is_participating AS is_participating, e.rating
+  
+
+  IF _scope = "my-uni" THEN
+    SELECT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
+    e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
+    _is_participating AS is_participating, e.rating,
+    manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
     FROM events e, hosting h
     WHERE _uni_id = h.uni_id
     AND h.event_id = e.event_id
-    AND e.accessibility = "PUB";
+    ORDER BY
+      CASE _sort_by WHEN "date" THEN e.start_time
+      WHEN "location" THEN location
+      END;
+
+  
+  ELSEIF _scope = "other-uni" THEN
+    SELECT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
+    e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
+    _is_participating AS is_participating, e.rating,
+    manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
+    FROM events e, hosting h
+    WHERE _uni_id = h.uni_id
+    AND h.event_id = e.event_id
+    AND e.accessibility = "PUB"
+    ORDER BY
+      CASE _sort_by WHEN "date" THEN e.start_time
+      WHEN "location" THEN location
+      END;
 
   
   ELSEIF _accessibility = "PUB" THEN
     BEGIN
-      SELECT e.name, e.start_time, e.end_time, e.description, e.location, e.street,
-      e.city, e.state, e.zip, e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-      _is_participating AS is_participating, e.rating
+      SELECT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
+      e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
+      _is_participating AS is_participating, e.rating,
+      manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
       FROM events e, hosting h
       WHERE h.uni_id = _uni_id 
-      AND h.event_id = e.event_id;
+      AND h.event_id = e.event_id
+      ORDER BY
+        CASE _sort_by WHEN "date" THEN e.start_time
+        WHEN "location" THEN location
+        END;
     END;
 
   
   ELSEIF _accessibility = "PRI" THEN
     BEGIN
-      SELECT e.name, e.start_time, e.end_time, e.description, e.location, e.street,
-      e.city, e.state, e.zip, e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-      _is_participating AS is_participating, e.rating
+      SELECT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
+      e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
+      _is_participating AS is_participating, e.rating,
+      manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
       FROM events e, private_events p, attending at, affiliated_with aw
       WHERE p.uni_id = _uni_id 
       AND p.event_id = e.event_id;
@@ -451,12 +498,12 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `search_events` (IN `_user_id` INT(1
   
   ELSEIF _accessibility = "RSO" THEN
     BEGIN
-      SELECT e.name, e.start_time, e.end_time, e.description, e.location, e.street,
-      e.city, e.state, e.zip, e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-      _is_participating AS is_participating, e.rating
+      SELECT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
+      e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
+      _is_participating AS is_participating, e.rating,
+      manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
       FROM events e, rso_events re
-      WHERE e.event_id = _event_id
-      AND re.event_id = e.event_id
+      WHERE e.event_id = re.event_id
       AND re.rso_id = ANY(
         SELECT r.rso_id 
         FROM rsos r, is_member m
@@ -471,11 +518,15 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `select_students` ()  BEGIN
   WHERE u.role = "STU";
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `update_event` (IN `_event_id` INT(11), IN `_name` VARCHAR(60), IN `_start_time` TIMESTAMP, IN `_end_time` TIMESTAMP, IN `_description` TINYTEXT, IN `_location` VARCHAR(60), IN `_street` VARCHAR(60), IN `_city` VARCHAR(60), IN `_state` TINYTEXT, IN `_zip` TINYTEXT, IN `_lat` DECIMAL(9,6), IN `_lon` DECIMAL(9,6), IN `_accessibility` ENUM('PUB','PRI','RSO'), IN `_categories` VARCHAR(60), IN `_user_id` INT(11), IN `_rso_id` INT(11), IN `_uni_id` INT(11))  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `update_event` (IN `_event_id` INT(11), IN `_name` VARCHAR(60), IN `_start_time` TIMESTAMP, IN `_end_time` TIMESTAMP, IN `_telephone` VARCHAR(12), IN `_email` VARCHAR(60), IN `_description` TINYTEXT, IN `_location` VARCHAR(60), IN `_lat` DECIMAL(9,6), IN `_lon` DECIMAL(9,6), IN `_accessibility` ENUM('PUB','PRI','RSO'), IN `_categories` VARCHAR(60), IN `_user_id` INT(11), IN `_rso_id` INT(11), IN `_uni_id` INT(11), IN `_status` ENUM('ACT','PND'))  BEGIN
 
   
   
   DECLARE _old_type ENUM('PUB','PRI','RSO');
+  
+  
+  DECLARE _current_rso_id INT(11);
+  DECLARE _role ENUM('SA','ADM','STU');
 
   
   IF NOT EXISTS(
@@ -497,8 +548,48 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `update_event` (IN `_event_id` INT(1
 
   END IF;
 
-
+  
   SET _old_type = (SELECT e.accessibility FROM events e WHERE e.event_id = _event_id LIMIT 1);
+
+  
+  SET _current_rso_id = (
+    SELECT r.rso_id
+    FROM rsos r, r_created_e re
+    WHERE r.rso_id = re.rso_id
+    AND re.event_id = _event_id);
+
+  
+  SET _role = (SELECT role FROM users WHERE user_id = _user_id);
+
+  
+  
+  IF _current_rso_id > 0 AND _rso_id = 0 AND _role <> 'SA' THEN
+    
+    UPDATE events SET
+    status = 'PND' 
+    WHERE event_id = _event_id;
+    DELETE FROM r_created_e
+    WHERE event_id = _event_id;
+
+  
+  ELSEIF _current_rso_id IS NULL AND _rso_id > 0 THEN
+    
+    INSERT INTO r_created_e (event_id, rso_id)
+    VALUES (_event_id ,_rso_id);
+    UPDATE events SET
+    status = 'ACT' 
+    WHERE event_id = _event_id;
+
+  END IF;
+
+  
+  IF _role = "SA" THEN
+
+    UPDATE events SET
+    status = _status
+    WHERE event_id = _event_id;
+    
+  END IF;
    
   
   
@@ -506,21 +597,24 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `update_event` (IN `_event_id` INT(1
   name = _name,
   start_time = _start_time,
   end_time = _end_time,
+  telephone = _telephone,
+  email = _email,
   description = _description,
   location = _location,
-  street = _street,
-  city = _city,
-  state = _state,
-  zip = _state,
   lat = _lat,
   lon = _lon
+
   WHERE events.event_id = _event_id;
 
   IF _old_type <> _accessibility THEN
+
     BEGIN
+
       
       CALL change_event_access(_event_id, _uni_id, _rso_id, _accessibility, _old_type);
+
     END;
+
   END IF;
 
   
@@ -528,10 +622,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `update_event` (IN `_event_id` INT(1
 
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `update_rso` (IN `_rso_id` INT(11), IN `_role` ENUM('SA','ADM','STU'), IN `_user_id` INT(11), IN `_name` VARCHAR(60), IN `_description` TEXT(500), IN `_rso_admin_id` INT(11), IN `_uni_id` INT(11))  BEGIN
-  
-  
-  
+CREATE DEFINER=`root`@`localhost` PROCEDURE `update_rso` (IN `_rso_id` INT(11), IN `_role` ENUM('SA','ADM','STU'), IN `_user_id` INT(11), IN `_name` VARCHAR(60), IN `_description` TEXT(500), IN `_members` VARCHAR(300), IN `_rso_admin_id` INT(11), IN `_uni_id` INT(11))  BEGIN
 
   
   IF _user_id <> (SELECT a.user_id FROM administrates a WHERE a.rso_id = _rso_id) THEN
@@ -547,6 +638,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `update_rso` (IN `_rso_id` INT(11), 
     AND a.uni_id = n.uni_id
     AND n.uni_id = _uni_id) THEN
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "You may only create an RSO at a university you attend";
+
   
   ELSEIF _role = "ADM" AND NOT EXISTS (
     SELECT u.user_id FROM
@@ -559,10 +651,39 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `update_rso` (IN `_rso_id` INT(11), 
   END IF;
 
   
+  CREATE TEMPORARY TABLE new_members (user_id INT(11) UNSIGNED);
+  CREATE TEMPORARY TABLE gone_members (user_id INT(11) UNSIGNED);
+
+  
+  INSERT INTO new_members (user_id)
+  SELECT u.user_id
+  FROM users u, is_member m, attending a
+
+  
+  WHERE FIND_IN_SET(u.user_id, _members)
+  AND u.user_id = a.user_id
+  AND a.uni_id = _uni_id
+  AND u.user_id <> ALL(SELECT m.user_id FROM is_member m WHERE m.rso_id = _rso_id);
+
+  
+  INSERT INTO gone_members (user_id)
+  SELECT m.user_id
+  FROM is_member m
+  WHERE m.rso_id = _rso_id
+  AND NOT FIND_IN_SET(user_id, _members);
+
+  
+
+  
   UPDATE rsos SET
   name = _name,
   description = _description
   WHERE rso_id = _rso_id; 
+
+  
+  UPDATE administrates SET 
+  user_id = _rso_admin_id 
+  WHERE rso_id = _rso_id;
 
   
   IF _role = "SA" OR _role = "ADM" THEN
@@ -570,6 +691,14 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `update_rso` (IN `_rso_id` INT(11), 
     
     END;
   END IF;
+
+  
+  INSERT INTO is_member (user_id, rso_id) (SELECT user_id, _rso_id FROM new_members);
+  DROP TABLE new_members;
+
+  
+  DELETE FROM is_member WHERE user_id IN (SELECT user_id FROM gone_members);
+  DROP TABLE gone_members;
 
   
   SELECT _rso_id AS rso_id FROM rsos LIMIT 1;
@@ -620,20 +749,25 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `view_event` (IN `_event_id` INT(11)
   
   IF _accessibility = "PUB" THEN
     BEGIN
-      SELECT e.name, e.start_time, e.end_time, e.description, e.location, e.street,
-      e.city, e.state, e.zip, e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-      _is_participating AS is_participating, e.rating
+      SELECT e.name, e.start_time, e.end_time, e.description, e.location,
+      e.telephone, e.email, e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
+      _is_participating AS is_participating, e.rating, r.rso_id, r.name as rso_name
       FROM events e
-      WHERE e.event_id = _event_id LIMIT 1;
+      LEFT OUTER JOIN r_created_e re ON re.event_id = e.event_id
+      LEFT OUTER JOIN rsos r ON r.rso_id = re.rso_id
+      WHERE e.event_id = _event_id
+      LIMIT 1;
     END;
 
   
   ELSEIF _accessibility = "PRI" THEN
     BEGIN
-      SELECT e.name, e.start_time, e.end_time, e.description, e.location, e.street,
-      e.city, e.state, e.zip, e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-      _is_participating AS is_participating, e.rating
+      SELECT e.name, e.start_time, e.end_time, e.description, e.location,
+      e.telephone, e.email, e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
+      _is_participating AS is_participating, e.rating, e.event_id, re.rso_id, r.name AS rso_name
       FROM events e, private_events p
+      LEFT OUTER JOIN r_created_e re ON re.event_id = p.event_id
+      LEFT OUTER JOIN rsos r ON r.rso_id = re.rso_id
       WHERE e.event_id = _event_id
       AND e.event_id = p.event_id
       AND p.uni_id = _uni_id
@@ -643,12 +777,13 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `view_event` (IN `_event_id` INT(11)
   
   ELSEIF _accessibility = "RSO" THEN
     BEGIN
-      SELECT e.name, e.start_time, e.end_time, e.description, e.location, e.street,
-      e.city, e.state, e.zip, e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-      _is_participating AS is_participating, e.rating
-      FROM events e, rso_events re
+      SELECT e.name, e.start_time, e.end_time, e.description, e.location,
+      e.telephone, e.email, e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
+      _is_participating AS is_participating, e.rating, r.rso_id, r.name AS rso_name
+      FROM events e, rso_events re, rsos r
       WHERE e.event_id = _event_id
       AND re.event_id = e.event_id
+      AND re.rso_id = r.rso_id
       AND re.rso_id = ANY(
         SELECT r.rso_id 
         FROM rsos r, is_member m
@@ -660,11 +795,14 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `view_event` (IN `_event_id` INT(11)
 
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `view_rso` (IN `_rso_id` INT(11))  BEGIN
-  SELECT r.rso_id, r.name, r.description, a.user_id AS rso_admin
-  FROM  administrates a, rsos r
+CREATE DEFINER=`root`@`localhost` PROCEDURE `view_rso` (IN `_rso_id` INT(11), IN `_user_id` INT(11), IN `_role` ENUM('SA','ADM','STU'))  BEGIN
+  SELECT r.rso_id, r.name, r.description, a.user_id AS rso_administrator
+  FROM rsos r, is_member m, administrates a
   WHERE r.rso_id = _rso_id
-  AND a.rso_id = _rso_id;
+  AND ((m.rso_id = _rso_id AND m.user_id = _user_id) OR
+    (a.rso_id = _rso_id AND a.user_id = _user_id))
+  OR (_role = "SA");
+
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `view_user` (IN `_user_id` INT(11))  BEGIN
@@ -701,7 +839,11 @@ CREATE DEFINER=`root`@`localhost` FUNCTION `check_uni_emails` (`_email` VARCHAR(
 CREATE DEFINER=`root`@`localhost` FUNCTION `get_is_owner` (`_user_id` INT(11), `_event_id` INT(11)) RETURNS INT(1) BEGIN
 
   DECLARE _is_owner INT(1);
+  DECLARE _role ENUM('SA','ADM','STU');
 
+  SELECT u.role INTO _role FROM users u WHERE u.user_id = _user_id;
+
+  
   IF EXISTS(
     SELECT u.user_id
     FROM u_created_e u, events e
@@ -721,6 +863,12 @@ CREATE DEFINER=`root`@`localhost` FUNCTION `get_is_owner` (`_user_id` INT(11), `
 
     
     SET _is_owner = 1;
+
+  ELSEIF _role = "SA" THEN
+
+    
+    SET _is_owner = 1;
+
 
   ELSE
 
@@ -757,6 +905,10 @@ CREATE DEFINER=`root`@`localhost` FUNCTION `get_is_participating` (`_user_id` IN
 
 END$$
 
+CREATE DEFINER=`root`@`localhost` FUNCTION `manhattan_distance` (`_lat1` DECIMAL(9,6), `_lon1` DECIMAL(9,6), `_lat2` DECIMAL(9,6), `_lon2` DECIMAL(9,6)) RETURNS DECIMAL(9,6) BEGIN
+  RETURN (ABS(_lat1 - _lat2) + ABS(_lon1 - _lon2));
+END$$
+
 DELIMITER ;
 
 -- --------------------------------------------------------
@@ -777,8 +929,8 @@ CREATE TABLE `administrates` (
 --
 
 CREATE TABLE `affiliated_with` (
-  `user_id` int(10) UNSIGNED NOT NULL,
-  `uni_id` int(10) UNSIGNED NOT NULL
+  `user_id` int(11) UNSIGNED NOT NULL,
+  `uni_id` int(11) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -817,12 +969,10 @@ CREATE TABLE `events` (
   `name` varchar(60) NOT NULL,
   `start_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `end_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `telephone` varchar(12) NOT NULL,
+  `email` varchar(60) NOT NULL,
   `description` tinytext NOT NULL,
   `location` varchar(60) NOT NULL,
-  `street` varchar(60) NOT NULL,
-  `city` varchar(60) NOT NULL,
-  `state` tinytext NOT NULL,
-  `zip` tinytext NOT NULL,
   `lat` decimal(9,6) NOT NULL,
   `lon` decimal(9,6) NOT NULL,
   `accessibility` enum('PUB','PRI','RSO') NOT NULL DEFAULT 'PUB',
@@ -874,6 +1024,16 @@ CREATE TABLE `participating` (
   `event_id` int(11) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+--
+-- Dumping data for table `participating`
+--
+
+INSERT INTO `participating` (`user_id`, `event_id`) VALUES
+(3, 3),
+(2, 7),
+(2, 15),
+(2, 17);
+
 -- --------------------------------------------------------
 
 --
@@ -882,7 +1042,7 @@ CREATE TABLE `participating` (
 
 CREATE TABLE `private_events` (
   `event_id` int(11) UNSIGNED NOT NULL,
-  `uni_id` int(11) NOT NULL
+  `uni_id` int(11) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -892,7 +1052,8 @@ CREATE TABLE `private_events` (
 --
 
 CREATE TABLE `public_events` (
-  `event_id` int(11) UNSIGNED NOT NULL
+  `event_id` int(11) UNSIGNED NOT NULL,
+  `uni_id` int(11) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -902,10 +1063,10 @@ CREATE TABLE `public_events` (
 --
 
 CREATE TABLE `rating` (
-  `event_id` int(10) UNSIGNED NOT NULL,
+  `event_id` int(11) UNSIGNED NOT NULL,
   `rating` tinyint(1) NOT NULL,
   `last_rated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `user_id` int(10) UNSIGNED NOT NULL
+  `user_id` int(11) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -928,7 +1089,8 @@ CREATE TABLE `rsos` (
 
 CREATE TABLE `rso_events` (
   `event_id` int(11) UNSIGNED NOT NULL,
-  `rso_id` int(11) NOT NULL
+  `rso_id` int(11) UNSIGNED NOT NULL,
+  `uni_id` int(11) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -952,10 +1114,7 @@ CREATE TABLE `universities` (
   `uni_id` int(11) UNSIGNED NOT NULL,
   `name` varchar(60) NOT NULL,
   `description` text NOT NULL,
-  `street` varchar(60) NOT NULL,
-  `city` varchar(60) NOT NULL,
-  `state` tinytext NOT NULL,
-  `zip` tinytext NOT NULL,
+  `location` varchar(60) NOT NULL,
   `lat` decimal(9,6) NOT NULL,
   `lon` decimal(9,6) NOT NULL,
   `email_domain` varchar(30) NOT NULL,
@@ -1048,6 +1207,20 @@ ALTER TABLE `is_member`
   ADD KEY `rso_id` (`rso_id`);
 
 --
+-- Indexes for table `private_events`
+--
+ALTER TABLE `private_events`
+  ADD KEY `event_id` (`event_id`),
+  ADD KEY `uni_id` (`uni_id`);
+
+--
+-- Indexes for table `public_events`
+--
+ALTER TABLE `public_events`
+  ADD KEY `event_id` (`event_id`),
+  ADD KEY `uni_id` (`uni_id`);
+
+--
 -- Indexes for table `rating`
 --
 ALTER TABLE `rating`
@@ -1059,6 +1232,21 @@ ALTER TABLE `rating`
 --
 ALTER TABLE `rsos`
   ADD PRIMARY KEY (`rso_id`);
+
+--
+-- Indexes for table `rso_events`
+--
+ALTER TABLE `rso_events`
+  ADD KEY `event_id` (`event_id`),
+  ADD KEY `rso_id` (`rso_id`),
+  ADD KEY `uni_id` (`uni_id`);
+
+--
+-- Indexes for table `r_created_e`
+--
+ALTER TABLE `r_created_e`
+  ADD KEY `rso_id` (`rso_id`),
+  ADD KEY `event_id` (`event_id`);
 
 --
 -- Indexes for table `universities`
@@ -1090,17 +1278,17 @@ ALTER TABLE `u_created_e`
 -- AUTO_INCREMENT for table `commented_on`
 --
 ALTER TABLE `commented_on`
-  MODIFY `comment_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `comment_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 --
 -- AUTO_INCREMENT for table `events`
 --
 ALTER TABLE `events`
-  MODIFY `event_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `event_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 --
 -- AUTO_INCREMENT for table `rsos`
 --
 ALTER TABLE `rsos`
-  MODIFY `rso_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `rso_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 --
 -- AUTO_INCREMENT for table `universities`
 --
@@ -1110,7 +1298,7 @@ ALTER TABLE `universities`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `user_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 --
 -- Constraints for dumped tables
 --
@@ -1121,6 +1309,13 @@ ALTER TABLE `users`
 ALTER TABLE `administrates`
   ADD CONSTRAINT `administrates_uni_id` FOREIGN KEY (`rso_id`) REFERENCES `rsos` (`rso_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `administrates_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `affiliated_with`
+--
+ALTER TABLE `affiliated_with`
+  ADD CONSTRAINT `affiliated_with_uni_id` FOREIGN KEY (`uni_id`) REFERENCES `universities` (`uni_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `affiliated_with_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `attending`
@@ -1151,11 +1346,47 @@ ALTER TABLE `is_member`
   ADD CONSTRAINT `is_member_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
+-- Constraints for table `private_events`
+--
+ALTER TABLE `private_events`
+  ADD CONSTRAINT `private_event_id` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `private_event_uni_id` FOREIGN KEY (`uni_id`) REFERENCES `universities` (`uni_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `public_events`
+--
+ALTER TABLE `public_events`
+  ADD CONSTRAINT `public_event_id` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `public_event_uni_id` FOREIGN KEY (`uni_id`) REFERENCES `universities` (`uni_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
 -- Constraints for table `rating`
 --
 ALTER TABLE `rating`
   ADD CONSTRAINT `rating_event_id` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `rating_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `rso_events`
+--
+ALTER TABLE `rso_events`
+  ADD CONSTRAINT `rso_event_id` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `rso_event_rso_id` FOREIGN KEY (`rso_id`) REFERENCES `rsos` (`rso_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `rso_event_uni_id` FOREIGN KEY (`uni_id`) REFERENCES `universities` (`uni_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `r_created_e`
+--
+ALTER TABLE `r_created_e`
+  ADD CONSTRAINT `r_created_e_event_id` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `r_created_e_rso_id` FOREIGN KEY (`rso_id`) REFERENCES `rsos` (`rso_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `u_created_e`
+--
+ALTER TABLE `u_created_e`
+  ADD CONSTRAINT `u_created_e_event_id` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `u_created_e_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

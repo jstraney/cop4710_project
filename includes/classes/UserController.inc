@@ -181,19 +181,10 @@ class UserController extends EntityController {
 
   }
 
-  public function update($params) {
+  // returns true if users password is correct for user with user id.
+  public function check_credentials($user_id, $password) {
 
-    $id = $params[1];
-
-    $user_name = $params['user-name']; 
-    $first_name = $params['first-name']; 
-    $last_name = $params['last-name']; 
-    $email = $params['e-mail']; 
-    $uni_id = $params['uni-id']; 
-    $password = $params['password']; 
-    $user_role = isset($params['role'])? $params['role'] : "STU"; 
-
-    $credentials = $this->get_credentials_by_id($id);
+    $credentials = $this->get_credentials_by_id($user_id);
 
     // no user by this id
     if (empty($credentials)) {
@@ -209,8 +200,32 @@ class UserController extends EntityController {
 
     if (check_password($password, $hash)) {
 
+      return TRUE;
+
+    }
+
+    return FALSE;
+
+  }
+
+  public function update($params) {
+
+    $id = $params[1];
+
+    $user_name = $params['user-name']; 
+    $first_name = $params['first-name']; 
+    $last_name = $params['last-name']; 
+    $email = $params['e-mail']; 
+    $uni_id = $params['uni-id']; 
+    $password = $params['password']; 
+    $user_role = isset($params['role'])? $params['role'] : "STU"; 
+
+    if ($this->check_credentials($id, $password)) {
+
       // check password entered against actual hash
       $query = $this->update_query;
+
+      $hash = encrypt_password($password);
 
       $this->db->prepared_query($query, array(
         ":user_name" => $user_name,
@@ -222,6 +237,13 @@ class UserController extends EntityController {
         ":role" => $user_role,
         ":user_id" => $id,
       ));
+
+      set_message("You have successfully changed your profile");
+
+    }
+    else {
+
+      set_message("There was a problem changing your profile", "error");
 
     }
 

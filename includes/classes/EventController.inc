@@ -173,8 +173,10 @@ class EventController extends EntityController {
     $email = isset($result['email'])? $result['email']: "";
     $lon = isset($result['lon'])? $result['lon']: "";
     $lat = isset($result['lat'])? $result['lat']: "";
+
     $is_owner = isset($result['is_owner'])? $result['is_owner']: 0;
     $is_participating = isset($result['is_participating'])? $result['is_participating']: 0;
+
     $rating = isset($result['rating'])? $result['rating']: "";
     $status = isset($result['status'])? $result['status']: "";
 
@@ -294,13 +296,30 @@ class EventController extends EntityController {
     // user who is signed in.
     global $user;
 
-    $uid = $user->id;
+    $uid = $user->user_id;
+
+    $event_id = $params[1];
+
+    $password = isset($params['password'])? $params['password'] : NULL;
+
+    $user_controller = new UserController();
+
+    $can_destroy = $user_controller->check_credentials($uid, $password);
+
+    if ($password == NULL || !$can_destroy) {
+
+      go_home();
+
+      die();
+
+    }
 
     $query = $this->destroy_query;
 
-    // $this->db->prepared_query($query, array());
+    $this->db->prepared_query($query, array(":event_id" => $event_id));
     
     // redirect to page of events, or user page. something...
+    redirect_entity_view("user", $uid);
      
   }
 

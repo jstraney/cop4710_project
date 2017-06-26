@@ -138,7 +138,7 @@
       var end_time = eventJson.end_time;
 
       var elem = $('<div class="record.event">');
-      var text = '<h5><a href="'+a.siteRoot+'/event/'+event_id+'">' + name + '</a></h5>';
+      var text = '<h5><a href="'+a.siteRoot+'event/'+event_id+'">' + name + '</a></h5>';
       text +='<p>' + description + '</p>';
       text +='<span class="info distance">' + distance + 'miles away</span>';
       text +='<span class="info rating">' + rating + '</span>';
@@ -165,6 +165,7 @@
         if (data.length == 0) {
 
           eventsAggregate.html('<p class="notice">No events match your search</p>');
+
           return;
 
         }

@@ -10,8 +10,13 @@ $template = <<<EOT
   <p>
   Deleting events is permanent. By clicking the submit button
   you agree that you understand that all data associated with this
-  event will be lost.
+  event will be lost. Enter your password to confirm.
   </p>
+
+  <div class="input-field">
+  <input type="password" id="password" name="password"/>
+  <label for="password">Password</label>
+  </div>
 
   <input class="btn btn-large" type="submit" value="Delete Event" ></input>
 

@@ -8,7 +8,7 @@ CALL update_rso(:rso_id, :role, :user_id, :name, :description, :members, :rso_ad
 EOT;
 
 $view_query = <<<EOT
-CALL view_rso(:rso_id);
+CALL view_rso(:rso_id, :user_id, :role);
 EOT;
 
 $view_all_query = <<<EOT
