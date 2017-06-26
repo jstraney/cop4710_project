@@ -48,6 +48,10 @@ body {
 
 }
 
+div.nav-wrapper > ul > li > a {
+  display: inline-block;
+}
+
 #content {
   width: 100%;
 }
