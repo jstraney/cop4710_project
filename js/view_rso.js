@@ -65,6 +65,15 @@
       data = data || "{}";
 
       data = JSON.parse(data);
+
+      console.log(data);
+      if (data.length == 0 ) {
+
+        eventAggregate.html('<p class="notice">There are no events at this time.</p>');
+
+        return;
+
+      }
       
       for (var i = 0; i < data.length; i ++) {
 
@@ -90,6 +99,14 @@
 
       data = JSON.parse(data);
 
+      if (data.length == 0) {
+
+        membersBoxContainer.html('<p class="notice">There are no members at this time.</p>');
+
+        return;
+
+      }
+
       for (var i = 0; i < data.length; i++) {
 
         var member = data[i];
@@ -112,6 +129,7 @@
 
     })
     .fail(function (err) {
+
       
     });
 

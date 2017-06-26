@@ -14,11 +14,12 @@ $template = <<<EOT
 
   <input style="display:none;" id="lon" name="lon" type="text" val=""></input>
   <input style="display:none;" id="lat" name="lat" type="text" val=""></input>
+
   <div id="map">
   </div>
   <script type="text/javascript" src="https://maps.google.com/maps/api/js?key=AIzaSyBGfGPKeqJZRoQSInY5LXqvZt7lZwihCPA&libraries=places"></script>
   <script src="{$site_root}/js/lib/jquery-locationpicker-plugin/locationpicker.jquery.js"></script>
-  <script>app.makePicker();</script>
+  <script>app.makePicker({defaultLocation: "{$location}", defaultLat: "{$lat}", defaultLon:"{$lon}"});</script>
 
   <label>Description</label>
   <textarea id="description" name="description" placeholder="Enter a description"></textarea>
@@ -26,9 +27,9 @@ $template = <<<EOT
   <div class="event-make contact">
     <h4>Contact Info</h4>
     <label>phone number</label>
-    <input name="phone-number" type="tel" pattern="^[0-9]{3}-[0-9]{3}-[0-9]{4}" title="format: 123-444-5555"></input>
+    <input name="telephone" type="tel" pattern="^[0-9]{3}-[0-9]{3}-[0-9]{4}" title="format: 123-444-5555"></input>
     <label>e-mail</label>
-    <input name="e-mail" type="email" value="{$user->email}"></input>
+    <input name="email" type="email" value="{$user->email}"></input>
   </div>
 
 
@@ -46,9 +47,11 @@ $template = <<<EOT
 
       var self = \$(this);
 
-      var top = self.position().top - 150;
+      var permPos = this.permPos || self.position().top - 150;
 
-      self.css({top: top + "px"});
+      this.permPos = permPos;
+
+      self.css({top: permPos + "px"});
 
     }
 

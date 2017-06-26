@@ -3,7 +3,7 @@
   var participate;
   var commentList;
   var comment;
-
+  var status = a.scope.status;
 
   // returns a hidden form to edit an event
   function editCommentFormFactory(comment_id) {
@@ -66,7 +66,7 @@
     // append comment content.
     elem.append('<p class="content">'+content+'</p>');
 
-    elem.append('<div class="date">'+date_posted+'</div>');
+    elem.append('<span class="date">'+date_posted+'</span>');
 
     // check if the user viewing the page is the owner of the comment.
     // NOTE: this does not prevent CSRF or XSS attacks. remember that
@@ -125,9 +125,17 @@
   $(function () {
 
     var participating = false;
+    // pnd or act.
 
     var participateForm = $('<form class="lefty" style="display:none" id="participate">'); 
     participateForm.append('<input type="submit" value="Participate!">');
+
+    if (status == "PND") {
+
+      $('input[type=submit]', participateForm).addClass('disabled')
+      .attr('disabled','disabled');
+
+    }
 
     // clicking on the button will submit ajax request to participate in event.
     participateForm.submit(function (e) {
@@ -235,8 +243,12 @@
 
     }
 
-    // poll every two and a half seconds.
-    pollParticipantsInterval = window.setInterval(pollParticipants, 2500);
+    // poll every two and a half seconds, but only if the status is active
+    if (status == "ACT") { 
+
+      pollParticipantsInterval = window.setInterval(pollParticipants, 2500);
+
+    }
 
     commentList = $("div.event-view.aggregate.comment");
 
@@ -293,11 +305,11 @@
 
     }
 
-    pollComments();
+    status == "ACT" && pollComments();
 
     // check for comments every 3 seconds.
     // uncomment for production. commented out for testing.
-    pollCommentInterval = window.setInterval(pollComments, 3000);
+    status == "ACT" && (pollCommentInterval = window.setInterval(pollComments, 3000));
 
     commentBody = $("#comment-body");
 
@@ -346,9 +358,25 @@
       // adding an event handler here normally will not
       // retain the value of i. passing i to this function binds
       // the value to the callback handler on the star.
-      bindStarHandler(star, i);
+      if (status == "ACT") { 
+
+        bindStarHandler(star, i);
+
+      }
+      else {
+
+        star.addClass('disabled');
+
+      }
 
       ratings.append(star);
+
+    }
+
+    if (status != "ACT") {
+
+      $('form#new-comment > input[type=submit]').addClass('disabled')
+        .attr('disabled', 'disabled');
 
     }
 
@@ -373,6 +401,7 @@
       });
 
     });
+
 
   });
 

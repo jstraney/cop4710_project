@@ -60,20 +60,26 @@ var app = app || {};
   a.siteRoot = "http://localhost/cop4710_project/";
 
   // one method of the app object is to make a location picker
-  a.makePicker = function () {
+  a.makePicker = function (configs) {
+
+    configs = configs || {};
+
+    var defaultLocation = configs.defaultLocation || null; 
+    var defaultLat = configs.defaultLat || null; 
+    var defaultLon = configs.defaultLon || null; 
 
     // latitude and longitude fields of the form containing the map
     var lat = $("#lat");
     var lon = $("#lon");
 
-    defaultLat = 28.6024274;
-    defaultLon = -81.2000598;
+    var locationInput = $("#location")
 
     // select the element with id of map
     $("#map").locationpicker({
       // set defaults
       enableAutocomplete: true,
-      locationName: "Orlando, FL 32816, USA",
+      addressFormat: 'address',
+      locationName: defaultLocation,
       // go knights!
       location: {
         longitude: defaultLon,
@@ -83,7 +89,7 @@ var app = app || {};
       inputBinding: {
         longitudeOutput: $("#lon"),
         latitudeOutput: $("#lat"),
-        locationNameInput: $("#location"),
+        locationNameInput: locationInput,
       },
       oninitialized: function (component) {
 
@@ -113,6 +119,7 @@ var app = app || {};
         longitude: lon.val(),
       },
       enableAutocomplete: true,
+      addressFormat: 'address',
       radius: 0,
       inputBinding: {
         longitudeInput: $("#lon"),
@@ -121,7 +128,7 @@ var app = app || {};
       },
       markerDraggable: false,
       oninitialized: function (component) {
-        console.log(component);
+
       },
 
     });

@@ -35,9 +35,10 @@ if ($viewed_by_admin) {
 
   // include special links to edit and delete
   $template .= '<div class="entity-actions">';
-  $template .= "<a href=\"{$site_root}/rso/{$rso_id}/delete\">Delete RSO</a>";
+  $template .= '<h4>RSO Settings</h4>';
   $template .= "<a href=\"{$site_root}/rso/{$rso_id}/edit\">Edit RSO</a>";
   $template .= "<a href=\"{$site_root}/event/new\">New Event</a>";
+  $template .= "<a href=\"{$site_root}/rso/{$rso_id}/delete\">Delete RSO</a>";
   $template .= '</div>';
 
 }

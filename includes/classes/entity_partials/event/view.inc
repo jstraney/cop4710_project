@@ -5,15 +5,15 @@ $start = $back_range[0];
 $end = $back_range[1];
 
 $template = <<<EOT
-<script src="{$site_root}/js/view_event.js"></script>
-
 <script>
-
-  app.scope.event_id = {$event_id};
-
-  app.scope.current_user_id = {$user_id};
-
+(function(a) {
+  a.scope.event_id = {$event_id};
+  a.scope.status = "{$status}";
+  a.scope.current_user_id = {$user_id};
+})(app);
 </script>
+
+<script src="{$site_root}/js/view_event.js"></script>
 
 <div><a href="{$site_root}/events">&laquo; Back to events</a></div>
 
@@ -29,6 +29,20 @@ if ($is_owner) {
 $template .= <<<EOT
 <h2>{$name}</h2>
 
+EOT;
+if ($rso_id != NULL) {
+
+  $template .= "<h5>Hosted by ";
+  $template .= "<a href=\"{$site_root}/rso/{$rso_id}\">{$rso_name}</a>";
+  $template .= "</h5>";
+
+}
+
+if ($status == "PND") {
+  $template .= '<p class="notice">This event is still pending the super admin\'s approval</p>';
+}
+
+$template .= <<<EOT
 <div>Location: {$location}</div>
 <input type="hidden" id="location" value="{$location}"></input>
 <input type="hidden" id="lon" value="{$lon}"></input>
