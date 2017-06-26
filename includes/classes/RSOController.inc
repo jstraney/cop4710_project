@@ -50,7 +50,7 @@ class RSOController extends EntityController {
     $members .= ",$user_id";
 
     // if no administrator was chosen, you as the creator are assumed to be the administrator
-    $rso_administrator = isset($params['rso-administrator'])? $params['rso-administrator']: $user_id; 
+    $rso_administrator = !empty($params['rso-administrator'])? $params['rso-administrator']: $user_id; 
 
     if ($role === "SA") {
 

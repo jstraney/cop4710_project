@@ -7,6 +7,7 @@
     $('#is-rso').change(function () {
 
       rsoSelection.slideToggle();
+      rsoId.removeAttr('disabled');
       
     });
 
@@ -17,10 +18,12 @@
     $('#not-rso').change(function () {
 
       rsoSelection.slideUp();
+      rsoId.attr('disabled','disabled');
 
     });
 
     rsoInput.autocomplete({
+
       source: function (req, res) {
 
         var name = req.term;

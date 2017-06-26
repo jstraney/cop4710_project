@@ -45,7 +45,6 @@ body {
   max-width: 800px;
   margin: 160px auto 50px;
   padding: 5px 20px 25px;
-  position: relative;
 
 }
 
@@ -125,6 +124,8 @@ form {
   margin: 15px auto 25px;
 }
 
+
+
 input, form {
   max-width: 500px;
   display: block;
@@ -148,6 +149,13 @@ input[type=submit] {
   color: #FFFFFF;
   padding: 5px 8px;
   font-size: 14px;
+}
+
+input[type=submit].disabled:hover,
+input[type=submit].disabled {
+  cursor: inherit;
+  color: #AAAAAA;
+  background-color: #CCCCCC;
 }
 
 form.lefty {
@@ -191,7 +199,7 @@ div.button:hover {
 
 
 div.aggregate {
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 div.record {
@@ -200,23 +208,21 @@ div.record {
 }
 
 div.entity-actions {
-  margin: 20px auto;
-  position: absolute;
-  bottom: 100%;
-  left: 0;
+  padding-top: 10px;
 }
 
 div.entity-actions > a {
   margin-right: 25px;
-  padding: 5px;
-  border: 1px solid #BBB;
-  border-bottom: none;
-  border-top-right-radius: 15px;
 }
 
 p.form-prompt {
   color: #888888;
   font-size: 14px;
+}
+
+p.notice {
+  color: #AEAEAE;
+  font-size: 20px;
 }
 
 /* RSO pages */
@@ -287,14 +293,15 @@ div#rating {
   white-space: nowrap;
 }
 
+div.star.rated ~ div.star,
+div.star.disabled, div.star.disabled:hover {
+  color: #775555;
+}
+
 div.star {
   display: inline-block;
   color: #FF6622;
   margin-right: 5px;
-}
-
-div.star.rated ~ div.star {
-  color: #775555;
 }
 
 div.star:hover ~ div.star {
@@ -303,7 +310,7 @@ div.star:hover ~ div.star {
 
 div.star:hover {
   cursor: pointer;
-  color: #aaCC22 !important;
+  color: #aaCC22;
 }
 
 div.star.rate-0 {
@@ -333,6 +340,11 @@ div.record.event.comment > .button.update {
   position: absolute;
   bottom: -30px;
   left: 70px;
+}
+
+div.record.event.comment > span.date {
+  color: #666666;
+  font-size: 14px;
 }
 
 div#map {
