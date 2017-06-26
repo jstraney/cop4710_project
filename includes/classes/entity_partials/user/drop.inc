@@ -1,5 +1,6 @@
 <?php
 $template = <<<EOT
+<div id="inner-content">
 <form method="POST" action="{$site_root}/user/{$id}/destroy">
 
   <h3>Delete Account</h3>
@@ -11,8 +12,9 @@ $template = <<<EOT
 
   <input id="password" type="password" name="password" value=""></input>
 
-  <input id="submit" type="submit" name="submit" value="Yes, delete this account"></input>
+  <input class="btn btn-large" id="submit" type="submit" name="submit" value="Yes, delete this account"></input>
 
 </form>
+</div>
 EOT;
 ?>

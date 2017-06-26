@@ -23,13 +23,9 @@ body {
 }
 
 #main-view { 
-  margin: 50px 0 50px;
+  margin: 160px 0 50px;
   padding: 5px 0 25px;
   position: relative;
-}
-
-#inner-content {
-  padding: 0 10px;
 }
 
 div.nav-wrapper > ul > li > a {
@@ -46,18 +42,6 @@ div.nav-wrapper > ul > li > a {
 
 div.nav-wrapper > a#logo-container {
   display: inline-block;
-  width: 50px;
-  height: 50px;
-  vertical-align: middle;
-}
-
-div#main-view > div#inner-content {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-div.nav-wrapper > a#logo-container > img {
-  width: 100%;
 }
 
 #content {
@@ -82,7 +66,6 @@ form {
 input, form {
   max-width: 500px;
   display: block;
-  float: none;
 }
 
 input[type=text], input[type=email], input[type=password],
@@ -95,20 +78,28 @@ input[type=tel]{
 
 input[type=submit] {
   margin: 10px auto 20px;
-  display: block;
-}
-
-form.col.s12 {
-  float: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border: none;
+  background-color: #FF6644;
+  color: #FFFFFF;
+  padding: 5px 8px;
+  font-size: 14px;
 }
 
 form.lefty {
   max-width: none;
 }
 
-form.lefty input[type=submit] {
-  margin: 10px auto 20px;
-  display: inline-block;
+form.lefty input[type=submit]{
+  margin-left: 0px;
+  margin-right: 10px;
+}
+
+input[type=submit]:hover {
+  cursor: pointer;
+  background-color: #AA9944;
 }
 
 textarea {
@@ -128,10 +119,6 @@ input[type=checkbox], input[type=radio] {
   margin: 0 5px;
 }
 
-div.pac-container.pac-logo {
-  background-color: #FFFFFF;
-}
-
 /* general entity css */
 
 div.button:hover {
@@ -139,19 +126,10 @@ div.button:hover {
   cursor: pointer;
 }
 
-.autocomplete-suggestion {
-  background-color: #FFFFFF;
-  border-bottom: 1px solid #BBBBBB;
-  padding: 10px;
-}
 
-.autocomplete-suggestion:hover {
-  background-color: #CCCCCC;
-  cursor: pointer;
-}
 
 div.aggregate {
-  margin-bottom: 25px;
+  margin-bottom: 10px;
 }
 
 div.record {
@@ -161,12 +139,17 @@ div.record {
 
 div.entity-actions {
   margin: 20px auto;
+  position: absolute;
+  bottom: 100%;
+  left: 0;
 }
 
 div.entity-actions > a {
   margin-right: 25px;
   padding: 5px;
+  border: 1px solid #BBB;
   border-bottom: none;
+  border-top-right-radius: 15px;
 }
 
 p.form-prompt {

@@ -1,6 +1,6 @@
 <?php
 $template = <<<EOT
-
+<div id="inner-content">
 <script src="{$site_root}/js/user_form.js"></script>
 <div><a href="{$site_root}/user/{$user_id}">Back to profile &raquo;</a></div>
 
@@ -31,8 +31,9 @@ $template = <<<EOT
   <label>Password</label>
   <input id="password" type="password" name="password" value=""></input>
 
-  <input id="submit" type="submit" name="submit" value="Change Info"></input>
+  <input class="btn btn-large" id="submit" type="submit" name="submit" value="Change Info"></input>
 
 </form>
+</div>
 EOT;
 ?>

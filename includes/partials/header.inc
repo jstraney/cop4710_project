@@ -11,8 +11,8 @@ $site_root = $configs['site_root'];
 <nav class="amber darken-4" role="navigation">
     <div class="nav-wrapper container">
       <a id="logo-container" href="<?php echo $site_root; ?>" class="brand-logo">
-		<!--<img class="logo" src="<?php echo $site_root; ?>/res/icons/top_logo.png"></img>-->Sup
-	  </a>
+      <img class="logo" src="<?php echo $site_root; ?>/res/icons/top_logo.png"></img>
+      </a>
       <ul class="right hide-on-med-and-down">
 		<?php
     // check if user is anonymous, or 0

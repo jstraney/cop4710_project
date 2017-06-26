@@ -240,7 +240,7 @@ BEGIN
   -- all events have many of the the same columns. Lookup from the application layer is performed
   -- on the event sub-type tables, thus limiting the scope of what is looked up based on user id.
   INSERT INTO events (name, start_time, end_time, telephone, email, description, location, lat, lon, accessibility)
-  VALUES (_name, _start_time, _end_time, telephone, email, _description, _location, _lat, _lon, _accessibility);
+  VALUES (_name, _start_time, _end_time, _telephone, _email, _description, _location, _lat, _lon, _accessibility);
 
   -- get event id from last insert operation
   SET _event_id = LAST_INSERT_ID();
@@ -272,7 +272,7 @@ BEGIN
   -- always create a relationship between the user and the event created.
   -- regardless of whether an RSO is used or not.
   INSERT INTO u_created_e (user_id, event_id)
-  VALUES (_user_id, _rso_id);
+  VALUES (_user_id, _event_id);
 
   -- regardless of whether it's RSO created or User created, update the status.
   UPDATE events SET status = _status WHERE event_id = _event_id;
@@ -340,12 +340,19 @@ CREATE PROCEDURE update_event (
   -- id of rso if this is an RSO accessible event
   IN _rso_id INT(11),
   -- id of hosting university if this is a privately accessible event
-  IN _uni_id INT(11))
+  IN _uni_id INT(11),
+  -- status. only submitable by SA roles
+  IN _status ENUM('ACT','PND'))
+
 BEGIN
 
   -- now the tricky part. If someone wants to change the event type, we need to see if
   -- the type has changed
   DECLARE _old_type ENUM('PUB','PRI','RSO');
+  -- id of the current RSO. If this is set from an existing RSO id, to 0 (no rso)
+  -- then the event status must be set to Pending Super Admin approval.
+  DECLARE _current_rso_id INT(11);
+  DECLARE _role ENUM('SA','ADM','STU');
 
   -- check if the user is the administrator of the RSO that made the event.
   IF NOT EXISTS(
@@ -367,8 +374,48 @@ BEGIN
 
   END IF;
 
-
+  -- set the events old type of pub, pri, or rso
   SET _old_type = (SELECT e.accessibility FROM events e WHERE e.event_id = _event_id LIMIT 1);
+
+  -- set the old rso id
+  SET _current_rso_id = (
+    SELECT r.rso_id
+    FROM rsos r, r_created_e re
+    WHERE r.rso_id = re.rso_id
+    AND re.event_id = _event_id);
+
+  -- set the role of the current user.
+  SET _role = (SELECT role FROM users WHERE user_id = _user_id);
+
+  -- check if we are upating an RSO created event to have No RSO.
+  -- note that this condition fails when it is already PND and SA makes adjustment.
+  IF _current_rso_id > 0 AND _rso_id = 0 AND _role <> 'SA' THEN
+    -- set this event to pending for super admin.
+    UPDATE events SET
+    status = 'PND' 
+    WHERE event_id = _event_id;
+    DELETE FROM r_created_e
+    WHERE event_id = _event_id;
+
+  -- check if the event used to have no RSO, but has just added one.
+  ELSEIF _current_rso_id IS NULL AND _rso_id > 0 THEN
+    -- indicated that this is an RSO created event. Allow joins when viewing events.
+    INSERT INTO r_created_e (event_id, rso_id)
+    VALUES (_event_id ,_rso_id);
+    UPDATE events SET
+    status = 'ACT' 
+    WHERE event_id = _event_id;
+
+  END IF;
+
+  -- only super admin can directly allow the status to change.
+  IF _role = "SA" THEN
+
+    UPDATE events SET
+    status = _status
+    WHERE event_id = _event_id;
+    
+  END IF;
    
   -- all events have many of the the same columns. Lookup from the application layer is performed
   -- on the event sub-type tables, thus limiting the scope of what is looked up based on user id.
@@ -393,6 +440,7 @@ BEGIN
       CALL change_event_access(_event_id, _uni_id, _rso_id, _accessibility, _old_type);
 
     END;
+
   END IF;
 
   -- Select the id of the event just created. used for redirect
@@ -412,8 +460,11 @@ BEGIN
 
   DECLARE _accessibility ENUM('PUB','PRI','RSO');
   DECLARE _not_participating INT(1);
+  DECLARE _status ENUM('PND','ACT');
 
-  SET _accessibility = (SELECT e.accessibility FROM events e WHERE e.event_id = _event_id);
+  SELECT e.accessibility, e.status INTO _accessibility, _status
+  FROM events e
+  WHERE e.event_id = _event_id;
 
   -- check if user is already participating.
   IF EXISTS (
@@ -431,11 +482,11 @@ BEGIN
   END IF;
 
   -- if public do a simple attend
-  IF _accessibility = "PUB" AND _not_participating THEN
+  IF _status = "ACT" AND _accessibility = "PUB" AND _not_participating THEN
     INSERT INTO participating (user_id, event_id)
     VALUES (_user_id, _event_id);
 
-  ELSEIF _accessibility = "PRI" AND _not_participating THEN
+  ELSEIF _status = "ACT" AND _accessibility = "PRI" AND _not_participating THEN
     INSERT INTO participating (user_id, event_id)
     SELECT u.user_id, _event_id
     FROM users u, attending a, universities n, private_events pe
@@ -445,7 +496,7 @@ BEGIN
     AND n.uni_id = pe.uni_id
     AND pe.event_id = _event_id LIMIT 1;
 
-  ELSEIF _accessibility = "RSO" AND _not_participating THEN
+  ELSEIF _status = "ACT" AND _accessibility = "RSO" AND _not_participating THEN
     INSERT INTO participating (user_id, event_id)
     SELECT u.user_id, _event_id
     FROM users u, is_member m, rso_events re
@@ -544,28 +595,34 @@ CREATE PROCEDURE change_event_access (
   -- rso id for rso events
   IN _rso_id INT(11),
   IN _accessibility ENUM('PUB','PRI','RSO'),
-  IN old_type ENUM('PUB','PRI','RSO'))
+  IN _old_type ENUM('PUB','PRI','RSO'))
 BEGIN
   -- since the access of the event is being changed, we know that the event
   -- is getting removed from one of the child tables. 
 
   -- in all three tables, event_id is a foreign key to events primary key.
   -- we are guaranteed to remove only the event being updated.
-  DELETE FROM public_events WHERE event_id = _event_id;
-  DELETE FROM private_events WHERE event_id = _event_id;
-  DELETE FROM rso_events WHERE event_id = _event_id;
+  IF _old_type = 'PUB' THEN 
+    DELETE FROM public_events WHERE event_id = _event_id;
+  ELSEIF _old_type = 'PRI' THEN 
+    DELETE FROM private_events WHERE event_id = _event_id;
+  ELSEIF _old_type = 'RSO' THEN 
+    DELETE FROM rso_events WHERE event_id = _event_id;
+    DELETE FROM r_created_e WHERE event_id = _event_id;
+  END IF;
 
   -- now perform an insert on the proper table
   IF _accessibility = 'RSO' THEN
     BEGIN
       -- check if rso does not exist 
+
       IF NOT EXISTS (SELECT rso_id FROM rsos WHERE rso_id = _rso_id) THEN
         -- throw error
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "The rso specified cannot be found.";
 
       ELSE
-        INSERT INTO rso_events (event_id, rso_id)
-        VALUES (_event_id, _rso_id);
+        INSERT INTO rso_events (event_id, rso_id, uni_id)
+        VALUES (_event_id, _rso_id, _uni_id);
         -- erase any public or private event that has the same event id
       END IF;
     END;
@@ -582,8 +639,8 @@ BEGIN
     END;
   ELSE 
     BEGIN
-        INSERT INTO public_events (event_id)
-        VALUES (_event_id);
+        INSERT INTO public_events (event_id, uni_id)
+        VALUES (_event_id, _uni_id);
     END;
   END IF;
 
@@ -689,9 +746,11 @@ BEGIN
   IF _accessibility = "PUB" THEN
     BEGIN
       SELECT e.name, e.start_time, e.end_time, e.description, e.location,
-      e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-      _is_participating AS is_participating, e.rating
+      e.telephone, e.email, e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
+      _is_participating AS is_participating, e.rating, r.rso_id, r.name as rso_name
       FROM events e
+      LEFT OUTER JOIN r_created_e re ON re.event_id = e.event_id
+      LEFT OUTER JOIN rsos r ON r.rso_id = re.rso_id
       WHERE e.event_id = _event_id
       LIMIT 1;
     END;
@@ -700,24 +759,27 @@ BEGIN
   ELSEIF _accessibility = "PRI" THEN
     BEGIN
       SELECT e.name, e.start_time, e.end_time, e.description, e.location,
-      e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-      _is_participating AS is_participating, e.rating
+      e.telephone, e.email, e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
+      _is_participating AS is_participating, e.rating, e.event_id, re.rso_id, r.name AS rso_name
       FROM events e, private_events p
+      LEFT OUTER JOIN r_created_e re ON re.event_id = p.event_id
+      LEFT OUTER JOIN rsos r ON r.rso_id = re.rso_id
       WHERE e.event_id = _event_id
       AND e.event_id = p.event_id
       AND p.uni_id = _uni_id
       OR _role = "SA" LIMIT 1;
     END;
 
-  -- return event only if user is_member of RSO
+  -- return event only if user is_member of RSO. implicitly made by an RSO, so no join is necessary
   ELSEIF _accessibility = "RSO" THEN
     BEGIN
       SELECT e.name, e.start_time, e.end_time, e.description, e.location,
-      e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-      _is_participating AS is_participating, e.rating
-      FROM events e, rso_events re
+      e.telephone, e.email, e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
+      _is_participating AS is_participating, e.rating, r.rso_id, r.name AS rso_name
+      FROM events e, rso_events re, rsos r
       WHERE e.event_id = _event_id
       AND re.event_id = e.event_id
+      AND re.rso_id = r.rso_id
       AND re.rso_id = ANY(
         SELECT r.rso_id 
         FROM rsos r, is_member m
@@ -735,9 +797,9 @@ CREATE FUNCTION manhattan_distance (
   _lat2 DECIMAL(9, 6),
   _lon2 DECIMAL(9, 6)
   )
-  RETURNS INT
+  RETURNS DECIMAL(9, 6) 
 BEGIN
-  RETURN FLOOR(ABS(_lat1 - _lat2) + ABS(_lon1 - _lon2));
+  RETURN (ABS(_lat1 - _lat2) + ABS(_lon1 - _lon2));
 END//
 
 CREATE PROCEDURE search_events (
@@ -748,6 +810,7 @@ CREATE PROCEDURE search_events (
   IN _accessibility ENUM ('PUB','PRI','RSO') 
   )
 BEGIN
+
   DECLARE _is_owner INT(1);
   DECLARE _is_participating INT(1);
 
@@ -755,31 +818,56 @@ BEGIN
   DECLARE _uni_lat DECIMAL(9, 6);
   DECLARE _uni_lon DECIMAL(9, 6);
 
+  SELECT n.lat, n.lon
+  INTO _uni_lat, _uni_lon
+  FROM universities n
+  WHERE n.uni_id = _uni_id;
 
-  SET _is_owner = get_is_owner(_user_id, _event_id);
-  SET _is_participating = get_is_participating(_user_id, _event_id);
   -- to calculate distance, get the coordinates of university and use manhattan
   -- heuristic between event points. (ABS(x1 - x2) + ABS(y1 - y1))
 
-  -- if the scope is for another university, then the events viewed can only be public
-  IF _scope = "other-uni" THEN
+  IF _scope = "my-uni" THEN
     SELECT e.name, e.start_time, e.end_time, e.description, e.location,
     e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-    _is_participating AS is_participating, e.rating
+    _is_participating AS is_participating, e.rating,
+    manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
     FROM events e, hosting h
     WHERE _uni_id = h.uni_id
     AND h.event_id = e.event_id
-    AND e.accessibility = "PUB";
+    ORDER BY
+      CASE _sort_by WHEN "date" THEN e.start_time
+      WHEN "location" THEN location
+      END;
+
+  -- if the scope is for another university, then the events viewed can only be public
+  ELSEIF _scope = "other-uni" THEN
+    SELECT e.name, e.start_time, e.end_time, e.description, e.location,
+    e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
+    _is_participating AS is_participating, e.rating,
+    manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
+    FROM events e, hosting h
+    WHERE _uni_id = h.uni_id
+    AND h.event_id = e.event_id
+    AND e.accessibility = "PUB"
+    ORDER BY
+      CASE _sort_by WHEN "date" THEN e.start_time
+      WHEN "location" THEN location
+      END;
 
   -- if the scope is "my-uni" (the only other scope) Allow a range of event types to be selected
   ELSEIF _accessibility = "PUB" THEN
     BEGIN
       SELECT e.name, e.start_time, e.end_time, e.description, e.location,
       e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-      _is_participating AS is_participating, e.rating
+      _is_participating AS is_participating, e.rating,
+      manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
       FROM events e, hosting h
       WHERE h.uni_id = _uni_id 
       AND h.event_id = e.event_id;
+      ORDER BY
+        CASE _sort_by WHEN "date" THEN e.start_time
+        WHEN "location" THEN location
+        END;
     END;
 
   -- return event only if user attends/affiliates-with hosting university 
@@ -787,7 +875,8 @@ BEGIN
     BEGIN
       SELECT e.name, e.start_time, e.end_time, e.description, e.location,
       e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-      _is_participating AS is_participating, e.rating
+      _is_participating AS is_participating, e.rating,
+      manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
       FROM events e, private_events p, attending at, affiliated_with aw
       WHERE p.uni_id = _uni_id 
       AND p.event_id = e.event_id;
@@ -798,10 +887,10 @@ BEGIN
     BEGIN
       SELECT e.name, e.start_time, e.end_time, e.description, e.location,
       e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-      _is_participating AS is_participating, e.rating
+      _is_participating AS is_participating, e.rating,
+      manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
       FROM events e, rso_events re
-      WHERE e.event_id = _event_id
-      AND re.event_id = e.event_id
+      WHERE e.event_id = re.event_id
       AND re.rso_id = ANY(
         SELECT r.rso_id 
         FROM rsos r, is_member m

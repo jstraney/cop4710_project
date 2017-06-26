@@ -1,6 +1,7 @@
 <?php
 
 $template = <<<EOT
+<div id="inner-content">
 <form method="POST" action="{$site_root}/event/{$event_id}/update">
 
 EOT;
@@ -8,13 +9,11 @@ EOT;
 if ($role === "SA" ) {
   $template .= <<<EOT
   <div>
-    <p>
+    <p class="form-prompt">
     Marking the event as active will allow the event to be viewed and attended.
     </p>
-    <select>
-      <option value="PND">Pending</option>
-      <option value="ACT">Active</option>
-    </select>
+    <input {$is_pnd} name="status" type="radio" value="PND">Pending</input>
+    <input {$is_act} name="status" type="radio" value="ACT">Active</input>
   </div> 
 EOT;
 
@@ -24,6 +23,7 @@ $template .= <<<EOT
   <script src="{$site_root}/js/event_form.js"></script>
   <script src="{$site_root}/js/lib/jquery-datetimepicker/jquery.datetimepicker.full.js"></script>
   <link rel="stylesheet" href="{$site_root}/js/lib/jquery-datetimepicker/jquery.datetimepicker.min.css"/>
+
   <h3>Edit Event</h3>
 
   <label>Title</label>
@@ -38,10 +38,12 @@ $template .= <<<EOT
   <div id="map">
   </div>
 
-  <script type="text/javascript" src="https://maps.google.com/maps/api/js?key=AIzaSyBGfGPKeqJZRoQSInY5LXqvZt7lZwihCPA&libraries=places"></script>
+  <script type="text/javascript" 
+    src="https://maps.google.com/maps/api/js?key=AIzaSyBGfGPKeqJZRoQSInY5LXqvZt7lZwihCPA&libraries=places">
+  </script>
 
   <script src="{$site_root}/js/lib/jquery-locationpicker-plugin/locationpicker.jquery.js"></script>
-  <script>app.makePicker();</script>
+  <script>app.makePicker({defaultLocation: "{$location}", defaultLat:{$lat}, defaultLon: {$lon}});</script>
 
   <label>Description</label>
   <textarea id="description" name="description">{$description}</textarea>
@@ -57,26 +59,30 @@ $template .= <<<EOT
   <div>
   <h4>Contact Info</h4>
   <label>phone number</label>
-  <input name="phone-number" type="tel" pattern="^[0-9]{3}-[0-9]{3}-[0-9]{4}"
+  <input name="telephone" type="tel" pattern="^[0-9]{3}-[0-9]{3}-[0-9]{4}"
     title="format: 123-444-5555" value="{$telephone}"></input>
   <label>e-mail</label>
-  <input name="e-mail" type="email" value="{$email}"></input>
+  <input name="email" type="email" value="{$email}"></input>
   </div>
 
   <!-- if the event is not hosted by an RSO, it is put into a 'pending' state, which is changed by-->
   <!-- the super admin -->
   <label>Is the organization an RSO (recognized student organization)?</label>
   <div>
-    No <input id="not-rso" type="radio" value="0" name="rso-hosted"></input> 
-    Yes <input id="is-rso" type="radio" value="1" name="rso-hosted"></input> 
+
+    <input {$not_rso} id="not-rso" type="radio" value="0" name="rso-hosted"/>
+    <label for="not-rso">No</label>
+    <input {$is_rso} id="is-rso" type="radio" value="1" name="rso-hosted"/> 
+    <label for="is-rso">Yes</label>
+
   </div>
 
   <!-- if the event is an RSO, put the following fields below -->
-  <div style="display:none" class="selection rso">
+  <div {$hidden_rso} class="selection rso">
     <label>Which RSO is it?</label>
     <!-- todo: populate with RSO's administrated by the current user. -->
-    <input type="text" id="rso-input"></input>
-    <input type="hidden" id="rso-id"></input>
+    <input type="text" id="rso-input" value="{$rso_name}"></input>
+    <input type="hidden" id="rso-id" name="rso-id" value="{$rso_id}"></input>
   </div>
 
   <div class="selection">
@@ -98,9 +104,10 @@ $template .= <<<EOT
     <input id="category" name="category" type="text"></input>
   <div class="selection">
 
-  <input type="submit" value="Update Event"></input>
+  <input class="btn btn-large" type="submit" value="Update Event"></input>
 
 </form>
+</div>
 EOT;
 
 ?>

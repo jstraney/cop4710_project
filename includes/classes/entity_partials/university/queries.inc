@@ -30,6 +30,6 @@ SELECT uni_id, name FROM universities;
 EOT;
 
 $match_name_query= <<<EOT
-SELECT name AS 'label', uni_id AS 'value' FROM universities WHERE name LIKE :name;
+SELECT name AS 'value', uni_id AS 'data' FROM universities WHERE name LIKE :name;
 EOT;
 ?>

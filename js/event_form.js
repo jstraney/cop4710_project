@@ -7,6 +7,7 @@
     $('#is-rso').change(function () {
 
       rsoSelection.slideToggle();
+      rsoId.removeAttr('disabled');
       
     });
 
@@ -17,34 +18,38 @@
     $('#not-rso').change(function () {
 
       rsoSelection.slideUp();
+      rsoId.attr('disabled','disabled');
 
     });
 
-    rsoInput.autocomplete({
-      source: function (req, res) {
+    rsoInput.devbridgeAutocomplete({
 
-        var name = req.term;
+      lookup: function (query, done) {
+
+        var name = query;
 
         // use api endpoint
         a.getRsosByAdministrator(name, function (data) {
 
-          console.log(JSON.parse(data));
+          data = data || "{}";
 
-          res(JSON.parse(data));
+          data = JSON.parse(data);
+
+          result = {};
+
+          result.suggestions = data;
+
+          done(result);
           
         });
         
 
       },
-      select: function (event, ui) {
+      onSelect: function (suggestion) {
 
-        ui = ui || {};
+        rsoId.val(suggestion.data); 
 
-        var item = ui.item;        
-
-        rsoId.val(item.value); 
-
-        ui.item.value = ui.item.label;
+        rsoInput.val(suggestion.value);
 
       }
 

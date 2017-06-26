@@ -176,6 +176,11 @@ class EventController extends EntityController {
     $is_owner = isset($result['is_owner'])? $result['is_owner']: 0;
     $is_participating = isset($result['is_participating'])? $result['is_participating']: 0;
     $rating = isset($result['rating'])? $result['rating']: "";
+    $status = isset($result['status'])? $result['status']: "";
+
+    // if the event was created by an RSO allow the following.
+    $rso_id = isset($result['rso_id'])? $result['rso_id']: "";
+    $rso_name = isset($result['rso_name'])? $result['rso_name']: "";
 
     // return the partial using the variable defined above.
     include get_entity_partial('event', 'view');
@@ -240,13 +245,14 @@ class EventController extends EntityController {
     $email = isset($params['email'])? $params['email']: "";
     $lon = isset($params['lon'])? $params['lon']: "";
     $lat = isset($params['lat'])? $params['lat']: "";
-    $state = isset($params['state'])? $params['state']: ""; 
 
     $accessibility = isset($params['accessibility'])? $params['accessibility']: "PUB"; 
     
     $rso_id = isset($params['rso-id'])? $params['rso-id']: 0; 
 
     $categories = isset($params['categories'])? $params['categories']: ""; 
+
+    $status = isset($params['status'])? $params['status']: 'PND';
 
     $query = $this->update_query;
 
@@ -263,9 +269,10 @@ class EventController extends EntityController {
       ":lat" => $lat,
       ":user_id" => $user_id,
       ":rso_id" => $rso_id,
-      ":uni_id" => $uni_id,
       ":accessibility" => $accessibility,
       ":categories" => $categories,
+      ":uni_id" => $uni_id,
+      ":status" => $status
     ));
 
     // redirect to event page.
@@ -307,6 +314,29 @@ class EventController extends EntityController {
     if ($user == NULL) {
 
       go_home();
+
+    }
+
+    $uni_id = isset($user->uni_id)? $user->uni_id: 0;
+
+    $geo_query = "SELECT location, lat, lon FROM universities WHERE uni_id = :uni_id";
+
+    // get geolocation info from a university
+    $geo_info =  $this->db->prepared_query($geo_query, array(":uni_id" => $uni_id));
+
+    if (!empty($geo_info)) {
+
+      $geo_info = $geo_info[0];
+      $location = $geo_info['location'];
+      $lat = $geo_info['lat'];
+      $lon = $geo_info['lon'];
+
+    }
+    else {
+      // set some default for SA which has no uni association
+      $location = "4000 Central Florida Blvd, Orlando, FL 32816"; 
+      $lat = 28.602427;
+      $lon = -81.200060;
 
     }
 
@@ -371,8 +401,39 @@ class EventController extends EntityController {
     // calculate duration from start and end time.
     $start_time = isset($result['start_time'])? $result['start_time']: "";
     $end_time = isset($result['end_time'])? $result['end_time']: "";
+    $telephone = isset($result['telephone'])? $result['telephone']: "";
+    $email = isset($result['email'])? $result['email']: "";
     $lon = isset($result['lon'])? $result['lon']: "";
     $lat = isset($result['lat'])? $result['lat']: "";
+    $rso_id = isset($result['rso_id'])? $result['rso_id']: "";
+    $rso_name = isset($result['rso_name'])? $result['rso_name']: "";
+    $status = isset($result['status'])? $result['status']: "PND";
+    // if the event is rso created, check 'is-rso' input
+    // and leave 'not-rso' unchecked
+    if ($rso_id > 0) {
+      $is_rso = "checked=\"checked\"";
+      $not_rso = "";
+      $hidden_rso = "";
+    }
+    // otherwise, check 'not-rso' and leave 'is-rso' unchecked
+    else {
+      $is_rso = "";
+      $not_rso = "checked=\"checked\"";
+      $hidden_rso = "style=\"display:none\"";
+    }
+
+    if ($status == "PND") {
+
+      $is_pnd = "checked=\"checked\"";
+      $is_act = "";
+
+    }
+    else {
+
+      $is_pnd = "";
+      $is_act = "checked=\"checked\"";
+
+    }
     
     include get_entity_partial("event", "edit");
 
@@ -515,11 +576,11 @@ class EventController extends EntityController {
     }
     else if ($scope == "other-uni") {
 
-      $uni_id = isset($params['uni-id'])? $params['uni_id']: 0;
+      $uni_id = isset($params['uni_id'])? $params['uni_id']: 0;
 
     }
 
-    $sort_by = isset($params['sort-by']) ? $params['sort-by'] : "date";
+    $sort_by = isset($params['sort_by']) ? $params['sort_by'] : "date";
 
     $accessibility = isset($params['accessibility'])? $params['accessibility']: 'PUB';
 

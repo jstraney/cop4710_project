@@ -7,8 +7,8 @@ EOT;
 
 $update_query = <<<EOT
 CALL update_event ( 
-  :event_id, :name, :start_time, :end_time, :end_time, :telephone, :description,
-  :location, :lat, :lon, :accessibility, :categories, :user_id, :rso_id, :uni_id);
+  :event_id, :name, :start_time, :end_time, :telephone, :email, :description,
+  :location, :lat, :lon, :accessibility, :categories, :user_id, :rso_id, :uni_id, :status);
 EOT;
 
 $delete_query = <<<EOT

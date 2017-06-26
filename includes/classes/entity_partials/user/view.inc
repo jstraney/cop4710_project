@@ -14,6 +14,7 @@ else {
 }
 
 $template = <<<EOT
+<div id="inner-content">
 <script>
 app.scope.user_id = {$user_id};
 </script>
@@ -60,6 +61,7 @@ if ($my_account) {
 <div><a href="{$site_root}/event/new">Create an Event &raquo;</a></div>
 <h3>Settings</h3>
 <div><a href="{$site_root}/user/{$user_id}/delete">Delete Account &raquo;</a></div>
+</div>
 EOT;
 }
 ?>

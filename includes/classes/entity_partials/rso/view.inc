@@ -1,5 +1,6 @@
 <?php
 $template = <<<EOT
+<div id="inner-content">
 <script>
 // scope set by php
 (function (a) {
@@ -11,6 +12,22 @@ $template = <<<EOT
 
 <script src="{$site_root}/js/view_rso.js"></script>
 <h2>{$name}</h2>
+
+EOT;
+
+if ($viewed_by_admin) {
+
+  // include special links to edit and delete
+  $template .= '<div class="entity-actions">';
+  $template .= '<h4>RSO Settings</h4>';
+  $template .= "<a href=\"{$site_root}/rso/{$rso_id}/edit\">Edit RSO</a>";
+  $template .= "<a href=\"{$site_root}/event/new\">New Event</a>";
+  $template .= "<a href=\"{$site_root}/rso/{$rso_id}/delete\">Delete RSO</a>";
+  $template .= '</div>';
+
+}
+
+$template .= <<<EOT
 
 <h3>About {$name}:</h3>
 <p>{$description}</p>
@@ -29,21 +46,7 @@ $template = <<<EOT
   <input type="submit" value="Join {$name}!"/>
 </form>
 
-EOT;
-
-if ($viewed_by_admin) {
-
-  // include special links to edit and delete
-  $template .= '<div class="entity-actions">';
-  $template .= "<a href=\"{$site_root}/rso/{$rso_id}/delete\">Delete RSO</a>";
-  $template .= "<a href=\"{$site_root}/rso/{$rso_id}/edit\">Edit RSO</a>";
-  $template .= "<a href=\"{$site_root}/event/new\">New Event</a>";
-  $template .= '</div>';
-
-}
-
-$template .= <<<EOT
-
+</div>
 </div>
 EOT;
 ?>

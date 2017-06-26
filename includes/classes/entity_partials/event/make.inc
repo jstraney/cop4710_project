@@ -1,6 +1,7 @@
 <?php
 
 $template = <<<EOT
+<div id="inner-content">
 <form method="POST" action="{$site_root}/event/create">
   <script src="{$site_root}/js/lib/jquery-datetimepicker/jquery.datetimepicker.full.js"></script>
   <link rel="stylesheet" href="{$site_root}/js/lib/jquery-datetimepicker/jquery.datetimepicker.min.css"/>
@@ -14,11 +15,12 @@ $template = <<<EOT
 
   <input style="display:none;" id="lon" name="lon" type="text" val=""></input>
   <input style="display:none;" id="lat" name="lat" type="text" val=""></input>
+
   <div id="map">
   </div>
   <script type="text/javascript" src="https://maps.google.com/maps/api/js?key=AIzaSyBGfGPKeqJZRoQSInY5LXqvZt7lZwihCPA&libraries=places"></script>
   <script src="{$site_root}/js/lib/jquery-locationpicker-plugin/locationpicker.jquery.js"></script>
-  <script>app.makePicker();</script>
+  <script>app.makePicker({defaultLocation: "{$location}", defaultLat: "{$lat}", defaultLon:"{$lon}"});</script>
 
   <label>Description</label>
   <textarea id="description" name="description" placeholder="Enter a description"></textarea>
@@ -26,9 +28,9 @@ $template = <<<EOT
   <div class="event-make contact">
     <h4>Contact Info</h4>
     <label>phone number</label>
-    <input name="phone-number" type="tel" pattern="^[0-9]{3}-[0-9]{3}-[0-9]{4}" title="format: 123-444-5555"></input>
+    <input name="telephone" type="tel" pattern="^[0-9]{3}-[0-9]{3}-[0-9]{4}" title="format: 123-444-5555"></input>
     <label>e-mail</label>
-    <input name="e-mail" type="email" value="{$user->email}"></input>
+    <input name="email" type="email" value="{$user->email}"></input>
   </div>
 
 
@@ -42,16 +44,6 @@ $template = <<<EOT
   <script>
   $("#start-time, #end-time").datetimepicker({
 
-    onGenerate: function (current_time, \$input) {
-
-      var self = \$(this);
-
-      var top = self.position().top - 150;
-
-      self.css({top: top + "px"});
-
-    }
-
   });
   </script>
 
@@ -60,8 +52,10 @@ $template = <<<EOT
   <!-- the super admin -->
   <label>Is the organization an RSO (recognized student organization)?</label>
   <div>
-    No <input id="not-rso" type="radio" value="0" name="rso-hosted"></input> 
-    Yes <input id="is-rso" type="radio" value="1" name="rso-hosted"></input> 
+    <input id="not-rso" type="radio" value="0" name="rso-hosted"/> 
+    <label for="not-rso">No</label>
+    <input id="is-rso" type="radio" value="1" name="rso-hosted"/> 
+    <label for="is-rso">Yes</label>
   </div>
 
   <!-- if the event is an RSO, put the following fields below -->
@@ -91,11 +85,12 @@ $template = <<<EOT
     <input id="category" name="category" type="text"></input>
   </div>
 
-  <input type="submit" value="Create Event"></input>
+  <input class="btn btn-large" type="submit" value="Create Event"></input>
 
   <script src="{$site_root}/js/event_form.js"></script>
 
 </form>
+</div>
 EOT;
 
 ?>

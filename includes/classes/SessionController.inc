@@ -108,6 +108,10 @@ class SessionController extends EntityController {
 
   public function make ($params) {
 
+    global $configs;
+
+    $site_root = $configs['site_root'];
+
     include get_entity_partial('session', 'make');
 
     return $template;

@@ -1,5 +1,6 @@
 <?php
 $template = <<<EOT
+<div id="inner-content">
 <script>
 (function () {
   app.scope.user_id = {$user_id};
@@ -16,11 +17,10 @@ $template = <<<EOT
 <div class="scope">
   <label>See Events:</label>
   <select id="scope" name="select-by">
-  <option value="my-uni">Near my university</option>
-  <option value="other-uni">At another university</option>
+  <option name="scope" value="my-uni">Near my university</option>
+  <option name="scope" value="other-uni">At another university</option>
   </select>
 </div>
-
 
 <!-- autocomplete university search -->
 <div style="display:none" class="search-uni">
@@ -31,24 +31,22 @@ $template = <<<EOT
 
 <div class="sort">
   <label>Sort By:</label>
-  <input id="sort-by date" type="radio" name="sort-by" value="date"> Date
-  <input id="sort-by location" type="radio" name="sort-by" value="location"> Location 
+  <input class="sort-by date" type="radio" name="sort-by" value="date"> Date
+  <input class="sort-by location" type="radio" name="sort-by" value="location"> Location 
 </div>
 
 <div class="access">
   <label>Event Types:</label>
-  <input type="checkbox" name="accessibility[]" value="PUB"> Public |
-  <input type="checkbox" name="accessibility[]" value="PRI"> Private |
-  <input type="checkbox" name="accessibility[]" value="RSO"> RSOs |
+  <input type="radio" name="accessibility" value="PUB"> Public |
+  <input type="radio" name="accessibility" value="PRI"> Private |
+  <input type="radio" name="accessibility" value="RSO"> RSOs |
 </div>
 
 </form>
 
-<div id="map">
-<!-- use ajax to populate the map with events -->
-</div>
 
-<div class="records"></div>
+<div class="events-view-all aggregate events"></div>
+</div>
 </div>
 EOT;
 ?>

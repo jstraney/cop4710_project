@@ -461,10 +461,11 @@ class UserController extends EntityController {
       ":user_id" => $user_id,
       ":start" => $start,
       ":end" => $end,
-
     ));
 
     if (empty($results)) {
+
+      echo '{"fail": true}';
 
       die();
 
@@ -491,6 +492,8 @@ class UserController extends EntityController {
     ));
 
     if (empty($results)) {
+
+      echo '{"fail": true}';
 
       die();
 

@@ -88,36 +88,31 @@
 
     // super admin can choose a university
     rsoUniInput = $('input#uni-name');
-
     rsoUniHidden = $('input#uni-id');
 
-    rsoUniInput.autocomplete({
+    rsoUniInput.devbridgeAutocomplete({
 
-      source: function (req, res) {
+      lookup: function (query, done) {
 
-        var name = req.term;
+        var name = query;
 
         app.getUniversityList({name: name}, function (data) {
 
-          console.log(data);
+          data = data || "{}";
           data = JSON.parse(data);
 
-          options = data;
+          result = {};
+          
+          result.suggestions = data;
 
-          res(data);
+          done(data);
 
         });
 
       },
-      select: function (event, ui ) {
+      onSelect: function (suggestion) {
 
-        ui = ui || {};
-
-        var item = ui.item;        
-
-        rsoUniHidden.val(item.value); 
-
-        ui.item.value = ui.item.label;
+        console.log(suggestion);
 
       }
 
@@ -128,30 +123,33 @@
     rsoAdminInput = $('input#rso-administrator');
     membersInput = $('input#members');
 
-    membersEntry.autocomplete({
+    membersEntry.devbridgeAutocomplete({
 
-      source: function (req, res) {
+      lookup: function (query, done) {
 
-        var name = req.term;
+        var name = query;
 
         a.getPeerStudentByName({name: name}, function (data) {
 
-          var choices = JSON.parse(data);
+          data = data || "{}";
+          data = JSON.parse(data);
 
-          console.log(choices);
+          var result = {};
 
-          res(choices);
+          result.suggestions = data;
+
+          done(result);
 
         });
 
       },
-      select: function (event, ui ) {
+      onSelect: function (suggestion) {
 
-        ui = ui || {};
+        suggestion = suggestion || {};
 
-        var item = ui.item;        
-        var user_id = item.value;
-        var user_name = item.label;
+        var user_id = suggestion.data;
+
+        var user_name = suggestion.value;
 
         // put memberId into our id object
         memberIds[user_id] = user_name; 
@@ -163,7 +161,7 @@
         rewriteMembersInput();
 
         // start over
-        ui.item.value = "";
+        membersEntry.val('');
 
       }
 

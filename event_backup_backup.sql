@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jun 22, 2017 at 03:33 PM
+-- Generation Time: Jun 22, 2017 at 03:34 PM
 -- Server version: 10.1.13-MariaDB
 -- PHP Version: 7.0.5
 
@@ -985,8 +985,8 @@ CREATE TABLE `users` (
 --
 
 CREATE TABLE `u_created_e` (
-  `user_id` int(11) UNSIGNED NOT NULL,
-  `event_id` int(11) UNSIGNED NOT NULL
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `event_id` int(10) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --

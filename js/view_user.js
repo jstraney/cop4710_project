@@ -20,9 +20,17 @@
 
     a.getUserParticipating({user_id: user_id, start: 0, end: 10}, function (data) {
 
-      console.log(data);
       data = data || "{}";
+
       data = JSON.parse(data);
+
+      if (data.fail) {
+
+        participating.append('<p class="notice">This user is not participating in any events at this time</p>');
+
+        return;
+
+      }
        
       for (var i = 0; i < data.length; i++) {
 
@@ -43,7 +51,14 @@
     a.getUserMembership({user_id: user_id, start: 0, end: 10}, function (data) {
 
       data = data || "{}";
+
       data = JSON.parse(data);
+
+      if (data.fail) {
+
+        isMember.append('<p class="notice">This user is not a member of any RSO\'s</p>');
+
+      }
        
       for (var i = 0; i < data.length; i++) {
 
