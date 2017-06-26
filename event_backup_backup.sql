@@ -959,7 +959,8 @@ CREATE TABLE `universities` (
   `lat` decimal(9,6) NOT NULL,
   `lon` decimal(9,6) NOT NULL,
   `email_domain` varchar(30) NOT NULL,
-  `website_url` varchar(60) NOT NULL
+  `website_url` varchar(60) NOT NULL,
+  'population' integer NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
