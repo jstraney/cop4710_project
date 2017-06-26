@@ -80,7 +80,7 @@ class UserController extends EntityController {
     $requirements_met = $requirements_met && $email && $password && $uni_id;
 
     if (!$requirements_met) {
-      set_message('One or more field was missing when creating your account. Please fill all required fields', 'error');
+      set_message('One or more fields were missing when creating your account. Please fill all required fields.', 'error');
     }
 
     $hash = encrypt_password($password);

@@ -2,7 +2,7 @@
 
 class UniversityController extends EntityController {
 
-  private $create_query ;
+  private $create_query;
 
   private $view_query;
   private $view_all_query;
