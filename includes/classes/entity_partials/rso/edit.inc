@@ -1,5 +1,6 @@
 <?php
 $template = <<<EOT
+<div id="inner-content">
 <script src="{$site_root}/js/rso_form.js"></script>
 <div>
   <a href="{$site_root}/rso/{$rso_id}">Back to {$name} &raquo;</a>
@@ -43,8 +44,9 @@ $template = <<<EOT
 
   </div>
 
-  <input type="submit" value="Change RSO"></input>
+  <input class="btn btn-large" type="submit" value="Change RSO"></input>
 
 </form>
+</div>
 EOT;
 ?>

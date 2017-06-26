@@ -14,7 +14,7 @@
 
     form.append(textArea);
 
-    form.append('<input type="submit" value="Change" >');
+    form.append('<input class="btn btn-large" type="submit" value="Change" >');
 
     form.submit(function (e) {
 
@@ -128,7 +128,7 @@
     // pnd or act.
 
     var participateForm = $('<form class="lefty" style="display:none" id="participate">'); 
-    participateForm.append('<input type="submit" value="Participate!">');
+    participateForm.append('<input class="btn btn-large" type="submit" value="Participate!">');
 
     if (status == "PND") {
 

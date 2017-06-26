@@ -1,6 +1,7 @@
 <?php
 
 $template = <<<EOT
+<div id="inner-content">
 <form method="POST" action="{$site_root}/event/{$event_id}/update">
 
 EOT;
@@ -68,8 +69,12 @@ $template .= <<<EOT
   <!-- the super admin -->
   <label>Is the organization an RSO (recognized student organization)?</label>
   <div>
-    No <input {$not_rso} id="not-rso" type="radio" value="0" name="rso-hosted"></input> 
-    Yes <input {$is_rso} id="is-rso" type="radio" value="1" name="rso-hosted"></input> 
+
+    <input {$not_rso} id="not-rso" type="radio" value="0" name="rso-hosted"/>
+    <label for="not-rso">No</label>
+    <input {$is_rso} id="is-rso" type="radio" value="1" name="rso-hosted"/> 
+    <label for="is-rso">Yes</label>
+
   </div>
 
   <!-- if the event is an RSO, put the following fields below -->
@@ -99,9 +104,10 @@ $template .= <<<EOT
     <input id="category" name="category" type="text"></input>
   <div class="selection">
 
-  <input type="submit" value="Update Event"></input>
+  <input class="btn btn-large" type="submit" value="Update Event"></input>
 
 </form>
+</div>
 EOT;
 
 ?>

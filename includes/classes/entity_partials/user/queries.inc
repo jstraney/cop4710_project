@@ -43,7 +43,7 @@ EOT;
 
 // gets users at a university by matching username
 $get_students_like_query = <<<EOT
-SELECT u.user_id AS value, u.user_name AS label
+SELECT u.user_id AS data, u.user_name AS value 
 FROM users u, attending a
 WHERE u.role = "STU"
 AND u.user_id = a.user_id

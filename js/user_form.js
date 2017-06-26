@@ -1,45 +1,42 @@
-(function () {
+(function (a) {
 
   $(function () {
 
-    var uniName = $('#uni-name');
+    var uniName = $('input#uni-name');
 
-    var uniId = $('#uni-id');
+    var uniId = $('input#uni-id');
 
     // buffer for selected university name and id.
-    var options;
     var selection = {};
 
-    uniName.autocomplete({
+    uniName.devbridgeAutocomplete({
 
-      source: function (req, res) {
+      lookup: function (query, done) {
 
-        var name = req.term;
+        var name = query;
+
         app.getUniversityList({name: name}, function (data) {
 
-          console.log(data);
+          data = data || '{}';
           data = JSON.parse(data);
 
-          options = data;
+          var result = {};
 
-          res(data);
+          result.suggestions = data;
+
+          done(result);
 
         });
 
       },
-      select: function (event, ui ) {
+      onSelect: function (suggestion) {
 
-        ui = ui || {};
-
-        var item = ui.item;        
-
-        uniId.val(item.value); 
-
-        ui.item.value = ui.item.label;
+        uniId.val(suggestion.data);
 
       }
+
     });
 
   });
 
-})();
+})(app);

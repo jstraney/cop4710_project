@@ -324,12 +324,19 @@ class EventController extends EntityController {
     // get geolocation info from a university
     $geo_info =  $this->db->prepared_query($geo_query, array(":uni_id" => $uni_id));
 
-    if (isset($geo_info)) {
+    if (!empty($geo_info)) {
 
       $geo_info = $geo_info[0];
       $location = $geo_info['location'];
       $lat = $geo_info['lat'];
       $lon = $geo_info['lon'];
+
+    }
+    else {
+      // set some default for SA which has no uni association
+      $location = "4000 Central Florida Blvd, Orlando, FL 32816"; 
+      $lat = 28.602427;
+      $lon = -81.200060;
 
     }
 

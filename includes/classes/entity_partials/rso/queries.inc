@@ -20,7 +20,7 @@ DELETE FROM rsos WHERE rso_id = :rso_id;
 EOT;
 
 $administrates_rso_query = <<<EOT
-SELECT r.rso_id AS value, r.name AS label
+SELECT r.rso_id AS data, r.name AS value 
 FROM users u, administrates a, rsos r
 WHERE u.user_id = :user_id
 AND u.user_id = a.user_id

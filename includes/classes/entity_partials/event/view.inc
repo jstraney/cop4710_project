@@ -1,10 +1,7 @@
 <?php
-// calculates the start and end on an id for the 'back' link.
-$back_range = get_pagination_from_id($event_id, 10);
-$start = $back_range[0];
-$end = $back_range[1];
 
 $template = <<<EOT
+<div id="inner-content">
 <script>
 (function(a) {
   a.scope.event_id = {$event_id};
@@ -85,10 +82,10 @@ $template .= <<<EOT
 <form id="new-comment" class="lefty" method="POST" action="{$site_root}/comment/create">
   <textarea id="comment-body" name="content">
   </textarea>
-  <input type="submit" value="Post"/>
+  <input class="btn btn-large" type="submit" value="Post"/>
 </form>
 </div>
-
+</div>
 EOT;
 
 ?>

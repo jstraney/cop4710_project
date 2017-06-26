@@ -4,18 +4,19 @@
 // variable below becomes part of that functions scope.
 //
 $template = <<<EOT
+<div id="inner-content">
 <script src="{$site_root}/js/user_form.js"></script>
 <div class="row">
-    <form method="POST" action="user/create" class="col s12 ">
+    <form method="POST" action="{$site_root}/user/create" class="col s12 ">
 	  <div class="row">
 	  </div>
 	  <div class="row">
-		<div class="input-field col s4 offset-s2 ">
+		<div class="input-field col s8 offset-s2 ">
 			<h5>Create an Account</h5>
 		</div>
 	  </div>
 	  <div class="row">
-		<div class="input-field col s4 offset-s2 ">
+		<div class="input-field col s8 offset-s2 ">
 		  <input name="user-name" id="user-name" type="text" class="validate">
 		  <label for="user_name">Username</label>
 		</div>
@@ -31,16 +32,16 @@ $template = <<<EOT
         </div>
       </div>
       <div class="row">
-        <div class="input-field col s4 offset-s2">
+        <div class="input-field col s8 offset-s2">
           <input name="e-mail" id="e-mail" type="email" class="validate">
           <label for="email">Email</label>
         </div>
 	  </div>
 	  <div class="row">
-        <div class="input-field col s4 offset-s2">
-          <label for="UniversityInput">College or University</label>
-          <input id="uni-name" type="text" name="uni-name" class="validate">
-		  <input id="uni-id" name="uni-id" type="hidden">
+        <div class="input-field col s8 offset-s2">
+          <input id="uni-name" type="text" name="uni-name" class="validate uni-name">
+          <label for="uni-name">College or University</label>
+          <input id="uni-id" name="uni-id" type="hidden" class="uni-id">
         </div>
       </div>
       <div class="row">
@@ -63,5 +64,6 @@ $template = <<<EOT
       </div>
     </form>
   </div>
+</div>
 EOT;
 ?>

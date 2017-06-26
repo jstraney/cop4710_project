@@ -1,5 +1,6 @@
 <?php
 $template = <<<EOT
+<div id="inner-content">
 <div>
   <a href="{$site_root}/rso/{$rso_id}">Back to {$name} &raquo;</a>
 </div>
@@ -16,8 +17,9 @@ $template = <<<EOT
 
   <input type="password"></input>
 
-  <input type="submit" value="Delete RSO"></input>
+  <input class="btn btn-large" type="submit" value="Delete RSO"></input>
 
 </form>
+</div>
 EOT;
 ?>

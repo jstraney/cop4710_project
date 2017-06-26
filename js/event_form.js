@@ -22,32 +22,34 @@
 
     });
 
-    rsoInput.autocomplete({
+    rsoInput.devbridgeAutocomplete({
 
-      source: function (req, res) {
+      lookup: function (query, done) {
 
-        var name = req.term;
+        var name = query;
 
         // use api endpoint
         a.getRsosByAdministrator(name, function (data) {
 
-          console.log(JSON.parse(data));
+          data = data || "{}";
 
-          res(JSON.parse(data));
+          data = JSON.parse(data);
+
+          result = {};
+
+          result.suggestions = data;
+
+          done(result);
           
         });
         
 
       },
-      select: function (event, ui) {
+      onSelect: function (suggestion) {
 
-        ui = ui || {};
+        rsoId.val(suggestion.data); 
 
-        var item = ui.item;        
-
-        rsoId.val(item.value); 
-
-        ui.item.value = ui.item.label;
+        rsoInput.val(suggestion.value);
 
       }
 

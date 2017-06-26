@@ -1,5 +1,6 @@
 <?php
 $template = <<<EOT
+<div id="inner-content">
 <script>
 (function () {
   app.scope.user_id = {$user_id};
@@ -45,6 +46,7 @@ $template = <<<EOT
 
 
 <div class="events-view-all aggregate events"></div>
+</div>
 </div>
 EOT;
 ?>

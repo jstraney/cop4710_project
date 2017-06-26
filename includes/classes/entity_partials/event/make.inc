@@ -1,6 +1,7 @@
 <?php
 
 $template = <<<EOT
+<div id="inner-content">
 <form method="POST" action="{$site_root}/event/create">
   <script src="{$site_root}/js/lib/jquery-datetimepicker/jquery.datetimepicker.full.js"></script>
   <link rel="stylesheet" href="{$site_root}/js/lib/jquery-datetimepicker/jquery.datetimepicker.min.css"/>
@@ -43,18 +44,6 @@ $template = <<<EOT
   <script>
   $("#start-time, #end-time").datetimepicker({
 
-    onGenerate: function (current_time, \$input) {
-
-      var self = \$(this);
-
-      var permPos = this.permPos || self.position().top - 150;
-
-      this.permPos = permPos;
-
-      self.css({top: permPos + "px"});
-
-    }
-
   });
   </script>
 
@@ -63,8 +52,10 @@ $template = <<<EOT
   <!-- the super admin -->
   <label>Is the organization an RSO (recognized student organization)?</label>
   <div>
-    No <input id="not-rso" type="radio" value="0" name="rso-hosted"></input> 
-    Yes <input id="is-rso" type="radio" value="1" name="rso-hosted"></input> 
+    <input id="not-rso" type="radio" value="0" name="rso-hosted"/> 
+    <label for="not-rso">No</label>
+    <input id="is-rso" type="radio" value="1" name="rso-hosted"/> 
+    <label for="is-rso">Yes</label>
   </div>
 
   <!-- if the event is an RSO, put the following fields below -->
@@ -94,11 +85,12 @@ $template = <<<EOT
     <input id="category" name="category" type="text"></input>
   </div>
 
-  <input type="submit" value="Create Event"></input>
+  <input class="btn btn-large" type="submit" value="Create Event"></input>
 
   <script src="{$site_root}/js/event_form.js"></script>
 
 </form>
+</div>
 EOT;
 
 ?>

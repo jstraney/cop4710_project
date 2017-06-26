@@ -1,6 +1,7 @@
 <?php
 
 $template = <<<EOT
+<div id="inner-content">
 
 <form method="POST" action="{$site_root}/event/{$id}/destroy">
 
@@ -12,10 +13,11 @@ $template = <<<EOT
   event will be lost.
   </p>
 
-  <input type="submit" value="Delete Event" ></input>
+  <input class="btn btn-large" type="submit" value="Delete Event" ></input>
 
 </form>
 
+</div>
 EOT;
 
 ?>

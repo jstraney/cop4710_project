@@ -1,5 +1,6 @@
 <?php
 $template = <<<EOT
+<div id="inner-content">
 <script src="{$site_root}/js/rso_form.js"></script>
 <form method="POST" action="{$site_root}/rso/create">
 
@@ -67,8 +68,9 @@ EOT;
 }
 
 $template .= <<<EOT
-  <input type="submit" value="Create RSO"/>
+  <input class="btn btn-large" type="submit" value="Create RSO"/>
 
 </form>
+</div>
 EOT;
 ?>
