@@ -11,17 +11,12 @@ CALL update_event (
   :location, :lat, :lon, :accessibility, :categories, :user_id, :rso_id, :uni_id, :status);
 EOT;
 
-$delete_query = <<<EOT
-DELETE events
-WHERE event_id = :event_id;
-EOT;
-
 $view_query = <<<EOT
 CALL view_event(:event_id, :user_id, :role, :uni_id);
 EOT;
 
 $destroy_query = <<<EOT
-DELETE events
+DELETE FROM events
 WHERE event_id = :event_id;
 EOT;
 

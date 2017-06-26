@@ -660,7 +660,11 @@ CREATE FUNCTION get_is_owner (
 BEGIN
 
   DECLARE _is_owner INT(1);
+  DECLARE _role ENUM('SA','ADM','STU');
 
+  SELECT u.role INTO _role FROM users u WHERE u.user_id = _user_id;
+
+  -- check if user created the event
   IF EXISTS(
     SELECT u.user_id
     FROM u_created_e u, events e
@@ -680,6 +684,12 @@ BEGIN
 
     -- this user is the owner
     SET _is_owner = 1;
+
+  ELSEIF _role = "SA" THEN
+
+    -- Super Admin can modify any event to mark it 'Pending'. Can also Delete them. 
+    SET _is_owner = 1;
+
 
   ELSE
 
@@ -827,7 +837,7 @@ BEGIN
   -- heuristic between event points. (ABS(x1 - x2) + ABS(y1 - y1))
 
   IF _scope = "my-uni" THEN
-    SELECT e.name, e.start_time, e.end_time, e.description, e.location,
+    SELECT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
     e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
     _is_participating AS is_participating, e.rating,
     manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
@@ -841,7 +851,7 @@ BEGIN
 
   -- if the scope is for another university, then the events viewed can only be public
   ELSEIF _scope = "other-uni" THEN
-    SELECT e.name, e.start_time, e.end_time, e.description, e.location,
+    SELECT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
     e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
     _is_participating AS is_participating, e.rating,
     manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
@@ -857,13 +867,13 @@ BEGIN
   -- if the scope is "my-uni" (the only other scope) Allow a range of event types to be selected
   ELSEIF _accessibility = "PUB" THEN
     BEGIN
-      SELECT e.name, e.start_time, e.end_time, e.description, e.location,
+      SELECT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
       e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
       _is_participating AS is_participating, e.rating,
       manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
       FROM events e, hosting h
       WHERE h.uni_id = _uni_id 
-      AND h.event_id = e.event_id;
+      AND h.event_id = e.event_id
       ORDER BY
         CASE _sort_by WHEN "date" THEN e.start_time
         WHEN "location" THEN location
@@ -873,7 +883,7 @@ BEGIN
   -- return event only if user attends/affiliates-with hosting university 
   ELSEIF _accessibility = "PRI" THEN
     BEGIN
-      SELECT e.name, e.start_time, e.end_time, e.description, e.location,
+      SELECT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
       e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
       _is_participating AS is_participating, e.rating,
       manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
@@ -885,7 +895,7 @@ BEGIN
   -- return event only if user is_member of RSO
   ELSEIF _accessibility = "RSO" THEN
     BEGIN
-      SELECT e.name, e.start_time, e.end_time, e.description, e.location,
+      SELECT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
       e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
       _is_participating AS is_participating, e.rating,
       manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
@@ -1081,13 +1091,18 @@ BEGIN
 END//
 
 CREATE PROCEDURE view_rso (
-  IN _rso_id INT(11)
+  IN _rso_id INT(11),
+  IN _user_id INT(11),
+  IN _role ENUM('SA','ADM','STU')
   )
 BEGIN
   SELECT r.rso_id, r.name, r.description, a.user_id AS rso_administrator
-  FROM  administrates a, rsos r
+  FROM rsos r, is_member m, administrates a
   WHERE r.rso_id = _rso_id
-  AND a.rso_id = _rso_id;
+  AND ((m.rso_id = _rso_id AND m.user_id = _user_id) OR
+    (a.rso_id = _rso_id AND a.user_id = _user_id))
+  OR (_role = "SA");
+
 END//
 
 DELIMITER ;

@@ -98,6 +98,8 @@ class RSOController extends EntityController {
 
     $user_id = $user->user_id;
 
+    $role = $user->role;
+
     $site_root = $configs['site_root'];
 
     // view query for RSO
@@ -106,7 +108,11 @@ class RSOController extends EntityController {
     $rso_id = $params[1];
 
     // result of querying the rso
-    $result = $this->db->prepared_query($query, array(":rso_id" => $rso_id));
+    $result = $this->db->prepared_query($query, array(
+      ":rso_id" => $rso_id,
+      ":user_id" => $user_id,
+      ":role" => $role,
+    ));
 
     if (empty($result)) {
 
@@ -207,7 +213,11 @@ class RSOController extends EntityController {
 
     $password = isset($params['password'])? $params['password']: "";
 
-    $view = $this->db->prepared_query($this->view_query, array(':rso_id' => $rso_id));
+    $view = $this->db->prepared_query($this->view_query, array(
+      ':rso_id' => $rso_id,
+      ':user_id' => $uid,
+      ':role' => $role,
+    ));
 
     if (empty($view)) {
 
@@ -220,7 +230,6 @@ class RSOController extends EntityController {
     $name = $view['name'];
 
     $query = $this->destroy_query;
-
 
     $this->db->prepared_query($query, array(":rso_id" => $rso_id));
 
@@ -332,10 +341,16 @@ class RSOController extends EntityController {
     $site_root = $configs['site_root'];
 
     $rso_id = $params[1];
+    $user_id = $user->user_id;
+    $role = $user->role;
 
     $query = $this->view_query;
 
-    $result = $this->db->prepared_query($query, array(":rso_id" => $rso_id));
+    $result = $this->db->prepared_query($query, array(
+      ":rso_id" => $rso_id,
+      ":user_id" => $user_id,
+      ":role" => $role,
+    ));
 
     if (empty($result)) {
 

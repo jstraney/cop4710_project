@@ -8,6 +8,20 @@ html {
 h2, h3, h4 {
   margin-top: 1.5em;
   margin-bottom: .8em;
+
+}
+
+
+h2 {
+  font-size: 3rem;  
+}
+
+h3 {
+  font-size: 2.5rem;  
+}
+
+h4 {
+  font-size: 2rem;  
 }
 
 body {

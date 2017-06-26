@@ -20,6 +20,7 @@ EOT;
 if ($is_owner) {
 
   $template .= "<div><a href=\"{$site_root}/event/{$event_id}/edit\">&laquo; Edit Event</a></div>";
+  $template .= "<div><a href=\"{$site_root}/event/{$event_id}/delete\">&laquo; Delete Event</a></div>";
 
 }
 
