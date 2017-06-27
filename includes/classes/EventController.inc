@@ -273,7 +273,6 @@ class EventController extends EntityController {
       ":rso_id" => $rso_id,
       ":accessibility" => $accessibility,
       ":categories" => $categories,
-      ":uni_id" => $uni_id,
       ":status" => $status
     ));
 

@@ -31,15 +31,20 @@ $template = <<<EOT
 
 <div class="sort">
   <label>Sort By:</label>
-  <input class="sort-by date" type="radio" name="sort-by" value="date"> Date
-  <input class="sort-by location" type="radio" name="sort-by" value="location"> Location 
+  <input id="sort-date" class="sort-by date" type="radio" name="sort-by" value="date">
+  <label for="sort-date">Date</label>
+  <input id="sort-location" class="sort-by location" type="radio" name="sort-by" value="location">
+  <label for="sort-location">Distance</label>
 </div>
 
 <div class="access">
   <label>Event Types:</label>
-  <input type="radio" name="accessibility" value="PUB"> Public |
-  <input type="radio" name="accessibility" value="PRI"> Private |
-  <input type="radio" name="accessibility" value="RSO"> RSOs |
+  <input id="pub" type="radio" name="accessibility" value="PUB"> 
+  <label for="pub">Public</label>
+  <input id="pri" type="radio" name="accessibility" value="PRI">
+  <label for="pri">Private</label>
+  <input id="rso" type="radio" name="accessibility" value="RSO">
+  <label for="rso">RSO Only</label>
 </div>
 
 </form>

@@ -132,18 +132,18 @@
       var location = eventJson.location;
       var lat = eventJson.lat;
       var lon = eventJson.lon;
-      var distance = eventJson.distance;
+      var distance = (parseFloat(eventJson.distance) * 69).toFixed(2);
       var rating = eventJson.rating;
-      var start_time = eventJson.start_time;
-      var end_time = eventJson.end_time;
+      var start_time = a.util.parseUTC(eventJson.start_time).formatMdyyyy_time();
+      var end_time = a.util.parseUTC(eventJson.end_time).formatMdyyyy_time();
 
-      var elem = $('<div class="record.event">');
+      var elem = $('<div class="record event">');
       var text = '<h5><a href="'+a.siteRoot+'event/'+event_id+'">' + name + '</a></h5>';
       text +='<p>' + description + '</p>';
-      text +='<span class="info distance">' + distance + 'miles away</span>';
-      text +='<span class="info rating">' + rating + '</span>';
-      text +='<span class="info start-time">' + start_time + '</span>';
-      text +='<span class="info end-time">' + end_time + '</span>';
+      text +='<span class="info distance"> ~' + distance + ' Miles away</span>';
+      text +='<span class="info rating">Rating: ' + rating + '</span>';
+      text +='<span class="info start-time">Starts: ' + start_time + '</span>';
+      text +='<span class="info end-time">Ends: ' + end_time + '</span>';
       elem.html(text);
 
       return elem;

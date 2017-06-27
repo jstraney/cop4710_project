@@ -1,6 +1,6 @@
 <?php
 
-class RSOController extends EntityController {
+class RsoController extends EntityController {
 
   private $create_query ;
 

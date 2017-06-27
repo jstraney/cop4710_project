@@ -38,7 +38,7 @@ body {
 
 #main-view { 
   margin: 50px 0 50px;
-  padding: 5px 0 25px;
+  padding: 5px 0 0;
   position: relative;
 }
 
@@ -235,6 +235,13 @@ div.record.member > .make-admin {
   right: 20px;
 }
 
+div.events-view-all.aggregate.events > .record > span.info {
+  color: #888888;
+  display: inline-block;
+  padding: 5px 20px 5px 0;
+  font-size: 14px;
+}
+
 /* Event Page */
 
 /* attendees */
@@ -279,6 +286,15 @@ div.star.rate-0 {
   color: #555555;
 }
 
+div.star.disabled {
+  color: #555555 !important;
+}
+
+div.star.disabled:hover {
+  color: #555555 !important;
+  cursor: inherit;
+}
+
 /* comments */
 div.record.event.comment {
   display: block;
@@ -302,6 +318,13 @@ div.record.event.comment > .button.update {
   position: absolute;
   bottom: -30px;
   left: 70px;
+}
+
+/* Users */
+
+div.user-view.aggregate.events div.record {
+  border-bottom: none;
+  display: inline-block;
 }
 
 div#map {

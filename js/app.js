@@ -27,7 +27,7 @@ var app = app || {};
       yyyy : arr[0],
       MM : arr[1],
       dd : arr[2],
-      hh : arr[3],
+      hh : (parseInt(arr[3]) % 12),
       mm : arr[4],
     };
 
@@ -36,6 +36,8 @@ var app = app || {};
     date.d = removeLeadingZero(date.dd);
     date.h = removeLeadingZero(date.hh);
     date.m = removeLeadingZero(date.mm);
+
+    date.amPm = date.hh >= 12 ? "pm" : "am";
 
     date.formatMdyyyy = function () {
 
@@ -46,7 +48,7 @@ var app = app || {};
     date.formatMdyyyy_time = function () {
 
       var str = date.M + '/' + date.d + '/' + date.yyyy + ' ';
-      str += date.h + ':' + date.mm;
+      str += date.h + ':' + date.mm + " " + date.amPm
 
       return str;
 

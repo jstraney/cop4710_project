@@ -339,8 +339,7 @@ CREATE PROCEDURE update_event (
   IN _user_id INT(11),
   -- id of rso if this is an RSO accessible event
   IN _rso_id INT(11),
-  -- id of hosting university if this is a privately accessible event
-  IN _uni_id INT(11),
+
   -- status. only submitable by SA roles
   IN _status ENUM('ACT','PND'))
 
@@ -354,8 +353,14 @@ BEGIN
   DECLARE _current_rso_id INT(11);
   DECLARE _role ENUM('SA','ADM','STU');
 
+  DECLARE _uni_id INT(11);
+  SELECT h.uni_id INTO _uni_id FROM
+  events e, hosting h
+  WHERE e.event_id = _event_id
+  AND h.event_id = e.event_id;
+
   -- check if the user is the administrator of the RSO that made the event.
-  IF NOT EXISTS(
+  IF _role <> "SA" AND NOT EXISTS(
     SELECT e.event_id
     FROM events e, r_created_e c, rsos r, administrates a
     WHERE _user_id = a.user_id
@@ -750,10 +755,11 @@ BEGIN
   -- see if the user attempting access is the owner, or if they are admin to the RSO that
   -- made the event
   SET _is_owner = get_is_owner(_user_id, _event_id);
+
   SET _is_participating = get_is_participating(_user_id, _event_id);
 
   -- no check necessary for public events
-  IF _accessibility = "PUB" THEN
+  IF _role = "SA" OR _accessibility = "PUB" THEN
     BEGIN
       SELECT e.name, e.start_time, e.end_time, e.description, e.location,
       e.telephone, e.email, e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
@@ -776,8 +782,7 @@ BEGIN
       LEFT OUTER JOIN rsos r ON r.rso_id = re.rso_id
       WHERE e.event_id = _event_id
       AND e.event_id = p.event_id
-      AND p.uni_id = _uni_id
-      OR _role = "SA" LIMIT 1;
+      AND p.uni_id = _uni_id LIMIT 1;
     END;
 
   -- return event only if user is_member of RSO. implicitly made by an RSO, so no join is necessary
@@ -793,8 +798,7 @@ BEGIN
       AND re.rso_id = ANY(
         SELECT r.rso_id 
         FROM rsos r, is_member m
-        WHERE _user_id = m.user_id AND m.rso_id = r.rso_id)
-      OR _role = "SA" LIMIT 1;
+        WHERE _user_id = m.user_id AND m.rso_id = r.rso_id);
     END;
 
   END IF;
@@ -835,22 +839,8 @@ BEGIN
 
   -- to calculate distance, get the coordinates of university and use manhattan
   -- heuristic between event points. (ABS(x1 - x2) + ABS(y1 - y1))
-
-  IF _scope = "my-uni" THEN
-    SELECT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
-    e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-    _is_participating AS is_participating, e.rating,
-    manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
-    FROM events e, hosting h
-    WHERE _uni_id = h.uni_id
-    AND h.event_id = e.event_id
-    ORDER BY
-      CASE _sort_by WHEN "date" THEN e.start_time
-      WHEN "location" THEN location
-      END;
-
   -- if the scope is for another university, then the events viewed can only be public
-  ELSEIF _scope = "other-uni" THEN
+  IF _scope = "other-uni" THEN
     SELECT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
     e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
     _is_participating AS is_participating, e.rating,
@@ -858,6 +848,7 @@ BEGIN
     FROM events e, hosting h
     WHERE _uni_id = h.uni_id
     AND h.event_id = e.event_id
+    -- a student can only see public events at another university
     AND e.accessibility = "PUB"
     ORDER BY
       CASE _sort_by WHEN "date" THEN e.start_time
@@ -871,9 +862,10 @@ BEGIN
       e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
       _is_participating AS is_participating, e.rating,
       manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
-      FROM events e, hosting h
+      FROM events e, public_events pe, hosting h
       WHERE h.uni_id = _uni_id 
       AND h.event_id = e.event_id
+      AND e.event_id = pe.event_id
       ORDER BY
         CASE _sort_by WHEN "date" THEN e.start_time
         WHEN "location" THEN location
@@ -906,7 +898,9 @@ BEGIN
         FROM rsos r, is_member m
         WHERE _user_id = m.user_id AND m.rso_id = r.rso_id);
     END;
+
   END IF;
+
 END//
 
 CREATE PROCEDURE create_rso (
@@ -1010,7 +1004,7 @@ CREATE PROCEDURE update_rso (
 BEGIN
 
   -- check if the user is the rso_administrator 
-  IF _user_id <> (SELECT a.user_id FROM administrates a WHERE a.rso_id = _rso_id) THEN
+  IF _role <> "SA" AND _user_id <> (SELECT a.user_id FROM administrates a WHERE a.rso_id = _rso_id) THEN
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "You are not athorized to change this RSO";
   END IF; 
 

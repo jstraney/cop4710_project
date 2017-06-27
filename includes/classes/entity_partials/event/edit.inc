@@ -12,8 +12,10 @@ if ($role === "SA" ) {
     <p class="form-prompt">
     Marking the event as active will allow the event to be viewed and attended.
     </p>
-    <input {$is_pnd} name="status" type="radio" value="PND">Pending</input>
-    <input {$is_act} name="status" type="radio" value="ACT">Active</input>
+    <input {$is_pnd} id="status-pnd" name="status" type="radio" value="PND"/>
+    <label for="status-pnd">Pending</label>
+    <input {$is_act} id="status-act" name="status" type="radio" value="ACT"/>
+    <label for="status-act">Active</label>
   </div> 
 EOT;
 
@@ -57,17 +59,18 @@ $template .= <<<EOT
   <script>$("#end-time").datetimepicker()</script>
 
   <div>
-  <h4>Contact Info</h4>
-  <label>phone number</label>
-  <input name="telephone" type="tel" pattern="^[0-9]{3}-[0-9]{3}-[0-9]{4}"
-    title="format: 123-444-5555" value="{$telephone}"></input>
-  <label>e-mail</label>
-  <input name="email" type="email" value="{$email}"></input>
+    <h4>Contact Info</h4>
+    <label>phone number</label>
+    <input name="telephone" type="tel" pattern="^[0-9]{3}-[0-9]{3}-[0-9]{4}"
+      title="format: 123-444-5555" value="{$telephone}"></input>
+    <label>e-mail</label>
+    <input name="email" type="email" value="{$email}"></input>
   </div>
 
   <!-- if the event is not hosted by an RSO, it is put into a 'pending' state, which is changed by-->
   <!-- the super admin -->
   <label>Is the organization an RSO (recognized student organization)?</label>
+
   <div>
 
     <input {$not_rso} id="not-rso" type="radio" value="0" name="rso-hosted"/>
@@ -102,7 +105,7 @@ $template .= <<<EOT
   <div class="selection">
     <label>Pick a Category</label>
     <input id="category" name="category" type="text"></input>
-  <div class="selection">
+  </div> 
 
   <input class="btn btn-large" type="submit" value="Update Event"></input>
 
