@@ -4,6 +4,7 @@ global $configs;
 $site_root = $configs['site_root'];
 $template = <<<EOT
 <br><br>
+<div id="inner-content">
 <div class="row">
 <div class="col s4 offset-s2 m6">
   <div class="card amber darken-1">
@@ -54,7 +55,6 @@ $template = <<<EOT
   </div>
 </div>
 </div>
-
-
+</div>
 EOT;
 ?>
