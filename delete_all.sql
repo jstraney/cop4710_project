@@ -1,0 +1,7 @@
+USE `event`;
+
+DELETE FROM users WHERE 1;
+DELETE FROM universities WHERE 1;
+DELETE FROM rsos WHERE 1;
+DELETE FROM events WHERE 1;
+DELETE FROM commented_on WHERE 1;
