@@ -57,9 +57,9 @@ class EventController extends EntityController {
 
     $role = $user->role;
 
-    $name = isset($params['name'])? $params['name']: "";
-    $description = isset($params['description'])? $params['description']: "";
-    $location = isset($params['location'])? $params['location']: "";
+    $name = isset($params['name'])? $params['name']: NULL;
+    $description = isset($params['description'])? $params['description']: NULL;
+    $location = isset($params['location'])? $params['location']: NULL;
 
     // calculate duration from start and end time.
     $start_time = isset($params['start-time'])? $params['start-time']: "";
@@ -103,8 +103,17 @@ class EventController extends EntityController {
     if (empty($result)) {
 
       // just go home for now. change to go_back once we are positive this works.
-      go_home();
-      return;
+      set_message("Something went wrong creating your event", "error");
+      go_back();
+      die();
+
+    }
+    else if (isset($result[0]["_err_msg"])) {
+
+      $msg = $result[0]["_err_msg"];
+      set_message($msg, "error");
+      go_back();
+      die();
 
     }
 
@@ -236,17 +245,19 @@ class EventController extends EntityController {
     $uni_id = isset($user->uni_id)? $user->uni_id: 0;
     $role = $user->role;
  
-    $name = isset($params['name'])? $params['name']: "";
-    $description = isset($params['description'])? $params['description']: "";
-    $location = isset($params['location'])? $params['location']: "";
+    $name = isset($params['name']) && !empty($params['name']) ? $params['name']: NULL;
+    $description = isset($params['description']) && !empty($params['description']) ? $params['description']: NULL;
+    $location = isset($params['location']) && !empty($params['location']) ? $params['location']: NULL;
+    console_log($location);
+    die();
 
     // calculate duration from start and end time.
-    $start_time = isset($params['start-time'])? $params['start-time']: "";
-    $end_time = isset($params['end-time'])? $params['end-time']: "";
+    $start_time = isset($params['start-time'])? $params['start-time']: NULL;
+    $end_time = isset($params['end-time'])? $params['end-time']: NULL;
     $telephone = isset($params['telephone'])? $params['telephone']: "";
     $email = isset($params['email'])? $params['email']: "";
-    $lon = isset($params['lon'])? $params['lon']: "";
-    $lat = isset($params['lat'])? $params['lat']: "";
+    $lon = isset($params['lon'])? $params['lon']: NULL; 
+    $lat = isset($params['lat'])? $params['lat']: NULL; 
 
     $accessibility = isset($params['accessibility'])? $params['accessibility']: "PUB"; 
     
@@ -273,7 +284,6 @@ class EventController extends EntityController {
       ":rso_id" => $rso_id,
       ":accessibility" => $accessibility,
       ":categories" => $categories,
-      ":uni_id" => $uni_id,
       ":status" => $status
     ));
 
@@ -283,10 +293,19 @@ class EventController extends EntityController {
       go_home();
 
     }
+    else if (isset($result[0]["_err_msg"])) {
+
+      $msg = $result[0]["_err_msg"];
+      set_message($msg, "error");
+      go_back();
+      die();
+
+    }
 
     $result = $result[0];
 
     set_message('Succesfully changed ' . $name);
+
     redirect_entity_view('event', $event_id);
 
   }
@@ -310,6 +329,14 @@ class EventController extends EntityController {
 
       go_home();
 
+      die();
+
+    }
+    else {
+
+      $msg = "The e-mail or password provided is incorrect"; 
+      set_message($msg, "error");
+      go_back();
       die();
 
     }
@@ -427,6 +454,8 @@ class EventController extends EntityController {
     $rso_id = isset($result['rso_id'])? $result['rso_id']: "";
     $rso_name = isset($result['rso_name'])? $result['rso_name']: "";
     $status = isset($result['status'])? $result['status']: "PND";
+    $accessibility = isset($result['accessibility'])? $result['accessibility']: "PND";
+
     // if the event is rso created, check 'is-rso' input
     // and leave 'not-rso' unchecked
     if ($rso_id > 0) {
@@ -453,6 +482,26 @@ class EventController extends EntityController {
       $is_act = "checked=\"checked\"";
 
     }
+
+    $acc_pub = "";
+    $acc_pri = "";
+    $acc_rso = "";
+
+    if ($accessibility == "PUB") {
+
+      $acc_pub = "selected=\"selected\"";
+
+    } 
+    else if ($accessibility == "PRI") {
+
+      $acc_pri = "selected=\"selected\"";
+
+    } 
+    else if ($accessibility == "RSO") {
+
+      $acc_rso = "selected=\"selected\"";
+
+    } 
     
     include get_entity_partial("event", "edit");
 

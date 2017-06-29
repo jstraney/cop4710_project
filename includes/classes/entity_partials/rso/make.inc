@@ -1,5 +1,14 @@
 <?php
 $template = <<<EOT
+<script>
+// place the current user in the scope of the form.
+(function (a) {
+
+  a.scope.current_user = {$user_id};
+
+})(app);
+
+</script>
 <div id="inner-content">
 <script src="{$site_root}/js/rso_form.js"></script>
 <form method="POST" action="{$site_root}/rso/create">

@@ -7,10 +7,13 @@
 
   var memberData;
 
+  // join form
+  var join;
+
   // compared to the box factory in the rso_form.js file, this is view only
   var memberBoxFactory = function (user_id, user_name) {
 
-    var box = $('<div class="record member user-'+user_id+'">');
+    var box = $('<div class="record member user-' + user_id + '">');
 
     var memberLink = $('<a href="'+ a.siteRoot + 'user/' + user_id +'">');
     memberLink.text(user_name);
@@ -20,6 +23,47 @@
     if (rso_administrator == user_id) {
 
       box.addClass('marked-administrator');
+
+    }
+
+    var current_user = a.scope.user_id;
+
+    if (current_user == user_id) {
+
+      // hide join button
+      join.hide();
+
+      var leave = $('<div class="button destroy">X</div>');
+
+      leave.click(function () {
+
+        var rso_id = a.scope.rso_id;
+
+        a.leaveRso({user_id: current_user, rso_id: rso_id}, function (data) {
+
+          data = data || "{}";
+          data = JSON.parse(data);
+         
+          if (data.success) {
+
+            join.show();
+            box.remove();  
+
+          }
+          else if (data.fail) {
+
+            // set some message.
+            var msg = data.msg;
+
+            a.util.spawnMsg(msg, "error");
+
+          }
+
+        });
+
+      });
+
+      box.append(leave);
 
     }
 
@@ -58,6 +102,7 @@
 
     eventAggregate = $('div.rso-view.aggregate.events');
 
+    join = $('form#join');
     
     a.getRsoEvents(rso_id)
     .then(function (data) {
@@ -91,6 +136,8 @@
 
     });
 
+
+
     // make API call to rsos/members/[id]
     a.getRsoMembers(rso_id)
     .then(function (data) {
@@ -115,7 +162,7 @@
         if (user_id == a.scope.user_id) {
 
           // hiding for now. if time allows, create 'leave' buttons on members.
-          $('#join').hide();
+          join.hide();
 
         }
 
@@ -131,6 +178,37 @@
     .fail(function (err) {
 
       
+    });
+
+    join.submit(function (e) {
+
+      e.preventDefault();
+
+      var current_user = a.scope.user_id;
+      var rso_id = a.scope.rso_id;
+
+      a.joinRso({user_id: current_user, rso_id: rso_id}, function (data) {
+
+        data = data || "{}";
+        data = JSON.parse(data);
+
+        if (data.success) {
+
+          var current_user_name = a.scope.user_name;
+
+          var memberBox = memberBoxFactory(current_user, current_user_name);
+
+          membersBoxContainer.append(memberBox);
+
+        }
+        else if (data.fail) {
+          
+          // add message somewhere.
+
+        }
+        
+      });
+
     });
 
   });

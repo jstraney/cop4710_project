@@ -1,6 +1,6 @@
 <?php
 
-class RSOController extends EntityController {
+class RsoController extends EntityController {
 
   private $create_query ;
 
@@ -10,6 +10,8 @@ class RSOController extends EntityController {
   private $delete_query;
 
   private $rso_members_query;
+  private $join_rso_query;
+  private $leave_rso_query;
 
   public function __construct() {
 
@@ -24,6 +26,9 @@ class RSOController extends EntityController {
 
     $this->rso_members_query = $rso_members_query;
     $this->administrates_rso_query = $administrates_rso_query;
+
+    $this->join_rso_query = $join_rso_query;
+    $this->leave_rso_query = $leave_rso_query;
 
   }
 
@@ -97,6 +102,8 @@ class RSOController extends EntityController {
     }
 
     $user_id = $user->user_id;
+
+    $user_name = $user->user_name;
 
     $role = $user->role;
 
@@ -193,6 +200,14 @@ class RSOController extends EntityController {
       redirect_entity_view('rso', $rso_id);
 
     }
+    else if (isset($result[0]["_err_msg"])) {
+
+      $msg = $result[0]["_err_msg"];
+      set_message($msg, "error");
+      go_back();
+      die();
+
+    }
 
     set_message("Succesfully changed RSO info");
 
@@ -254,7 +269,7 @@ class RSOController extends EntityController {
 
     }
 
-    $uid = $user->user_id;
+    $user_id = $user->user_id;
 
     $role = $user->role;
      
@@ -280,7 +295,7 @@ class RSOController extends EntityController {
 
     }
 
-    $uid = $user->user_id;
+    $user_id = $user->user_id;
 
     $role = $user->role;
 
@@ -288,7 +303,11 @@ class RSOController extends EntityController {
 
     $query = $this->view_query;
 
-    $result = $this->db->prepared_query($query, array(":rso_id" => $rso_id));
+    $result = $this->db->prepared_query($query, array(
+      ":rso_id" => $rso_id,
+      ":user_id" => $user_id,
+      ":role" => $role
+    ));
 
     if (empty($result)) {
 
@@ -411,6 +430,94 @@ class RSOController extends EntityController {
 
     echo json_encode($result);
 
+    die();
+
+  }
+
+  public function join_rso ($params) {
+
+    global $user;
+
+    if ($user == NULL) {
+
+      die();
+
+    }
+
+    $user_id = $user->user_id;
+    $uni_id = isset($user->uni_id)? $user->uni_id: 0;
+
+    $rso_id = check_field($params, 'rso_id'); 
+
+    $query = $this->join_rso_query;
+
+    $result = $this->db->prepared_query($query, array(
+      ":user_id" => $user_id,
+      ":rso_id" => $rso_id,
+      ":uni_id" => $uni_id,
+    ));
+
+    if (empty($result)) {
+
+      echo '{"fail": true}'; 
+      die();
+
+    }
+    else if (isset($result[0]['_err_msg'])) {
+
+      $msg = $result[0]['_err_msg']; 
+
+      echo '{"fail": true, "msg": "'.$msg.'"}'; 
+      die();
+
+    }
+
+    echo '{"success": true}'; 
+    die();
+
+
+
+
+  }
+
+  public function leave_rso ($params) {
+
+    global $user;
+
+    if ($user == NULL) {
+
+      die();
+
+    }
+
+    $user_id = $user->user_id;
+    $uni_id = isset($user->uni_id)? $user->uni_id: 0;
+
+    $rso_id = check_field($params, 'rso_id'); 
+
+    $query = $this->leave_rso_query;
+
+    $result = $this->db->prepared_query($query, array(
+      ":user_id" => $user_id,
+      ":rso_id" => $rso_id,
+    ));
+
+    if (empty($result)) {
+
+      echo '{"fail": true}'; 
+      die();
+
+    }
+    else if (isset($result[0]['_err_msg'])) {
+      
+      $msg = $result[0]['_err_msg']; 
+
+      echo '{"fail": true, "msg": "'.$msg.'"}'; 
+      die();
+
+    }
+
+    echo '{"success": true}'; 
     die();
 
   }

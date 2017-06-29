@@ -48,43 +48,50 @@
 
     });
 
-    searchUni = $('div.search-uni > input');
+    searchUni = $('input#uni-name');
     uniId = $('input#uni-id');
 
-    searchUni.autocomplete({
+    searchUni.devbridgeAutocomplete({
 
-      source: function (req, res) {
+      lookup: function (query, done) {
 
-        var name = req.term;
+        var name = query;
+
         app.getUniversityList({name: name}, function (data) {
 
-          console.log(data);
+          data = data || "{}";
           data = JSON.parse(data);
 
-          options = data;
+          result = {};
 
-          res(data);
+          result.suggestions = data;
+
+          done(result);
 
         });
 
       },
-      select: function (event, ui ) {
+      onSelect: function (suggestion) {
 
-        ui = ui || {};
+        searchUni.val(suggestion.value)
 
-        var item = ui.item;        
+        uniId.val(suggestion.data);
 
-        params.uni_id = item.value;
+        params.uni_id = suggestion.data;
 
-        ui.item.value = ui.item.label;
+        pollEvents();
 
       }
+
     });
 
 
     function setOtherUniScope () {
 
       searchUni.parent().show();
+
+      // only public events are available to outsiders
+      accessScopeFilters.parent().hide();
 
     }
 
@@ -115,6 +122,10 @@
     function setMyUniScope () {
 
       searchUni.parent().hide();
+      // select a variety of 'accessibilities' (pub, pri, rso)
+      accessScopeFilters.parent().show();
+
+      pollEvents();
 
     }
 
@@ -132,19 +143,32 @@
       var location = eventJson.location;
       var lat = eventJson.lat;
       var lon = eventJson.lon;
-      var distance = eventJson.distance;
+      var distance = (parseFloat(eventJson.distance)*69).toFixed(2);
       var rating = eventJson.rating;
-      var start_time = eventJson.start_time;
-      var end_time = eventJson.end_time;
+      var start_time = a.util.parseUTC(eventJson.start_time).formatMdyyyy_time();
+      var end_time = a.util.parseUTC(eventJson.end_time).formatMdyyyy_time();
+      var status = eventJson.status == "PND"? "Pending Approval" : "Active";
+      var uni_id = eventJson.uni_id;
+      var uni_name = eventJson.uni_name;
 
-      var elem = $('<div class="record.event">');
+      var elem = $('<div style="display:none" class="record event">');
       var text = '<h5><a href="'+a.siteRoot+'event/'+event_id+'">' + name + '</a></h5>';
-      text +='<p>' + description + '</p>';
-      text +='<span class="info distance">' + distance + 'miles away</span>';
-      text +='<span class="info rating">' + rating + '</span>';
-      text +='<span class="info start-time">' + start_time + '</span>';
-      text +='<span class="info end-time">' + end_time + '</span>';
+      text += '<p>' + description + '</p>';
+      text += '<span class="info distance">~' + distance + ' Miles away</span>';
+      text += '<span class="info rating">Rating : ' + rating + '</span>';
+      text += '<span class="info start-time">Start : ' + start_time + '</span>';
+      text += '<span class="info end-time">End : ' + end_time + '</span>';
+      text += '<span class="info uni"><a href="'+ a.siteRoot + 'university/' + uni_id + '">';
+      text += uni_name + '</a></span>';
+      text += '<span class="info status">Status : ' + status + '</span>';
       elem.html(text);
+
+      window.setTimeout(function () {
+
+        elem.fadeIn(2000);
+        elem.addClass("loaded");
+
+      }, 200);
 
       return elem;
 
@@ -157,8 +181,6 @@
         data = data || "{}";
 
         data = JSON.parse(data);
-
-        console.log(data);
 
         eventsAggregate.html('');
 

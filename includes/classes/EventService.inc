@@ -1,7 +1,8 @@
 <?php
 // Takes events for events.ucf.edu/feed.json and puts new events into the
 // the events table. The task is run through a cron job
-include_once "event_controller.inc";
+include_once "EntityController.inc";
+include_once "EventController.inc";
 
 class EventService {
 
@@ -51,22 +52,45 @@ class EventService {
     
   }
 
-  public function is_error () {
+  private function is_error () {
 
     return $this->error;
 
   }
 
-  public function insert_events() {
+  private function insert_events() {
 
     $this->request_data();
 
-    var_dump($this->data);
+    $events = $this->data;
+
+    foreach ($events as $event) {
+
+      var_dump($event);
+
+    }
 
     curl_close($this->curl);
 
   }
 
+  public function import_ucf_events () {
+
+    $this->insert_events();
+
+    if ($this->is_error()) {
+
+      set_message("Something went wrong importing the events");
+      go_back();
+      die();
+
+    }
+
+  }
+
 }
+
+$event = new EventService();
+$event->import_ucf_events();
 
 ?>

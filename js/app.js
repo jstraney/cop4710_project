@@ -12,6 +12,27 @@ var app = app || {};
 
   a.util = {};
 
+  a.util.spawnMsg = function (msg, type) {
+
+    var modal = $('<div style="display:none" class="sup-modal ' + type + '">' + msg + '</div>');
+
+    $("body").append(modal);
+
+    modal.fadeIn(500);
+    modal.css({top: "15%"});
+
+    window.setTimeout(function () {
+
+      modal.fadeOut(1000, function () {
+
+        modal.remove();
+        
+      });
+
+    }, 3000);
+
+  };
+
   // returns date object from utc String
   a.util.parseUTC = function (utcString) {
 
@@ -27,10 +48,11 @@ var app = app || {};
       yyyy : arr[0],
       MM : arr[1],
       dd : arr[2],
-      hh : arr[3],
+      hh : arr[3] % 12,
       mm : arr[4],
     };
 
+    date.ampm = date.hh >= 12? "pm": "am";
     date.yy = date.yyyy.slice(2);
     date.M = removeLeadingZero(date.MM);
     date.d = removeLeadingZero(date.dd);
@@ -46,7 +68,7 @@ var app = app || {};
     date.formatMdyyyy_time = function () {
 
       var str = date.M + '/' + date.d + '/' + date.yyyy + ' ';
-      str += date.h + ':' + date.mm;
+      str += date.h + ':' + date.mm + " " + date.ampm;
 
       return str;
 
@@ -301,6 +323,18 @@ var app = app || {};
   a.getEventsJson = function (params, callback, error) {
 
     return apiEndpoint(params, "events/json", callback, error);
+
+  }
+
+  a.joinRso = function (params, callback, error) {
+
+    return apiEndpoint(params, "rso/join", callback, error);
+
+  }
+
+  a.leaveRso = function (params, callback, error) {
+
+    return apiEndpoint(params, "rso/leave", callback, error);
 
   }
 

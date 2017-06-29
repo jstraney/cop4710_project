@@ -13,6 +13,7 @@
   var rsoAdminBox;
 
   var rsoUniInput;
+
   var rsoUniHidden;
 
   // returns template memberBox
@@ -37,6 +38,16 @@
 
     makeAdmin.click(function () {
 
+      // if this is the current user selected as admin
+      if (rsoAdminBox == box) {
+
+        // deselect them
+        rsoAdminBox.toggleClass("marked-administrator");
+
+        // mark current user as admin
+        rsoAdminInput(a.scope.current_user);
+
+      }
 
       // if there is an admin box set, toggle its class
       rsoAdminBox && rsoAdminBox.toggleClass('marked-administrator');
@@ -47,7 +58,6 @@
       // give it the css class for styles
       rsoAdminBox.toggleClass('marked-administrator');
 
-      console.log(rsoAdminInput);
       // set the hidden inputs value
       rsoAdminInput.val(user_id);
 
@@ -55,6 +65,14 @@
     });
 
     box.append(makeAdmin);
+
+    // check if the rso being (edited/maybe created) has admin
+    // if there is one, check if this user is admin...etc.
+    a.scope.rso_administrator && a.scope.rso_administrator == user_id && 
+    (function () { 
+      rsoAdminBox = box;
+      rsoAdminBox.addClass('marked-administrator');
+    })();
 
     box.append('<div>'+user_name+'</div>');
 
@@ -176,8 +194,17 @@
 
       for( var i = 0; i < members.length; i++) {
 
+
         var member = members[i];        
         var user_id = member.user_id;
+
+        // do not add current user to form. prevents confusion/issues
+        if (a.scope.current_user == user_id) {
+
+          continue;
+
+        }
+
         var user_name = member.user_name;
 
         // put memberId into our id object

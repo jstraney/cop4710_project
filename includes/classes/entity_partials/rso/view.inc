@@ -6,6 +6,7 @@ $template = <<<EOT
 (function (a) {
   a.scope.rso_id = {$rso_id};
   a.scope.user_id = {$user_id};
+  a.scope.user_name = "{$user_name}";
   a.scope.rso_administrator = {$rso_administrator};
 }) (app);
 </script>
@@ -43,7 +44,7 @@ $template .= <<<EOT
 </div>
 
 <form id="join" class="lefty" method="POST" action="{$site_root}/rso/{$rso_id}/join">
-  <input type="submit" value="Join {$name}!"/>
+  <input class="btn btn-large" type="submit" value="Join {$name}!"/>
 </form>
 
 </div>

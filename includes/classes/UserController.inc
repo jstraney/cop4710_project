@@ -227,7 +227,7 @@ class UserController extends EntityController {
 
       $hash = encrypt_password($password);
 
-      $this->db->prepared_query($query, array(
+      $result = $this->db->prepared_query($query, array(
         ":user_name" => $user_name,
         ":first_name" => $first_name,
         ":last_name" => $last_name,
@@ -238,12 +238,26 @@ class UserController extends EntityController {
         ":user_id" => $id,
       ));
 
+      if (empty($result)) {
+
+      }
+      else if (isset($result[0]["_err_msg"])) {
+
+        $msg = $result[0]["_err_msg"];
+        set_message($msg, "error");
+        go_back();
+        die();
+
+      }
+
       set_message("You have successfully changed your profile");
 
     }
     else {
 
       set_message("There was a problem changing your profile", "error");
+      go_back();
+      die();
 
     }
 
