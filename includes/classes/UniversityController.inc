@@ -8,6 +8,7 @@ class UniversityController extends EntityController {
   private $view_all_query;
   private $update_query;
   private $delete_query;
+  private $university_rsos_query;
 
   public function __construct() {
 
@@ -20,7 +21,7 @@ class UniversityController extends EntityController {
     $this->view_all_query = $view_all_query;
     $this->update_query = $update_query;
     $this->destroy_query = $destroy_query;
-
+    $this->university_rsos_query = $university_rsos_query;
     $this->select_all_query = $select_all_query;
     $this->match_name_query = $match_name_query;
 
@@ -75,7 +76,11 @@ class UniversityController extends EntityController {
     $lat = isset($result['lat']) ? $result['lat']: "";
     $lon = isset($result['lon']) ? $result['lon']: "";
     $website_url = isset($result['website_url']) ? $result['website_url']: "";
-    $num_students = isset($result['num_students']) ? $result['num_students']: 0;
+    $num_students = isset($result['population']) ? $result['population']: 0;
+
+    // find rsos associated with this university
+    $associated_rsos = $this->view_associated_rsos($params);
+    print_r ($associated_rsos);
 
     include get_entity_partial('university', 'view');
 
@@ -264,6 +269,17 @@ class UniversityController extends EntityController {
 
   }
 
+    // show rsos associated with a given university
+  public function view_associated_rsos ($params) {
+
+    $uni_id = isset($params['uni_id']) ? $params['uni_id']: 0;
+
+    $query = $this->university_rsos_query;
+
+    $result = $this->db->prepared_query($query, array(":uni_id" => $uni_id));
+
+    return $result;
+  }
 
 }
 

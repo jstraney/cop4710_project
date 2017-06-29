@@ -18,6 +18,12 @@ FROM universities n
 WHERE n.uni_id = :uni_id
 EOT;
 
+$university_rsos_query = <<<EOT
+SELECT h.rso_id
+FROM has h
+WHERE h.uni_id = :uni_id
+EOT;
+
 $view_all_query = <<<EOT
 SELECT uni_id, name, description, location, lat, lon, website_url
 FROM universities LIMIT :start, :end;
