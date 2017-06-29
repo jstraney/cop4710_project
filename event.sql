@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jun 29, 2017 at 01:11 PM
+-- Generation Time: Jun 29, 2017 at 02:04 PM
 -- Server version: 10.1.13-MariaDB
 -- PHP Version: 7.0.5
 
@@ -1371,7 +1371,7 @@ CREATE TABLE `universities` (
   `lon` decimal(9,6) NOT NULL,
   `email_domain` varchar(30) NOT NULL,
   `website_url` varchar(60) NOT NULL,
-  'population' integer NOT NULL
+  `population` int(10) UNSIGNED NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -1538,27 +1538,27 @@ ALTER TABLE `u_created_e`
 -- AUTO_INCREMENT for table `commented_on`
 --
 ALTER TABLE `commented_on`
-  MODIFY `comment_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `comment_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `events`
 --
 ALTER TABLE `events`
-  MODIFY `event_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `event_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `rsos`
 --
 ALTER TABLE `rsos`
-  MODIFY `rso_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `rso_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `universities`
 --
 ALTER TABLE `universities`
-  MODIFY `uni_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `uni_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `user_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 --
 -- Constraints for dumped tables
 --
