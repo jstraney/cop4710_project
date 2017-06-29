@@ -46,6 +46,14 @@ body {
   padding: 0 10px;
 }
 
+ul.terms {
+  padding-left: 25px;
+}
+
+ul.terms, ul.terms > li {
+  list-style-type: upper-roman;
+}
+
 div.nav-wrapper > ul > li > a {
   display: inline-block;
 }
