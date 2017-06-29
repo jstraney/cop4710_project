@@ -108,12 +108,15 @@ class Router {
     $this->routes['POST']['/^user\/membership\/json$/'] = array('user_membership_json', 'UserController', 'users');
 
     // RSO endpoints
-    $this->routes['POST']['/^rsos\/json$/'] = array('get_list_json', 'RSOController', 'rso');
-    $this->routes['POST']['/^rso\/members\/json$/'] = array('rso_members_json', 'RSOController', 'rso');
+    $this->routes['POST']['/^rsos\/json$/'] = array('get_list_json', 'RsoController', 'rso');
+    $this->routes['POST']['/^rso\/members\/json$/'] = array('rso_members_json', 'RsoController', 'rso');
     // gets rsos managed by the current user.
-    $this->routes['POST']['/^rso\/administrated\/json$/'] = array('rso_administrator_json', 'RSOController', 'rso');
+    $this->routes['POST']['/^rso\/administrated\/json$/'] = array('rso_administrator_json', 'RsoController', 'rso');
     // get all rsos from a university by uni_id.
-    $this->routes['POST']['/^rsos\/university=([0-9]+)\/json$/'] = array('get_rsos_json', 'RSOController', 'rso');
+    $this->routes['POST']['/^rsos\/university=([0-9]+)\/json$/'] = array('get_rsos_json', 'RsoController', 'rso');
+
+    $this->routes['POST']['/^rso\/join$/'] = array('join_rso', 'RsoController', 'event');
+    $this->routes['POST']['/^rso\/leave$/'] = array('leave_rso', 'RsoController', 'event');
 
     // comments endpoints
     // note that to give the app a 'real world' feel, all routes for comments will be done with post requests.

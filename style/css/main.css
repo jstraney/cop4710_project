@@ -235,11 +235,10 @@ div.record.member > .make-admin {
   right: 20px;
 }
 
-div.events-view-all.aggregate.events > .record > span.info {
-  color: #888888;
-  display: inline-block;
-  padding: 5px 20px 5px 0;
-  font-size: 14px;
+div.rso-view.aggregate.members > div.member > .button.destroy {
+  position: absolute;
+  top: 0px;
+  right: -15px;
 }
 
 /* Event Page */
@@ -320,11 +319,56 @@ div.record.event.comment > .button.update {
   left: 70px;
 }
 
-/* Users */
+form#event-search {
+  max-width: none;
+  border: 1px solid #CCCCCC;
+  padding: 15px;
+}
 
-div.user-view.aggregate.events div.record {
-  border-bottom: none;
+form#event-search > div.scope {
   display: inline-block;
+}
+
+form#event-search > div {
+  margin-bottom: 10px;
+}
+
+div.events-view-all.aggregate.events {
+  min-height: 200px;
+}
+
+div.events-view-all.aggregate.events > div.record {
+  position: relative;
+  -webkit-transition: 1s top;
+  -moz-transition: 1s top;
+  transition: 1s top;
+  top: -100px;
+}
+
+div.events-view-all.aggregate.events > div.record.loaded {
+  top: 0;
+}
+
+
+div.events-view-all.aggregate.events  span.info {
+  color: #888888;
+  padding: 5px 20px 0 0;
+  font-size: 14px;
+}
+
+div.events-view-all.aggregate.events  span.info.status {
+  color: #333333;
+  font-weight: 600;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+div.events-view-all.aggregate.events  span.info.uni {
+  font-weight: 600;
+  display: inline-block;
+  
+>>>>>>> development
 }
 
 div#map {
@@ -347,3 +391,19 @@ div.message.error {
 div.message.info {
   color: #33cc44;
 }
+
+div.sup-modal {
+  position: fixed;
+  width: 300px;
+  top: 30%;
+  left: 50%;
+  margin-left: -150px;
+  color: #333388;
+  background-color: #DDEEFF;
+  border-radius: 2px;
+  padding: 15px;
+  -webkit-transition: 1s top;
+  -moz-transition: 1s top;
+  transition: 1s top;
+}
+

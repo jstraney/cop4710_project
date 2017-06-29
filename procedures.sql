@@ -33,11 +33,17 @@ DROP FUNCTION IF EXISTS `event`.manhattan_distance;
 DROP PROCEDURE IF EXISTS `event`.create_rso;
 DROP PROCEDURE IF EXISTS `event`.update_rso;
 DROP PROCEDURE IF EXISTS `event`.view_rso;
+DROP PROCEDURE IF EXISTS `event`.join_rso;
+DROP PROCEDURE IF EXISTS `event`.leave_rso;
 
 -- use the applications database
 USE `event`;
 
 DELIMITER //
+
+
+    
+
 -- these are procedures attached to the database which are then callable by our PDO
 -- procedures are being used for the following reasons 
 
@@ -69,31 +75,44 @@ CREATE PROCEDURE create_user (
   IN _uni_id INT(11))
 BEGIN
 
--- only perform insert if the email matches the universities email domain 
-IF (_role = "STU" OR _role = "ADM") AND (check_uni_emails(_email, _uni_id) < 1) THEN
-  SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'e-mail must match university selected.';
-ELSEIF _role = "STU" THEN
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
-    INSERT INTO users (user_name, first_name, last_name, email, role, hash)
-    VALUES (_user_name, _first_name, _last_name, _email, _role, _hash);
-    -- add relationship to user_attending_university table
-    INSERT INTO attending (user_id, uni_id)
-    VALUES (LAST_INSERT_ID(), _uni_id);
+    DECLARE _err_msg TEXT;
+    ROLLBACK;
+    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    SELECT _err_msg;
   END;
--- admin is affiliated with a university
-ELSEIF _role = "ADM" THEN
-  BEGIN
-    INSERT INTO users (user_name, first_name, last_name, email, role, hash)
-    VALUES (_user_name, _first_name, _last_name, _email, _role, _hash);
-    -- add affiliated_with relationship
-    INSERT INTO affiliated_with (user_id, uni_id)
-    VALUES (LAST_INSERT_ID(), _uni_id);
-  END;
--- super admin has no affiliation with university
-ELSEIF _role = "SA"  THEN
-  INSERT INTO users (user_name, first_name, last_name, email, role, hash)
-  VALUES (_user_name, _first_name, _last_name, _email, role, _hash);
-END IF;
+
+  START TRANSACTION;
+
+    -- only perform insert if the email matches the universities email domain 
+    IF (_role = "STU" OR _role = "ADM") AND (check_uni_emails(_email, _uni_id) < 1) THEN
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'e-mail must match university selected.';
+    ELSEIF _role = "STU" THEN
+      BEGIN
+        INSERT INTO users (user_name, first_name, last_name, email, role, hash)
+        VALUES (_user_name, _first_name, _last_name, _email, _role, _hash);
+        -- add relationship to user_attending_university table
+        INSERT INTO attending (user_id, uni_id)
+        VALUES (LAST_INSERT_ID(), _uni_id);
+      END;
+    -- admin is affiliated with a university
+    ELSEIF _role = "ADM" THEN
+      BEGIN
+        INSERT INTO users (user_name, first_name, last_name, email, role, hash)
+        VALUES (_user_name, _first_name, _last_name, _email, _role, _hash);
+        -- add affiliated_with relationship
+        INSERT INTO affiliated_with (user_id, uni_id)
+        VALUES (LAST_INSERT_ID(), _uni_id);
+      END;
+    -- super admin has no affiliation with university
+    ELSEIF _role = "SA"  THEN
+      INSERT INTO users (user_name, first_name, last_name, email, role, hash)
+      VALUES (_user_name, _first_name, _last_name, _email, role, _hash);
+    END IF;
+
+  COMMIT;
+
 END//
 
 CREATE PROCEDURE update_user (
@@ -107,28 +126,40 @@ CREATE PROCEDURE update_user (
   IN _uni_id INT(11)) 
 BEGIN
 
-  IF _role = "STU" AND (check_uni_emails(_email, _uni_id) < 1) THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'e-mail must match university selected.';
-  END IF;
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+  BEGIN
+    DECLARE _err_msg TEXT;
+    ROLLBACK;
+    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    SELECT _err_msg;
+  END;
 
-  UPDATE users SET
-  user_name = _user_name,
-  first_name = _first_name,
-  last_name = _last_name,
-  email = _email,
-  role = _role,
-  hash = _hash
-  WHERE user_id = _user_id;
+  START TRANSACTION;
+    
+    IF _role = "STU" AND (check_uni_emails(_email, _uni_id) < 1) THEN
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'e-mail must match university selected.';
+    END IF;
 
-  IF _role = "STU" THEN
-    UPDATE attending SET
-    uni_id = _uni_id
+    UPDATE users SET
+    user_name = _user_name,
+    first_name = _first_name,
+    last_name = _last_name,
+    email = _email,
+    role = _role,
+    hash = _hash
     WHERE user_id = _user_id;
-  ELSEIF _role = "ADM" OR _role = "SA" THEN
-    UPDATE affiliated_with SET
-    uni_id = _uni_id
-    WHERE user_id = _user_id;
-  END IF;
+
+    IF _role = "STU" THEN
+      UPDATE attending SET
+      uni_id = _uni_id
+      WHERE user_id = _user_id;
+    ELSEIF _role = "ADM" OR _role = "SA" THEN
+      UPDATE affiliated_with SET
+      uni_id = _uni_id
+      WHERE user_id = _user_id;
+    END IF;
+
+  COMMIT;
 
 END//
 
@@ -161,7 +192,7 @@ END//
 CREATE PROCEDURE get_current_user (
   IN _user_id INT(11))
 BEGIN
-
+  
   DECLARE _role ENUM('SA','ADM','STU');
 
   SET _role = (SELECT u.role FROM users u WHERE u.user_id = _user_id LIMIT 1);
@@ -221,102 +252,114 @@ BEGIN
 
   DECLARE _status ENUM('PND','ACT');
 
-  -- no event should be happening at the same time
-  IF EXISTS(
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    DECLARE _err_msg TEXT;
+    ROLLBACK;
+    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    SELECT _err_msg;
+  END;
 
-    SELECT e.event_id FROM events e 
-    -- location is the same.
-    WHERE e.location = _location
-    -- the end time is between the start and end time of this event 
-    AND ((_end_time >= e.start_time AND _end_time <= e.end_time) OR
-      -- or the start time is between the start and end time of this event.
-        (_start_time >= e.start_time AND _start_time <= e.end_time))) THEN
+  START TRANSACTION;
 
-    -- throw an error.
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "Your event is occuring at the same time and location as another event";
+    -- no event should be happening at the same time
+    IF EXISTS(
 
-  END IF;
+      SELECT e.event_id FROM events e 
+      -- location is the same.
+      WHERE e.location = _location
+      -- the end time is between the start and end time of this event 
+      AND ((_end_time >= e.start_time AND _end_time <= e.end_time) OR
+        -- or the start time is between the start and end time of this event.
+          (_start_time >= e.start_time AND _start_time <= e.end_time))) THEN
 
-  -- all events have many of the the same columns. Lookup from the application layer is performed
-  -- on the event sub-type tables, thus limiting the scope of what is looked up based on user id.
-  INSERT INTO events (name, start_time, end_time, telephone, email, description, location, lat, lon, accessibility)
-  VALUES (_name, _start_time, _end_time, _telephone, _email, _description, _location, _lat, _lon, _accessibility);
+      -- throw an error.
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "Your event is occuring at the same time and location as another event";
 
-  -- get event id from last insert operation
-  SET _event_id = LAST_INSERT_ID();
+    END IF;
 
-  -- create relationship between this event and the host university
-  INSERT INTO hosting (uni_id, event_id)
-  VALUES (_uni_id, _event_id);
+    -- all events have many of the the same columns. Lookup from the application layer is performed
+    -- on the event sub-type tables, thus limiting the scope of what is looked up based on user id.
+    INSERT INTO events (name, start_time, end_time, telephone, email, description, location, lat, lon, accessibility)
+    VALUES (_name, _start_time, _end_time, _telephone, _email, _description, _location, _lat, _lon, _accessibility);
 
-  -- create the 'created' relationship. 
-  -- if a a real rso id was used in creating the event. mark the event 
-  -- as being made by an rso
-  IF _rso_id > 0 THEN
+    -- get event id from last insert operation
+    SET _event_id = LAST_INSERT_ID();
 
-    -- set status to active. No super admin approval needed
-    SET _status = 'ACT';
+    -- create relationship between this event and the host university
+    INSERT INTO hosting (uni_id, event_id)
+    VALUES (_uni_id, _event_id);
 
-    -- create relationship between the event and the RSO 
-    INSERT INTO r_created_e (rso_id, event_id)
-    VALUES (_rso_id, _event_id);
+    -- create the 'created' relationship. 
+    -- if a a real rso id was used in creating the event. mark the event 
+    -- as being made by an rso
+    IF _rso_id > 0 THEN
 
-  -- if there isn't an RSO, the status should be PND for pending, even for Admins
-  ELSE
+      -- set status to active. No super admin approval needed
+      SET _status = 'ACT';
 
-    -- status is pending. needs Super admin approval
-    SET _status = 'PND';
+      -- create relationship between the event and the RSO 
+      INSERT INTO r_created_e (rso_id, event_id)
+      VALUES (_rso_id, _event_id);
 
-  END IF;
-      
-  -- always create a relationship between the user and the event created.
-  -- regardless of whether an RSO is used or not.
-  INSERT INTO u_created_e (user_id, event_id)
-  VALUES (_user_id, _event_id);
+    -- if there isn't an RSO, the status should be PND for pending, even for Admins
+    ELSE
 
-  -- regardless of whether it's RSO created or User created, update the status.
-  UPDATE events SET status = _status WHERE event_id = _event_id;
+      -- status is pending. needs Super admin approval
+      SET _status = 'PND';
 
-  -- set accessibilty for viewing and commenting
-  IF _accessibility = 'RSO' THEN
+    END IF;
+        
+    -- always create a relationship between the user and the event created.
+    -- regardless of whether an RSO is used or not.
+    INSERT INTO u_created_e (user_id, event_id)
+    VALUES (_user_id, _event_id);
 
-    BEGIN
-      -- check if rso does not exist 
-      IF NOT EXISTS (SELECT r.rso_id FROM rsos r WHERE r.rso_id = _rso_id) THEN
+    -- regardless of whether it's RSO created or User created, update the status.
+    UPDATE events SET status = _status WHERE event_id = _event_id;
 
-        -- throw error
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "The rso specified cannot be found.";
+    -- set accessibilty for viewing and commenting
+    IF _accessibility = 'RSO' THEN
 
-      ELSE
-        -- add to rso_events
-        INSERT INTO rso_events (event_id, rso_id, uni_id)
-        VALUES (_event_id, _rso_id, _uni_id);
+      BEGIN
+        -- check if rso does not exist 
+        IF NOT EXISTS (SELECT r.rso_id FROM rsos r WHERE r.rso_id = _rso_id) THEN
 
-      END IF;
-    END;
-  ELSEIF _accessibility = 'PRI' THEN
-    BEGIN
+          -- throw error
+          SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "The rso specified cannot be found.";
 
-      -- check if university does not exist
-      IF NOT EXISTS (SELECT uni_id FROM universities WHERE uni_id = _uni_id) THEN
-        -- throw error
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "The university specified cannot be found.";
+        ELSE
+          -- add to rso_events
+          INSERT INTO rso_events (event_id, rso_id, uni_id)
+          VALUES (_event_id, _rso_id, _uni_id);
 
-      ELSE
-        -- inser into private events.
-        INSERT INTO private_events (event_id, uni_id)
-        VALUES (_event_id, _uni_id);
-      END IF;
-    END;
-  ELSE
-    BEGIN
-        INSERT INTO public_events (event_id, uni_id)
-        VALUES (_event_id, _uni_id);
-    END;
-  END IF;
+        END IF;
+      END;
+    ELSEIF _accessibility = 'PRI' THEN
+      BEGIN
 
-  -- Select the id of the event just created. used for redirect
-  SELECT _event_id AS event_id FROM events LIMIT 1;
+        -- check if university does not exist
+        IF NOT EXISTS (SELECT uni_id FROM universities WHERE uni_id = _uni_id) THEN
+          -- throw error
+          SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "The university specified cannot be found.";
+
+        ELSE
+          -- inser into private events.
+          INSERT INTO private_events (event_id, uni_id)
+          VALUES (_event_id, _uni_id);
+        END IF;
+      END;
+    ELSE
+      BEGIN
+          INSERT INTO public_events (event_id, uni_id)
+          VALUES (_event_id, _uni_id);
+      END;
+    END IF;
+
+    -- Select the id of the event just created. used for redirect
+    SELECT _event_id AS event_id FROM events LIMIT 1;
+
+  COMMIT;
 
 END//
 
@@ -339,7 +382,6 @@ CREATE PROCEDURE update_event (
   IN _user_id INT(11),
   -- id of rso if this is an RSO accessible event
   IN _rso_id INT(11),
-
   -- status. only submitable by SA roles
   IN _status ENUM('ACT','PND'))
 
@@ -351,105 +393,130 @@ BEGIN
   -- id of the current RSO. If this is set from an existing RSO id, to 0 (no rso)
   -- then the event status must be set to Pending Super Admin approval.
   DECLARE _current_rso_id INT(11);
+
   DECLARE _role ENUM('SA','ADM','STU');
 
   DECLARE _uni_id INT(11);
-  SELECT h.uni_id INTO _uni_id FROM
-  events e, hosting h
-  WHERE e.event_id = _event_id
-  AND h.event_id = e.event_id;
 
-  -- check if the user is the administrator of the RSO that made the event.
-  IF _role <> "SA" AND NOT EXISTS(
-    SELECT e.event_id
-    FROM events e, r_created_e c, rsos r, administrates a
-    WHERE _user_id = a.user_id
-    AND a.rso_id = r.rso_id
-    AND r.rso_id = c.rso_id
-    AND c.event_id = _event_id) AND 
-  -- or if the user is the creator of the event
-  NOT EXISTS (
-    SELECT e.event_id 
-    FROM events e, u_created_e u 
-    WHERE e.event_id = _event_id
-    AND e.event_id = u.event_id
-    AND u.user_id = _user_id) THEN
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+  BEGIN
+    DECLARE _err_msg TEXT;
+    ROLLBACK;
+    GET DIAGNOSTICS CONDITION 1
+      _err_msg = MESSAGE_TEXT;
+    SELECT _err_msg;
+  END;
 
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "You are not authorized to change this event.";
+  START TRANSACTION;
 
-  END IF;
+    -- the uni ID should be the id of the hosting university.
+    SELECT h.uni_id INTO _uni_id
+    FROM hosting h
+    WHERE h.event_id = _event_id;
 
-  -- set the events old type of pub, pri, or rso
-  SET _old_type = (SELECT e.accessibility FROM events e WHERE e.event_id = _event_id LIMIT 1);
+    -- check if the user is SuperAdmin or the administrator of the RSO that made the event.
+    IF _role <> "SA" AND NOT EXISTS(
+      SELECT e.event_id
+      FROM events e, r_created_e c, rsos r, administrates a
+      WHERE _user_id = a.user_id
+      AND a.rso_id = r.rso_id
+      AND r.rso_id = c.rso_id
+      AND c.event_id = _event_id) AND 
+    -- or if the user is the creator of the event
+    NOT EXISTS (
+      SELECT e.event_id 
+      FROM events e, u_created_e u 
+      WHERE e.event_id = _event_id
+      AND e.event_id = u.event_id
+      AND u.user_id = _user_id) THEN
 
-  -- set the old rso id
-  SET _current_rso_id = (
-    SELECT r.rso_id
-    FROM rsos r, r_created_e re
-    WHERE r.rso_id = re.rso_id
-    AND re.event_id = _event_id);
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "You are not authorized to change this event.";
 
-  -- set the role of the current user.
-  SET _role = (SELECT role FROM users WHERE user_id = _user_id);
+    END IF;
 
-  -- check if we are upating an RSO created event to have No RSO.
-  -- note that this condition fails when it is already PND and SA makes adjustment.
-  IF _current_rso_id > 0 AND _rso_id = 0 AND _role <> 'SA' THEN
-    -- set this event to pending for super admin.
+    -- set the events old type of pub, pri, or rso
+    SET _old_type = (SELECT e.accessibility FROM events e WHERE e.event_id = _event_id LIMIT 1);
+
+    -- set the old rso id
+    SET _current_rso_id = (
+      SELECT r.rso_id
+      FROM rsos r, r_created_e re
+      WHERE r.rso_id = re.rso_id
+      AND re.event_id = _event_id);
+
+    -- set the role of the current user.
+    SET _role = (SELECT role FROM users WHERE user_id = _user_id);
+
+    -- check if we are upating an RSO created event to have No RSO.
+    -- note that this condition fails when it is already PND and SA makes adjustment.
+    IF _current_rso_id > 0 AND _rso_id = 0 AND _role <> 'SA' THEN
+      -- set this event to pending for super admin.
+      UPDATE events SET
+      status = 'PND' 
+      WHERE event_id = _event_id;
+
+      DELETE FROM r_created_e
+      WHERE event_id = _event_id;
+
+      -- since the rso has been removed, do not allow this event to have rso only access
+      IF _accessibility = "RSO" THEN
+
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "An event must be RSO created to have RSO only access";
+
+      END IF;
+
+    -- check if the event used to have no RSO, but has just added one.
+    ELSEIF _current_rso_id IS NULL AND _rso_id > 0 THEN
+
+      -- indicated that this is an RSO created event. Allow joins when viewing events.
+      INSERT INTO r_created_e (event_id, rso_id)
+      VALUES (_event_id ,_rso_id);
+
+      UPDATE events SET
+      status = 'ACT' 
+      WHERE event_id = _event_id;
+
+    END IF;
+
+    -- only super admin can directly allow the status to change.
+    IF _role = "SA" THEN
+
+      UPDATE events SET
+      status = _status
+      WHERE event_id = _event_id;
+      
+    END IF;
+     
+    -- all events have many of the the same columns. Lookup from the application layer is performed
+    -- on the event sub-type tables, thus limiting the scope of what is looked up based on user id.
     UPDATE events SET
-    status = 'PND' 
-    WHERE event_id = _event_id;
-    DELETE FROM r_created_e
-    WHERE event_id = _event_id;
+    name = _name,
+    start_time = _start_time,
+    end_time = _end_time,
+    telephone = _telephone,
+    email = _email,
+    description = _description,
+    location = _location,
+    lat = _lat,
+    lon = _lon
 
-  -- check if the event used to have no RSO, but has just added one.
-  ELSEIF _current_rso_id IS NULL AND _rso_id > 0 THEN
-    -- indicated that this is an RSO created event. Allow joins when viewing events.
-    INSERT INTO r_created_e (event_id, rso_id)
-    VALUES (_event_id ,_rso_id);
-    UPDATE events SET
-    status = 'ACT' 
-    WHERE event_id = _event_id;
+    WHERE events.event_id = _event_id;
 
-  END IF;
+    IF _old_type <> _accessibility THEN
 
-  -- only super admin can directly allow the status to change.
-  IF _role = "SA" THEN
+      BEGIN
 
-    UPDATE events SET
-    status = _status
-    WHERE event_id = _event_id;
-    
-  END IF;
-   
-  -- all events have many of the the same columns. Lookup from the application layer is performed
-  -- on the event sub-type tables, thus limiting the scope of what is looked up based on user id.
-  UPDATE events SET
-  name = _name,
-  start_time = _start_time,
-  end_time = _end_time,
-  telephone = _telephone,
-  email = _email,
-  description = _description,
-  location = _location,
-  lat = _lat,
-  lon = _lon
+        -- call the change_event_access procedure
+        CALL change_event_access(_event_id, _uni_id, _rso_id, _accessibility, _old_type);
 
-  WHERE events.event_id = _event_id;
+      END;
 
-  IF _old_type <> _accessibility THEN
+    END IF;
 
-    BEGIN
+    -- Select the id of the event just created. used for redirect
+    SELECT _event_id AS event_id FROM events LIMIT 1;
 
-      -- call the change_event_access procedure
-      CALL change_event_access(_event_id, _uni_id, _rso_id, _accessibility, _old_type);
-
-    END;
-
-  END IF;
-
-  -- Select the id of the event just created. used for redirect
-  SELECT _event_id AS event_id FROM events LIMIT 1;
+  COMMIT;
 
 END//
 
@@ -467,50 +534,62 @@ BEGIN
   DECLARE _not_participating INT(1);
   DECLARE _status ENUM('PND','ACT');
 
-  SELECT e.accessibility, e.status INTO _accessibility, _status
-  FROM events e
-  WHERE e.event_id = _event_id;
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    DECLARE _err_msg TEXT;
+    ROLLBACK;
+    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    SELECT _err_msg;
+  END;
 
-  -- check if user is already participating.
-  IF EXISTS (
-    SELECT p.user_id
-    FROM participating p, events e
-    WHERE _user_id = p.user_id
-    AND p.event_id = _event_id) THEN
+  START TRANSACTION;
 
-    SET _not_participating = 0;
+    SELECT e.accessibility, e.status INTO _accessibility, _status
+    FROM events e
+    WHERE e.event_id = _event_id;
 
-  ELSE
+    -- check if user is already participating.
+    IF EXISTS (
+      SELECT p.user_id
+      FROM participating p, events e
+      WHERE _user_id = p.user_id
+      AND p.event_id = _event_id) THEN
 
-    SET _not_participating = 1;
+      SET _not_participating = 0;
 
-  END IF;
+    ELSE
 
-  -- if public do a simple attend
-  IF _status = "ACT" AND _accessibility = "PUB" AND _not_participating THEN
-    INSERT INTO participating (user_id, event_id)
-    VALUES (_user_id, _event_id);
+      SET _not_participating = 1;
 
-  ELSEIF _status = "ACT" AND _accessibility = "PRI" AND _not_participating THEN
-    INSERT INTO participating (user_id, event_id)
-    SELECT u.user_id, _event_id
-    FROM users u, attending a, universities n, private_events pe
-    WHERE _user_id = u.user_id
-    AND u.user_id = a.user_id
-    AND a.uni_id = n.uni_id
-    AND n.uni_id = pe.uni_id
-    AND pe.event_id = _event_id LIMIT 1;
+    END IF;
 
-  ELSEIF _status = "ACT" AND _accessibility = "RSO" AND _not_participating THEN
-    INSERT INTO participating (user_id, event_id)
-    SELECT u.user_id, _event_id
-    FROM users u, is_member m, rso_events re
-    WHERE _user_id = u.user_id
-    AND u.user_id = m.user_id
-    AND m.rso_id = re.rso_id
-    AND re.event_id = _event_id LIMIT 1;
+    -- if public do a simple attend
+    IF _status = "ACT" AND _accessibility = "PUB" AND _not_participating THEN
+      INSERT INTO participating (user_id, event_id)
+      VALUES (_user_id, _event_id);
 
-  END IF;
+    ELSEIF _status = "ACT" AND _accessibility = "PRI" AND _not_participating THEN
+      INSERT INTO participating (user_id, event_id)
+      SELECT u.user_id, _event_id
+      FROM users u, attending a, universities n, private_events pe
+      WHERE _user_id = u.user_id
+      AND u.user_id = a.user_id
+      AND a.uni_id = n.uni_id
+      AND n.uni_id = pe.uni_id
+      AND pe.event_id = _event_id LIMIT 1;
+
+    ELSEIF _status = "ACT" AND _accessibility = "RSO" AND _not_participating THEN
+      INSERT INTO participating (user_id, event_id)
+      SELECT u.user_id, _event_id
+      FROM users u, is_member m, rso_events re
+      WHERE _user_id = u.user_id
+      AND u.user_id = m.user_id
+      AND m.rso_id = re.rso_id
+      AND re.event_id = _event_id LIMIT 1;
+
+    END IF;
+
+  COMMIT;
 
 END//
 
@@ -524,32 +603,45 @@ BEGIN
 
   DECLARE _accessibility ENUM ('PUB','PRI','RSO');
 
-  SET _accessibility = (SELECT accessibility FROM events WHERE event_id = _event_id);
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    DECLARE _err_msg TEXT;
+    ROLLBACK;
+    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    SELECT _err_msg;
+  END;
 
-  -- to comment on the event, the event must be public 
-  IF _accessibility = "PUB" OR
-    -- or private and the user attends the university
-    ( _accessibility = "PRI" AND EXISTS(
-    SELECT a.user_id
-    FROM attending a, private_events pe
-    WHERE _user_id = a.user_id
-    AND a.uni_id = pe.uni_id 
-    AND pe.event_id = _event_id)) OR
-    -- or an rso event and the user is a member of the rso
-    ( _accessibility = "RSO" AND EXISTS(
-    SELECT m.user_id
-    FROM is_member m, rso_events re 
-    WHERE _user_id = m.user_id
-    AND m.rso_id = re.rso_id
-    AND re.event_id = _event_id)) THEN
+  START TRANSACTION;
 
-    -- insert the comment
-    INSERT INTO commented_on (date_posted, content, user_id, event_id)
-    VALUES (NOW(), _content, _user_id, _event_id);
+    SET _accessibility = (SELECT accessibility FROM events WHERE event_id = _event_id);
 
-    SELECT comment_id FROM commented_on WHERE comment_id = LAST_INSERT_ID(); 
+    -- to comment on the event, the event must be public 
+    IF _accessibility = "PUB" OR
+      -- or private and the user attends the university
+      ( _accessibility = "PRI" AND EXISTS(
+      SELECT a.user_id
+      FROM attending a, private_events pe
+      WHERE _user_id = a.user_id
+      AND a.uni_id = pe.uni_id 
+      AND pe.event_id = _event_id)) OR
+      -- or an rso event and the user is a member of the rso
+      ( _accessibility = "RSO" AND EXISTS(
+      SELECT m.user_id
+      FROM is_member m, rso_events re 
+      WHERE _user_id = m.user_id
+      AND m.rso_id = re.rso_id
+      AND re.event_id = _event_id)) THEN
 
-  END IF;
+      -- insert the comment
+      INSERT INTO commented_on (date_posted, content, user_id, event_id)
+      VALUES (NOW(), _content, _user_id, _event_id);
+
+      SELECT comment_id FROM commented_on WHERE comment_id = LAST_INSERT_ID(); 
+
+    END IF;
+
+  COMMIT;
+
 END//
 
 CREATE PROCEDURE rate_event (
@@ -559,37 +651,49 @@ CREATE PROCEDURE rate_event (
   )
 BEGIN
 
-  -- if  rating exists, update it. otherwise, insert a new one.
-  IF NOT EXISTS(
-    SELECT r.user_id
-    FROM rating r
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    DECLARE _err_msg TEXT;
+    ROLLBACK;
+    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    SELECT _err_msg;
+  END;
+
+  START TRANSACTION;
+
+    -- if  rating exists, update it. otherwise, insert a new one.
+    IF NOT EXISTS(
+      SELECT r.user_id
+      FROM rating r
+      WHERE r.user_id = _user_id
+      AND r.event_id = _event_id) THEN
+      -- insert new rating for unique user rating event pair.
+      INSERT INTO rating (user_id, event_id, rating)
+      VALUES (_user_id, _event_id, _rating);
+    ELSE
+      -- update the record with matching user id and event id.
+      UPDATE rating SET
+      rating = _rating
+      WHERE user_id = _user_id
+      AND event_id = _event_id;
+    END IF;
+
+    -- update the events average rating
+    UPDATE events SET
+    rating = (
+      SELECT AVG(r.rating)
+      FROM rating r
+      WHERE r.event_id = _event_id)
+    WHERE event_id = _event_id;
+
+    -- bring back the users rating and the events rating to update the page
+    SELECT r.rating, e.rating AS total_rating
+    FROM rating r, events e
     WHERE r.user_id = _user_id
-    AND r.event_id = _event_id) THEN
-    -- insert new rating for unique user rating event pair.
-    INSERT INTO rating (user_id, event_id, rating)
-    VALUES (_user_id, _event_id, _rating);
-  ELSE
-    -- update the record with matching user id and event id.
-    UPDATE rating SET
-    rating = _rating
-    WHERE user_id = _user_id
-    AND event_id = _event_id;
-  END IF;
+    AND r.event_id = _event_id
+    AND e.event_id = _event_id;
 
-  -- update the events average rating
-  UPDATE events SET
-  rating = (
-    SELECT AVG(r.rating)
-    FROM rating r
-    WHERE r.event_id = _event_id)
-  WHERE event_id = _event_id;
-
-  -- bring back the users rating and the events rating to update the page
-  SELECT r.rating, e.rating AS total_rating
-  FROM rating r, events e
-  WHERE r.user_id = _user_id
-  AND r.event_id = _event_id
-  AND e.event_id = _event_id;
+  COMMIT;
 
 END//
 
@@ -602,6 +706,17 @@ CREATE PROCEDURE change_event_access (
   IN _accessibility ENUM('PUB','PRI','RSO'),
   IN _old_type ENUM('PUB','PRI','RSO'))
 BEGIN
+
+  -- roll back if there is a user defined error
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+  BEGIN
+    DECLARE _err_msg TEXT;
+    ROLLBACK;
+    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    SELECT _err_msg;
+  END;
+
+  START TRANSACTION;
   -- since the access of the event is being changed, we know that the event
   -- is getting removed from one of the child tables. 
 
@@ -609,15 +724,19 @@ BEGIN
   -- we are guaranteed to remove only the event being updated.
   IF _old_type = 'PUB' THEN 
     DELETE FROM public_events WHERE event_id = _event_id;
+
   ELSEIF _old_type = 'PRI' THEN 
     DELETE FROM private_events WHERE event_id = _event_id;
+
   ELSEIF _old_type = 'RSO' THEN 
     DELETE FROM rso_events WHERE event_id = _event_id;
     DELETE FROM r_created_e WHERE event_id = _event_id;
+
   END IF;
 
   -- now perform an insert on the proper table
   IF _accessibility = 'RSO' THEN
+
     BEGIN
       -- check if rso does not exist 
 
@@ -744,6 +863,7 @@ CREATE PROCEDURE view_event (
   IN _uni_id INT(11)
   )
 BEGIN
+
   -- events accessibility
   DECLARE _accessibility ENUM ('PUB','PRI','RSO');
   DECLARE _is_owner INT(1);
@@ -805,6 +925,9 @@ BEGIN
 
 END//
 
+-- uses the manhattan heuristic to obtain a rough estimate of distance
+-- from point a to point b. adds abs y distance to abs x distance
+-- plus side is it's fast to calculate, downside is it's not really accurate
 CREATE FUNCTION manhattan_distance (
   _lat1 DECIMAL(9, 6),
   _lon1 DECIMAL(9, 6),
@@ -840,19 +963,21 @@ BEGIN
   -- to calculate distance, get the coordinates of university and use manhattan
   -- heuristic between event points. (ABS(x1 - x2) + ABS(y1 - y1))
   -- if the scope is for another university, then the events viewed can only be public
+
   IF _scope = "other-uni" THEN
     SELECT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
     e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-    _is_participating AS is_participating, e.rating,
+    _is_participating AS is_participating, e.rating, h.uni_id AS uni_id, n.name AS uni_name,
     manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
-    FROM events e, hosting h
-    WHERE _uni_id = h.uni_id
+    FROM events e, hosting h, universities n
+    WHERE _uni_id = n.uni_id
+    AND n.uni_id = h.uni_id
     AND h.event_id = e.event_id
     -- a student can only see public events at another university
     AND e.accessibility = "PUB"
     ORDER BY
       CASE _sort_by WHEN "date" THEN e.start_time
-      WHEN "location" THEN location
+      WHEN "location" THEN distance 
       END;
 
   -- if the scope is "my-uni" (the only other scope) Allow a range of event types to be selected
@@ -860,28 +985,35 @@ BEGIN
     BEGIN
       SELECT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
       e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-      _is_participating AS is_participating, e.rating,
-      manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
-      FROM events e, public_events pe, hosting h
-      WHERE h.uni_id = _uni_id 
+      _is_participating AS is_participating, e.rating, h.uni_id AS uni_id,
+      n.name AS uni_name, manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
+      FROM events e, public_events pe, hosting h, universities n
+      WHERE n.uni_id = _uni_id 
+      AND n.uni_id = h.uni_id
       AND h.event_id = e.event_id
       AND e.event_id = pe.event_id
       ORDER BY
-        CASE _sort_by WHEN "date" THEN e.start_time
-        WHEN "location" THEN location
-        END;
+        CASE _sort_by WHEN "date" THEN e.start_time 
+        WHEN "location" THEN distance 
+        END ASC; 
     END;
 
   -- return event only if user attends/affiliates-with hosting university 
   ELSEIF _accessibility = "PRI" THEN
     BEGIN
-      SELECT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
+      SELECT DISTINCT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
       e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-      _is_participating AS is_participating, e.rating,
-      manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
-      FROM events e, private_events p, attending at, affiliated_with aw
-      WHERE p.uni_id = _uni_id 
-      AND p.event_id = e.event_id;
+      _is_participating AS is_participating, e.rating, h.uni_id AS uni_id,
+      n.name AS uni_name, manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
+      FROM events e, private_events p, attending at, affiliated_with aw, hosting h, universities n
+      WHERE _uni_id = n.uni_id
+      AND n.uni_id = h.uni_id
+      AND h.uni_id = p.uni_id 
+      AND p.event_id = e.event_id
+      ORDER BY
+        CASE _sort_by WHEN "date" THEN e.start_time 
+        WHEN "location" THEN distance 
+        END ASC; 
     END;
 
   -- return event only if user is_member of RSO
@@ -889,10 +1021,12 @@ BEGIN
     BEGIN
       SELECT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
       e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-      _is_participating AS is_participating, e.rating,
-      manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
-      FROM events e, rso_events re
+      _is_participating AS is_participating, e.rating, h.uni_id AS uni_id,
+      n.name AS uni_name, manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
+      FROM events e, rso_events re, hosting h, universities n
       WHERE e.event_id = re.event_id
+      AND _uni_id = h.uni_id
+      AND h.uni_id = n.uni_id
       AND re.rso_id = ANY(
         SELECT r.rso_id 
         FROM rsos r, is_member m
@@ -925,58 +1059,70 @@ BEGIN
 
   DECLARE _rso_id INT(11);
 
-  -- create a temporary table for members using the comma separated list
-  CREATE TEMPORARY TABLE temp_members (user_id INT(11) UNSIGNED);
-  INSERT INTO temp_members (user_id)
-  SELECT user_id FROM users WHERE FIND_IN_SET(user_id, _members);
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    DECLARE _err_msg TEXT;
+    ROLLBACK;
+    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    SELECT _err_msg;
+  END;
 
-  -- check if the members list has 5 records (or more). waive for SA and ADM
-  IF _role = "STU" AND (SELECT COUNT(user_id) FROM temp_members) < 5 THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "You must specify at least 5 members";
-  END IF;
+  START TRANSACTION;
 
-  -- check if the RSO is posted to the univserity currently attended by the user
-  IF _role = "STU" AND NOT EXISTS (
-    SELECT u.user_id FROM
-    users u, attending a, universities n
-    WHERE _user_id = u.user_id
-    AND u.user_id = a.user_id 
-    AND a.uni_id = n.uni_id
-    AND n.uni_id = _uni_id) THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "You may only create an RSO at a university you attend";
-  -- similarly, an admin should not be able to make RSO's for other universities.
-  ELSEIF _role = "ADM" AND NOT EXISTS (
-    SELECT u.user_id FROM
-    users u, affiliated_with a, universities n
-    WHERE _user_id = u.user_id
-    AND u.user_id = a.user_id 
-    AND a.uni_id = n.uni_id
-    AND n.uni_id = _uni_id) THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "You may only create an RSO at a university you're affiliated with";
+    -- create a temporary table for members using the comma separated list
+    CREATE TEMPORARY TABLE temp_members (user_id INT(11) UNSIGNED);
+    INSERT INTO temp_members (user_id)
+    SELECT user_id FROM users WHERE FIND_IN_SET(user_id, _members);
 
-  END IF;
+    -- check if the members list has 5 records (or more). waive for SA and ADM
+    IF _role = "STU" AND (SELECT COUNT(user_id) FROM temp_members) < 5 THEN
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "You must specify at least 5 members";
+    END IF;
 
-  -- insert the rso into the base table
-  INSERT INTO rsos (name, description)
-  VALUES (_name, _description);
+    -- check if the RSO is posted to the univserity currently attended by the user
+    IF _role = "STU" AND NOT EXISTS (
+      SELECT u.user_id FROM
+      users u, attending a, universities n
+      WHERE _user_id = u.user_id
+      AND u.user_id = a.user_id 
+      AND a.uni_id = n.uni_id
+      AND n.uni_id = _uni_id) THEN
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "You may only create an RSO at a university you attend";
+    -- similarly, an admin should not be able to make RSO's for other universities.
+    ELSEIF _role = "ADM" AND NOT EXISTS (
+      SELECT u.user_id FROM
+      users u, affiliated_with a, universities n
+      WHERE _user_id = u.user_id
+      AND u.user_id = a.user_id 
+      AND a.uni_id = n.uni_id
+      AND n.uni_id = _uni_id) THEN
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "You may only create an RSO at a university you're affiliated with";
 
-  -- get the id from the rso just inserted
-  SET _rso_id = LAST_INSERT_ID();
+    END IF;
 
-  -- now set the has relationship between the university and the rso
-  INSERT INTO has (uni_id, rso_id)
-  VALUES (_uni_id, _rso_id); 
+    -- insert the rso into the base table
+    INSERT INTO rsos (name, description)
+    VALUES (_name, _description);
 
-  -- now set the has administrates rel. between the user and the rso
-  INSERT INTO administrates (user_id, rso_id)
-  VALUES (_rso_admin_id, _rso_id);
+    -- get the id from the rso just inserted
+    SET _rso_id = LAST_INSERT_ID();
 
-  -- insert any members specified
-  INSERT INTO is_member (user_id, rso_id) (SELECT user_id, _rso_id FROM temp_members);
-  DROP TABLE temp_members;
+    -- now set the has relationship between the university and the rso
+    INSERT INTO has (uni_id, rso_id)
+    VALUES (_uni_id, _rso_id); 
 
-  -- return the id of RSO created for redirect purposes
-  SELECT _rso_id AS rso_id FROM rsos LIMIT 1; 
+    -- now set the has administrates rel. between the user and the rso
+    INSERT INTO administrates (user_id, rso_id)
+    VALUES (_rso_admin_id, _rso_id);
+
+    -- insert any members specified
+    INSERT INTO is_member (user_id, rso_id) (SELECT user_id, _rso_id FROM temp_members);
+    DROP TABLE temp_members;
+
+    -- return the id of RSO created for redirect purposes
+    SELECT _rso_id AS rso_id FROM rsos LIMIT 1; 
+
+  COMMIT;
 
 END//
 
@@ -1003,84 +1149,96 @@ CREATE PROCEDURE update_rso (
 
 BEGIN
 
-  -- check if the user is the rso_administrator 
-  IF _role <> "SA" AND _user_id <> (SELECT a.user_id FROM administrates a WHERE a.rso_id = _rso_id) THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "You are not athorized to change this RSO";
-  END IF; 
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    DECLARE _err_msg TEXT;
+    ROLLBACK;
+    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    SELECT _err_msg;
+  END;
 
-  -- check if user is student the the rso's host university
-  IF _role = "STU" AND NOT EXISTS (
-    SELECT u.user_id FROM
-    users u, attending a, universities n
-    WHERE _user_id = u.user_id
-    AND u.user_id = a.user_id 
-    AND a.uni_id = n.uni_id
-    AND n.uni_id = _uni_id) THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "You may only create an RSO at a university you attend";
+  START TRANSACTION;
 
-  -- or check if the admin user is affiliated with the university
-  ELSEIF _role = "ADM" AND NOT EXISTS (
-    SELECT u.user_id FROM
-    users u, affiliated_with a, universities n
-    WHERE _user_id = u.user_id
-    AND u.user_id = a.user_id 
-    AND a.uni_id = n.uni_id
-    AND n.uni_id = _uni_id) THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "You may only create an RSO at a university you're affiliated with";
-  END IF;
+    -- check if the user is the rso_administrator 
+    IF _user_id <> (SELECT a.user_id FROM administrates a WHERE a.rso_id = _rso_id) THEN
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "You are not athorized to change this RSO";
+    END IF; 
 
-  -- create a temporary table for members using the comma separated list
-  CREATE TEMPORARY TABLE new_members (user_id INT(11) UNSIGNED);
-  CREATE TEMPORARY TABLE gone_members (user_id INT(11) UNSIGNED);
+    -- check if user is student the the rso's host university
+    IF _role = "STU" AND NOT EXISTS (
+      SELECT u.user_id FROM
+      users u, attending a, universities n
+      WHERE _user_id = u.user_id
+      AND u.user_id = a.user_id 
+      AND a.uni_id = n.uni_id
+      AND n.uni_id = _uni_id) THEN
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "You may only create an RSO at a university you attend";
 
-  -- members to be added
-  INSERT INTO new_members (user_id)
-  SELECT u.user_id
-  FROM users u, is_member m, attending a
+    -- or check if the admin user is affiliated with the university
+    ELSEIF _role = "ADM" AND NOT EXISTS (
+      SELECT u.user_id FROM
+      users u, affiliated_with a, universities n
+      WHERE _user_id = u.user_id
+      AND u.user_id = a.user_id 
+      AND a.uni_id = n.uni_id
+      AND n.uni_id = _uni_id) THEN
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "You may only create an RSO at a university you're affiliated with";
+    END IF;
 
-  -- user must not be a member
-  WHERE FIND_IN_SET(u.user_id, _members)
-  AND u.user_id = a.user_id
-  AND a.uni_id = _uni_id
-  AND u.user_id <> ALL(SELECT m.user_id FROM is_member m WHERE m.rso_id = _rso_id);
+    -- create a temporary table for members using the comma separated list
+    CREATE TEMPORARY TABLE new_members (user_id INT(11) UNSIGNED);
+    CREATE TEMPORARY TABLE gone_members (user_id INT(11) UNSIGNED);
 
-  -- members to be deleted
-  INSERT INTO gone_members (user_id)
-  SELECT m.user_id
-  FROM is_member m
-  WHERE m.rso_id = _rso_id
-  AND NOT FIND_IN_SET(user_id, _members);
+    -- members to be added
+    INSERT INTO new_members (user_id)
+    SELECT u.user_id
+    FROM users u, is_member m, attending a
 
-  -- otherwise, the member is still a member. do nothing.
+    -- user must not be a member
+    WHERE FIND_IN_SET(u.user_id, _members)
+    AND u.user_id = a.user_id
+    AND a.uni_id = _uni_id
+    AND u.user_id <> ALL(SELECT m.user_id FROM is_member m WHERE m.rso_id = _rso_id);
 
-  -- insert the rso into the base table
-  UPDATE rsos SET
-  name = _name,
-  description = _description
-  WHERE rso_id = _rso_id; 
+    -- members to be deleted
+    INSERT INTO gone_members (user_id)
+    SELECT m.user_id
+    FROM is_member m
+    WHERE m.rso_id = _rso_id
+    AND NOT FIND_IN_SET(user_id, _members);
 
-  -- change the administrator
-  UPDATE administrates SET 
-  user_id = _rso_admin_id 
-  WHERE rso_id = _rso_id;
+    -- otherwise, the member is still a member. do nothing.
 
-  -- if user is super admin or admin, allow changing the 'status' of the RSO
-  IF _role = "SA" OR _role = "ADM" THEN
-    BEGIN
-    -- set rso status to 'ACT' for active or 'PND' for pending
-    END;
-  END IF;
+    -- insert the rso into the base table
+    UPDATE rsos SET
+    name = _name,
+    description = _description
+    WHERE rso_id = _rso_id; 
 
-  -- insert any new members specified
-  INSERT INTO is_member (user_id, rso_id) (SELECT user_id, _rso_id FROM new_members);
-  DROP TABLE new_members;
+    -- change the administrator
+    UPDATE administrates SET 
+    user_id = _rso_admin_id 
+    WHERE rso_id = _rso_id;
 
-  -- delete members that are gone.
-  DELETE FROM is_member WHERE user_id IN (SELECT user_id FROM gone_members);
-  DROP TABLE gone_members;
+    -- if user is super admin or admin, allow changing the 'status' of the RSO
+    IF _role = "SA" OR _role = "ADM" THEN
+      BEGIN
+      -- set rso status to 'ACT' for active or 'PND' for pending
+      END;
+    END IF;
 
-  -- return the id of RSO created for redirect purposes
-  SELECT _rso_id AS rso_id FROM rsos LIMIT 1;
+    -- insert any new members specified
+    INSERT INTO is_member (user_id, rso_id) (SELECT user_id, _rso_id FROM new_members);
+    DROP TABLE new_members;
+
+    -- delete members that are gone.
+    DELETE FROM is_member WHERE user_id IN (SELECT user_id FROM gone_members);
+    DROP TABLE gone_members;
+
+    -- return the id of RSO created for redirect purposes
+    SELECT _rso_id AS rso_id FROM rsos LIMIT 1;
+
+  COMMIT;
 
 END//
 
@@ -1090,12 +1248,142 @@ CREATE PROCEDURE view_rso (
   IN _role ENUM('SA','ADM','STU')
   )
 BEGIN
-  SELECT r.rso_id, r.name, r.description, a.user_id AS rso_administrator
-  FROM rsos r, is_member m, administrates a
-  WHERE r.rso_id = _rso_id
-  AND ((m.rso_id = _rso_id AND m.user_id = _user_id) OR
-    (a.rso_id = _rso_id AND a.user_id = _user_id))
-  OR (_role = "SA");
+
+  -- id of attending/affiliated with university
+  DECLARE _uni_id INT(11);
+
+  -- check the role
+
+  -- if user is student, make sure they attend the university
+  IF _role = "STU" THEN
+    SELECT a.uni_id INTO _uni_id
+    FROM attending a
+    WHERE a.user_id = _user_id;
+
+  -- if user is administrator, make sure they attend the university
+  ELSEIF _role = "ADM" THEN
+    SELECT a.uni_id INTO _uni_id
+    FROM affiliated_with a
+    WHERE a.user_id = _user_id;
+  END IF;
+  -- now check if super admin. if super admin, just view the RSO
+  IF _role = "SA" THEN
+
+    -- select the university. Do not bother to check affiliation
+    SELECT r.rso_id, r.name, r.description, a.user_id AS rso_administrator
+    FROM rsos r, administrates a, has h
+    WHERE r.rso_id = _rso_id
+    AND r.rso_id = a.rso_id;
+
+  -- if not SA (stu, or adm), apply the condition that the user must
+  -- attend/affiliate with the University
+  ELSE
+    SELECT r.rso_id, r.name, r.description, a.user_id AS rso_administrator
+    FROM rsos r, administrates a, has h
+    WHERE r.rso_id = _rso_id
+    AND r.rso_id = a.rso_id
+    AND h.rso_id = r.rso_id
+    AND h.uni_id = _uni_id;
+  END IF;
+
+END//
+
+-- procedure that allows a user to join the RSO
+CREATE PROCEDURE join_rso (
+  IN _user_id INT(11),
+  IN _rso_id INT(11),
+  IN _uni_id INT(11)
+)
+BEGIN
+
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    DECLARE _err_msg TEXT;
+    ROLLBACK;
+    GET DIAGNOSTICS CONDITION 1
+      _err_msg = MESSAGE_TEXT;
+    SELECT _err_msg;
+  END;
+
+  START TRANSACTION;
+
+  -- check if user is member of the university
+    IF NOT EXISTS (
+      SELECT a.uni_id
+      FROM attending a
+      WHERE a.user_id = _user_id
+      AND a.uni_id = _uni_id)
+    AND NOT EXISTS (
+      SELECT a.uni_id
+      FROM affiliated_with a 
+      WHERE a.user_id = _user_id
+      AND a.uni_id = _uni_id) THEN
+
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'You must belong to this Universities RSO.';
+
+    -- also check if this user is a member
+    ELSEIF EXISTS (
+      SELECT m.user_id
+      FROM is_member m
+      WHERE _rso_id = m.rso_id
+      AND m.user_id = _user_id) THEN
+
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'You are already a member of this RSO';
+
+    ELSE
+      -- add new member
+      INSERT INTO is_member (user_id, rso_id)
+      VALUES (_user_id, _rso_id);
+
+      SELECT _user_id AS user_id;
+
+    END IF;
+
+
+  COMMIT;
+
+END;
+
+-- procedure that allows a user to leave the RSO
+CREATE PROCEDURE leave_rso (
+  IN _user_id INT(11),
+  IN _rso_id INT(11)
+)
+BEGIN
+
+  DECLARE _rso_administrator INT(11);
+
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+
+  BEGIN
+    DECLARE _err_msg TEXT;
+    ROLLBACK;
+    GET DIAGNOSTICS CONDITION 1
+      _err_msg = MESSAGE_TEXT;
+    SELECT _err_msg;
+  END;
+
+  START TRANSACTION;
+
+    SELECT user_id INTO _rso_administrator
+    FROM administrates
+    WHERE user_id = _user_id
+    AND rso_id = _rso_id;
+
+    -- prevent a complicated situation
+    IF _rso_administrator = _user_id THEN
+
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "You must mark someone else as the administrator before leaving";
+
+    END IF;
+
+    DELETE FROM is_member 
+    WHERE user_id = _user_id
+    AND rso_id = _rso_id;
+
+    SELECT _user_id AS user_id;
+
+  COMMIT;
 
 END//
 

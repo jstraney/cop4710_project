@@ -35,6 +35,12 @@ $template = <<<EOT
       // this is weird but it works.
       a.scope.members = {$members_json};
 
+      // current administrator
+      a.scope.rso_administrator = {$rso_administrator};
+
+      // current user
+      a.scope.current_user = {$user_id};
+
     })(app);
     </script>
 

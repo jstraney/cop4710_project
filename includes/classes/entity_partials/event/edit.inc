@@ -12,10 +12,10 @@ if ($role === "SA" ) {
     <p class="form-prompt">
     Marking the event as active will allow the event to be viewed and attended.
     </p>
-    <input {$is_pnd} id="status-pnd" name="status" type="radio" value="PND"/>
-    <label for="status-pnd">Pending</label>
-    <input {$is_act} id="status-act" name="status" type="radio" value="ACT"/>
-    <label for="status-act">Active</label>
+    <input {$is_pnd} id="stat-pnd" name="status" type="radio" value="PND"/>
+    <label for="stat-pnd">Pending</label>
+    <input {$is_act} id="stat-act" name="status" type="radio" value="ACT"/>
+    <label for="stat-act">Active</label>
   </div> 
 EOT;
 
@@ -91,9 +91,9 @@ $template .= <<<EOT
   <div class="selection">
     <label>Who can see this event?</label>
     <select id="accessibility" name="accessibility">
-      <option id="access-pub"value="PUB">Public</option>
-      <option id="access-pri"value="PRI">Private</option>
-      <option id="access-rso" value="RSO">RSO</option>
+      <option $acc_pub id="access-pub"value="PUB">Public</option>
+      <option $acc_pri id="access-pri"value="PRI">Private</option>
+      <option $acc_rso id="access-rso" value="RSO">RSO</option>
     </select>
     <p class="field-prompt">
     Events marked as public can be seen by anyone. Events marked as private can only be
@@ -105,7 +105,7 @@ $template .= <<<EOT
   <div class="selection">
     <label>Pick a Category</label>
     <input id="category" name="category" type="text"></input>
-  </div> 
+  </div>
 
   <input class="btn btn-large" type="submit" value="Update Event"></input>
 

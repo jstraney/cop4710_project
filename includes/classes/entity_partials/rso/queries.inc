@@ -36,4 +36,12 @@ AND m.rso_id = r.rso_id
 AND u.user_id = m.user_id;
 EOT;
 
+$join_rso_query = <<<EOT
+CALL join_rso (:user_id, :rso_id, :uni_id);
+EOT;
+
+$leave_rso_query = <<<EOT
+CALL leave_rso (:user_id, :rso_id);
+EOT;
+
 ?>

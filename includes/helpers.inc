@@ -26,6 +26,12 @@ function check_password($pw, $hash) {
 
 }
 
+function check_field ($params, $key) {
+
+  return isset($params[$key]) && !empty($params[$key])? $params[$key]: NULL;
+
+}
+
 // this function simply returns the string of the path
 // to the entity partial from the classes directory.
 function get_entity_partial ($entity, $partial) {
