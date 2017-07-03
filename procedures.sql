@@ -77,13 +77,23 @@ BEGIN
 
   DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
   START TRANSACTION;
+
+    -- check for manditory fields
+    IF _user_name IS NULL OR _first_name IS NULL OR _last_name IS NULL OR
+    _email IS NULL OR _role IS NULL OR _hash IS NULL OR _uni_id IS NULL THEN
+
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "One or more field was missing when creating your account";
+
+    END IF;
 
     -- only perform insert if the email matches the universities email domain 
     IF (_role = "STU" OR _role = "ADM") AND (check_uni_emails(_email, _uni_id) < 1) THEN
@@ -122,19 +132,28 @@ CREATE PROCEDURE update_user (
   IN _last_name varchar(60),
   IN _email varchar(60),
   IN _role enum("SA", "ADM", "STU"),
-  IN _hash varchar(60),
   IN _uni_id INT(11)) 
 BEGIN
 
   DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
   START TRANSACTION;
+
+    -- check fields
+    IF _user_name IS NULL OR _first_name IS NULL OR _last_name IS NULL OR
+    _email IS NULL OR _role IS NULL OR _uni_id IS NULL THEN
+
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "One or more field was missing when updating your account";
+
+    END IF;
     
     IF _role = "STU" AND (check_uni_emails(_email, _uni_id) < 1) THEN
       SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'e-mail must match university selected.';
@@ -145,8 +164,7 @@ BEGIN
     first_name = _first_name,
     last_name = _last_name,
     email = _email,
-    role = _role,
-    hash = _hash
+    role = _role
     WHERE user_id = _user_id;
 
     IF _role = "STU" THEN
@@ -237,8 +255,6 @@ CREATE PROCEDURE create_event (
   IN _lon DECIMAL(9, 6),
   -- determines the ISA relationship
   IN _accessibility ENUM('PUB','PRI','RSO'),
-  -- category of event ('arts', 'fundraiser', etc.) 
-  IN _categories varchar(60),
   -- user creating event
   IN _user_id INT(11),
   -- id of rso if this is an RSO accessible event
@@ -252,15 +268,25 @@ BEGIN
 
   DECLARE _status ENUM('PND','ACT');
 
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
   START TRANSACTION;
+
+    -- check fields
+    IF _name IS NULL OR _start_time IS NULL OR _end_time IS NULL OR _description IS NULL OR
+    _location IS NULL OR _lat IS NULL OR _lon IS NULL OR _accessibility IS NULL THEN
+
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "One or more field was missing from your event";
+
+    END IF;
 
     -- no event should be happening at the same time
     IF EXISTS(
@@ -376,8 +402,6 @@ CREATE PROCEDURE update_event (
   IN _lon DECIMAL(9, 6),
   -- determines the ISA relationship
   IN _accessibility ENUM('PUB','PRI','RSO'),
-  -- category of event ('arts', 'fundraiser', etc.) 
-  IN _categories varchar(60),
   -- id of user. checks if is the administrator of the RSO 
   IN _user_id INT(11),
   -- id of rso if this is an RSO accessible event
@@ -400,15 +424,24 @@ BEGIN
 
   DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1
-      _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
   START TRANSACTION;
 
+    -- check fields
+    IF _name IS NULL OR _start_time IS NULL OR _end_time IS NULL OR _description IS NULL OR
+    _location IS NULL OR _lat IS NULL OR _lon IS NULL OR _accessibility IS NULL THEN
+
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "One or more field was missing from your event";
+
+    END IF;
+  
     -- the uni ID should be the id of the hosting university.
     SELECT h.uni_id INTO _uni_id
     FROM hosting h
@@ -534,11 +567,13 @@ BEGIN
   DECLARE _not_participating INT(1);
   DECLARE _status ENUM('PND','ACT');
 
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
@@ -603,11 +638,13 @@ BEGIN
 
   DECLARE _accessibility ENUM ('PUB','PRI','RSO');
 
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
@@ -651,11 +688,13 @@ CREATE PROCEDURE rate_event (
   )
 BEGIN
 
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
@@ -710,9 +749,11 @@ BEGIN
   -- roll back if there is a user defined error
   DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
@@ -881,44 +922,50 @@ BEGIN
   -- no check necessary for public events
   IF _role = "SA" OR _accessibility = "PUB" THEN
     BEGIN
-      SELECT e.name, e.start_time, e.end_time, e.description, e.location,
+      SELECT DISTINCT e.name, e.start_time, e.end_time, e.description, e.location,
       e.telephone, e.email, e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
       _is_participating AS is_participating, e.rating, r.rso_id, r.name as rso_name
-      FROM events e
+      FROM public_events pe, universities n, events e
       LEFT OUTER JOIN r_created_e re ON re.event_id = e.event_id
       LEFT OUTER JOIN rsos r ON r.rso_id = re.rso_id
       WHERE e.event_id = _event_id
+      AND e.event_id = pe.event_id
+      AND pe.uni_id = n.uni_id
       LIMIT 1;
     END;
 
   -- return event only if user attends/affiliates-with hosting university 
   ELSEIF _accessibility = "PRI" THEN
     BEGIN
-      SELECT e.name, e.start_time, e.end_time, e.description, e.location,
+      SELECT DISTINCT e.name, e.start_time, e.end_time, e.description, e.location,
       e.telephone, e.email, e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-      _is_participating AS is_participating, e.rating, e.event_id, re.rso_id, r.name AS rso_name
-      FROM events e, private_events p
+      _is_participating AS is_participating, e.rating, e.event_id, re.rso_id, r.name AS rso_name,
+      n.name AS uni_name, n.uni_id
+      FROM events e, universities n, private_events p
       LEFT OUTER JOIN r_created_e re ON re.event_id = p.event_id
       LEFT OUTER JOIN rsos r ON r.rso_id = re.rso_id
       WHERE e.event_id = _event_id
       AND e.event_id = p.event_id
-      AND p.uni_id = _uni_id LIMIT 1;
+      AND p.uni_id = n.uni_id
+      AND n.uni_id = _uni_id LIMIT 1;
     END;
 
   -- return event only if user is_member of RSO. implicitly made by an RSO, so no join is necessary
   ELSEIF _accessibility = "RSO" THEN
     BEGIN
-      SELECT e.name, e.start_time, e.end_time, e.description, e.location,
+      SELECT DISTINCT e.name, e.start_time, e.end_time, e.description, e.location,
       e.telephone, e.email, e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-      _is_participating AS is_participating, e.rating, r.rso_id, r.name AS rso_name
-      FROM events e, rso_events re, rsos r
+      _is_participating AS is_participating, e.rating, r.rso_id, r.name AS rso_name,
+      n.name AS uni_name, n.uni_id
+      FROM events e, universities n, rso_events re, rsos r
       WHERE e.event_id = _event_id
       AND re.event_id = e.event_id
       AND re.rso_id = r.rso_id
       AND re.rso_id = ANY(
         SELECT r.rso_id 
         FROM rsos r, is_member m
-        WHERE _user_id = m.user_id AND m.rso_id = r.rso_id);
+        WHERE _user_id = m.user_id AND m.rso_id = r.rso_id)
+      AND re.uni_id = n.uni_id;
     END;
 
   END IF;
@@ -944,7 +991,8 @@ CREATE PROCEDURE search_events (
   IN _uni_id INT(11),
   IN _scope TINYTEXT,
   IN _sort_by TINYTEXT, 
-  IN _accessibility ENUM ('PUB','PRI','RSO') 
+  IN _accessibility ENUM ('PUB','PRI','RSO') ,
+  IN _categories varchar(500) 
   )
 BEGIN
 
@@ -965,16 +1013,18 @@ BEGIN
   -- if the scope is for another university, then the events viewed can only be public
 
   IF _scope = "other-uni" THEN
-    SELECT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
+    SELECT DISTINCT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
     e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
     _is_participating AS is_participating, e.rating, h.uni_id AS uni_id, n.name AS uni_name,
     manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
-    FROM events e, hosting h, universities n
+    FROM public_events pe, hosting h, universities n, events e
+    LEFT JOIN categorized_as c ON e.event_id = c.event_id
     WHERE _uni_id = n.uni_id
     AND n.uni_id = h.uni_id
     AND h.event_id = e.event_id
     -- a student can only see public events at another university
     AND e.accessibility = "PUB"
+    AND (_categories = "" OR FIND_IN_SET(c.label, _categories))
     ORDER BY
       CASE _sort_by WHEN "date" THEN e.start_time
       WHEN "location" THEN distance 
@@ -983,15 +1033,19 @@ BEGIN
   -- if the scope is "my-uni" (the only other scope) Allow a range of event types to be selected
   ELSEIF _accessibility = "PUB" THEN
     BEGIN
-      SELECT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
+      SELECT DISTINCT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
       e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
       _is_participating AS is_participating, e.rating, h.uni_id AS uni_id,
       n.name AS uni_name, manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
-      FROM events e, public_events pe, hosting h, universities n
+      FROM  public_events pe, hosting h, universities n, events e
+      LEFT JOIN categorized_as c ON e.event_id = c.event_id
       WHERE n.uni_id = _uni_id 
       AND n.uni_id = h.uni_id
       AND h.event_id = e.event_id
       AND e.event_id = pe.event_id
+      -- find category in the categories search string
+      -- or return full set if string is blank
+      AND (_categories = "" OR FIND_IN_SET(c.label, _categories))
       ORDER BY
         CASE _sort_by WHEN "date" THEN e.start_time 
         WHEN "location" THEN distance 
@@ -1005,11 +1059,14 @@ BEGIN
       e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
       _is_participating AS is_participating, e.rating, h.uni_id AS uni_id,
       n.name AS uni_name, manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
-      FROM events e, private_events p, attending at, affiliated_with aw, hosting h, universities n
+      FROM private_events p, attending at, affiliated_with aw, hosting h, universities n, events e
+      LEFT JOIN categorized_as c ON e.event_id = c.event_id
       WHERE _uni_id = n.uni_id
       AND n.uni_id = h.uni_id
       AND h.uni_id = p.uni_id 
       AND p.event_id = e.event_id
+      -- if no categories provided, return all events in the scope
+      AND (_categories = "" OR FIND_IN_SET(c.label, _categories))
       ORDER BY
         CASE _sort_by WHEN "date" THEN e.start_time 
         WHEN "location" THEN distance 
@@ -1019,18 +1076,25 @@ BEGIN
   -- return event only if user is_member of RSO
   ELSEIF _accessibility = "RSO" THEN
     BEGIN
-      SELECT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
+      SELECT DISTINCT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
       e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
       _is_participating AS is_participating, e.rating, h.uni_id AS uni_id,
       n.name AS uni_name, manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
-      FROM events e, rso_events re, hosting h, universities n
+      FROM rso_events re, hosting h, universities n, events e
+      LEFT JOIN categorized_as c ON e.event_id = c.event_id
       WHERE e.event_id = re.event_id
       AND _uni_id = h.uni_id
       AND h.uni_id = n.uni_id
+      -- make sure the events are in the users RSO's
       AND re.rso_id = ANY(
         SELECT r.rso_id 
         FROM rsos r, is_member m
-        WHERE _user_id = m.user_id AND m.rso_id = r.rso_id);
+        WHERE _user_id = m.user_id AND m.rso_id = r.rso_id)
+      AND (_categories = "" OR FIND_IN_SET(c.label, _categories))
+      ORDER BY
+        CASE _sort_by WHEN "date" THEN e.start_time 
+        WHEN "location" THEN distance 
+        END ASC; 
     END;
 
   END IF;
@@ -1061,13 +1125,21 @@ BEGIN
 
   DECLARE EXIT HANDLER FOR SQLEXCEPTION
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
   START TRANSACTION;
+
+    IF _name IS NULL OR _description IS NULL THEN 
+
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "One or more field was missing from your RSO.";
+
+    END IF;
 
     -- create a temporary table for members using the comma separated list
     CREATE TEMPORARY TABLE temp_members (user_id INT(11) UNSIGNED);
@@ -1149,15 +1221,23 @@ CREATE PROCEDURE update_rso (
 
 BEGIN
 
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
   START TRANSACTION;
+
+    IF _name IS NULL OR _description IS NULL THEN 
+
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "One or more field was missing from your RSO.";
+
+    END IF;
 
     -- check if the user is the rso_administrator 
     IF _user_id <> (SELECT a.user_id FROM administrates a WHERE a.rso_id = _rso_id) THEN
@@ -1191,9 +1271,8 @@ BEGIN
 
     -- members to be added
     INSERT INTO new_members (user_id)
-    SELECT u.user_id
+    SELECT DISTINCT u.user_id
     FROM users u, is_member m, attending a
-
     -- user must not be a member
     WHERE FIND_IN_SET(u.user_id, _members)
     AND u.user_id = a.user_id
@@ -1296,12 +1375,13 @@ CREATE PROCEDURE join_rso (
 )
 BEGIN
 
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1
-      _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
@@ -1353,13 +1433,13 @@ BEGIN
 
   DECLARE _rso_administrator INT(11);
 
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
-
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1
-      _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
