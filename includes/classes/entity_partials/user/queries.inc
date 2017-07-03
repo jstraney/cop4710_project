@@ -20,7 +20,7 @@ EOT;
 
 // updates the fields on a profile when someone submits the user/edit form.
 $update_query = <<<EOT
-CALL update_user(:user_id, :user_name, :first_name, :last_name, :email, :role, :hash, :uni_id);
+CALL update_user(:user_id, :user_name, :first_name, :last_name, :email, :role, :uni_id);
 EOT;
 
 // destroys a user using their :uid

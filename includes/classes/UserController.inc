@@ -67,21 +67,13 @@ class UserController extends EntityController {
 
   public function create($params) {
 
-    $user_name = isset($params['user-name'])? $params['user-name']: FALSE;
-    $first_name = isset($params['first-name'])? $params['first-name']: FALSE; 
-    $last_name = isset($params['last-name'])? $params['last-name']: FALSE; 
-    $email = isset($params['e-mail'])? $params['e-mail']: FALSE; 
-    $password = isset($params['password'])? $params['password']: FALSE; 
-    $uni_id = isset($params['uni-id'])? $params['uni-id']: FALSE; 
-    $user_role = isset($params['role'])? $params['role']: "STU"; 
-
-    $requirements_met = TRUE;
-    $requirements_met = $user_name && $first_name && $last_name;
-    $requirements_met = $requirements_met && $email && $password && $uni_id;
-
-    if (!$requirements_met) {
-      set_message('One or more fields were missing when creating your account. Please fill all required fields.', 'error');
-    }
+    $user_name = check_field($params, 'user-name', NULL);
+    $first_name = check_field($params,'first-name', NULL); 
+    $last_name = check_field($params,'last-name', NULL); 
+    $email = check_field($params, 'e-mail', NULL); 
+    $password = check_field($params, 'password', NULL); 
+    $uni_id = check_field($params, 'uni-id', NULL);
+    $user_role = check_field($params, 'role', "STU");
 
     $hash = encrypt_password($password);
 
@@ -97,15 +89,20 @@ class UserController extends EntityController {
       ":role" => $user_role,
     ));
 
-    if ($result === FALSE) {
-
-      set_message("There has been an error in creating your account. Contact our administrative team for assistance.", "error");
+    if (empty($result)) {
 
       go_home();
-
-      return;
+      die();
 
     } 
+    else if (isset($result[0]['_err_msg'])) {
+
+      $msg = $result[0]['_err_msg'];
+      set_message($msg, "error");
+      go_back();
+      die();
+
+    }
 
     set_message("You have successfully created an account! Log in to get started.");
 
@@ -159,13 +156,13 @@ class UserController extends EntityController {
 
     $viewed_user = $result[0];
 
-    $user_name = isset($viewed_user['user_name'])? $viewed_user['user_name']: "";
-    $first_name = isset($viewed_user['first_name'])? $viewed_user['first_name']: "";
-    $last_name = isset($viewed_user['last_name'])? $viewed_user['last_name']: "";
-    $email = isset($viewed_user['email'])? $viewed_user['email']: "";
-    $uni_id = isset($viewed_user['uni_id'])? $viewed_user['uni_id']: "";
-    $uni_name = isset($viewed_user['uni_name'])? $viewed_user['uni_name']: "";
-    $user_role = isset($viewed_user['role'])? $viewed_user['role']: "";
+    $user_name = check_field($viewed_user, 'user_name', "");
+    $first_name = check_field($viewed_user,'first_name', ""); 
+    $last_name = check_field($viewed_user,'last_name', ""); 
+    $email = check_field($viewed_user, 'email', ""); 
+    $uni_id = check_field($viewed_user, 'uni_id', 0);
+    $uni_name = check_field($viewed_user, 'uni_name', "");
+    $user_role = check_field($viewed_user, 'role', "STU");
 
     include get_entity_partial('user', 'view');
 
@@ -191,6 +188,7 @@ class UserController extends EntityController {
 
       // go to home page. 
       go_home();
+      die();
 
     }
 
@@ -212,20 +210,18 @@ class UserController extends EntityController {
 
     $id = $params[1];
 
-    $user_name = $params['user-name']; 
-    $first_name = $params['first-name']; 
-    $last_name = $params['last-name']; 
-    $email = $params['e-mail']; 
-    $uni_id = $params['uni-id']; 
-    $password = $params['password']; 
-    $user_role = isset($params['role'])? $params['role'] : "STU"; 
+    $user_name = check_field($params, 'user-name', NULL);
+    $first_name = check_field($params,'first-name', NULL); 
+    $last_name = check_field($params,'last-name', NULL); 
+    $email = check_field($params, 'e-mail', NULL); 
+    $password = check_field($params, 'password', NULL); 
+    $uni_id = check_field($params, 'uni-id', NULL);
+    $user_role = check_field($params, 'role', "STU");
 
     if ($this->check_credentials($id, $password)) {
 
       // check password entered against actual hash
       $query = $this->update_query;
-
-      $hash = encrypt_password($password);
 
       $result = $this->db->prepared_query($query, array(
         ":user_name" => $user_name,
@@ -233,7 +229,6 @@ class UserController extends EntityController {
         ":last_name" => $last_name,
         ":email" => $email,
         ":uni_id" => $uni_id,
-        ":hash" => $hash,
         ":role" => $user_role,
         ":user_id" => $id,
       ));
@@ -247,6 +242,14 @@ class UserController extends EntityController {
         set_message($msg, "error");
         go_back();
         die();
+
+      }
+
+      if (isset($_FILES['pic'])) {
+
+        $file = $_FILES['pic']['tmp_name'];
+
+        create_entity_pic("users", $id, $file);
 
       }
 

@@ -17,6 +17,9 @@ class EventController extends EntityController {
 
   private $get_rso_events_query;
 
+  private $get_categories_query;
+  private $get_categories_like_query;
+
   public function __construct() {
 
     $this->db = new Database();
@@ -34,6 +37,10 @@ class EventController extends EntityController {
     $this->event_participants_query = $event_participants_query;
 
     $this->get_rso_events_query = $get_rso_events_query;
+
+    $this->get_categories_query = $get_categories_query;
+
+    $this->get_categories_like_query = $get_categories_like_query;
 
   }
 
@@ -57,24 +64,27 @@ class EventController extends EntityController {
 
     $role = $user->role;
 
-    $name = isset($params['name'])? $params['name']: NULL;
-    $description = isset($params['description'])? $params['description']: NULL;
-    $location = isset($params['location'])? $params['location']: NULL;
+    $name = check_field($params,'name', NULL);
+    $description = check_field($params,'description', NULL);
+    $location = check_field($params,'location', NULL);
 
     // calculate duration from start and end time.
-    $start_time = isset($params['start-time'])? $params['start-time']: "";
-    $end_time = isset($params['end-time'])? $params['end-time']: "";
-    $telephone = isset($params['telephone'])? $params['telephone']: "";
-    $email = isset($params['email'])? $params['email']: "";
-    $lon = isset($params['lon'])? $params['lon']: "";
-    $lat = isset($params['lat'])? $params['lat']: "";
+    $start_time = check_field($params,'start-time', NULL);
+    $end_time = check_field($params,'end-time', NULL);
+    $telephone = check_field($params,'telephone', "");
+    $email = check_field($params,'email', "");
+    $lon = check_field($params,'lon', NULL);
+    $lat = check_field($params,'lat', NULL);
 
-    $categories = isset($params['categories'])? $params['categories']: ""; 
-    $accessibility = isset($params['accessibility'])? $params['accessibility']: ""; 
+    $categories = check_field($params,'categories', ""); 
+
+    $cat_arr = explode(",", $categories);
+
+    $accessibility = check_field($params,'accessibility', NULL); 
 
     // allow user to set the rso from the list of rso's they administrate.
     // If none was selected, set to 0 to set event to PND -> pending
-    $rso_id = isset($params['rso-id'])? $params['rso-id']: 0; 
+    $rso_id = check_field($params,'rso-id', 0); 
 
     // always use the users university
     $uni_id = isset($user->uni_id)? $user->uni_id: 0; 
@@ -93,7 +103,6 @@ class EventController extends EntityController {
       ":lat" => $lat,
       ":lon" => $lon,
       ":accessibility" => $accessibility,
-      ":categories" => $categories,
       ":user_id" => $user_id,
       ":rso_id" => $rso_id,
       ":uni_id" => $uni_id,
@@ -119,9 +128,35 @@ class EventController extends EntityController {
 
     // get id of event just created.
     $result = $result[0];
+
+    // the insert was succesful, so we can use the new event id (returned by procedure).
     $event_id = $result['event_id'];
-    $event_id = $result['event_id'];
+
+    if (!empty($categories)) {
+      // We will not know how many categories are being added, so I am
+      // building the query string here in the controller.
+      $category_query = "INSERT INTO categorized_as (event_id, label) VALUES ";
+
+      foreach ($cat_arr as $key => $category) {
+
+        // event id is provided by the databases auto-increment, so it is safe to concatenate here.
+        $category_query .= "($event_id, :cat_$key ),";
+
+        // name the keys for the prepared query below
+        $cat_arr["cat_".$key] = $cat_arr[$key];
+        unset($cat_arr[$key]);
+
+      }
+
+      // replace last comma with semi-colon
+      $category_query = substr($category_query, 0, -1) . ";";
+
+      $this->db->prepared_query($category_query, $cat_arr);
+
+    }
+
     set_message("You've successfully created the event " . $name . ". Try inviting friends!");
+
     redirect_entity_view('event', $event_id);
 
   }
@@ -138,6 +173,7 @@ class EventController extends EntityController {
     if (!isset($user)) {
 
       go_home();
+      die();
 
     }
 
@@ -189,9 +225,31 @@ class EventController extends EntityController {
     $rating = isset($result['rating'])? $result['rating']: "";
     $status = isset($result['status'])? $result['status']: "";
 
+    $uni_id = check_field($result, 'uni_id', 0);
+    $uni_name = check_field($result, 'uni_name', "");
+
     // if the event was created by an RSO allow the following.
     $rso_id = isset($result['rso_id'])? $result['rso_id']: "";
     $rso_name = isset($result['rso_name'])? $result['rso_name']: "";
+
+    $accessibility = isset($result['accessibility'])? $result['accessibility']: "";
+
+    if ($accessibility == "PUB") {
+
+      $access_msg = "This event is public to everyone";
+
+    }
+    else if ($accessibility == "PRI") {
+
+      $access_msg = "This event is exclusive to students at ";
+
+    }
+    else if ($accessibility == "RSO") {
+
+      $access_msg = "This event is exclusive to members of " . $rso_name;
+
+    }
+
 
     // return the partial using the variable defined above.
     include get_entity_partial('event', 'view');
@@ -244,28 +302,30 @@ class EventController extends EntityController {
     $user_id = $user->user_id;
     $uni_id = isset($user->uni_id)? $user->uni_id: 0;
     $role = $user->role;
- 
-    $name = isset($params['name']) && !empty($params['name']) ? $params['name']: NULL;
-    $description = isset($params['description']) && !empty($params['description']) ? $params['description']: NULL;
-    $location = isset($params['location']) && !empty($params['location']) ? $params['location']: NULL;
-    console_log($location);
-    die();
+    $name = check_field($params,'name', NULL);
+    $description = check_field($params,'description', NULL);
+    $location = check_field($params,'location', NULL);
 
     // calculate duration from start and end time.
-    $start_time = isset($params['start-time'])? $params['start-time']: NULL;
-    $end_time = isset($params['end-time'])? $params['end-time']: NULL;
-    $telephone = isset($params['telephone'])? $params['telephone']: "";
-    $email = isset($params['email'])? $params['email']: "";
-    $lon = isset($params['lon'])? $params['lon']: NULL; 
-    $lat = isset($params['lat'])? $params['lat']: NULL; 
+    $start_time = check_field($params,'start-time', NULL);
+    $end_time = check_field($params,'end-time', NULL);
+    $telephone = check_field($params,'telephone', "");
+    $email = check_field($params,'email', "");
+    $lon = check_field($params,'lon', NULL);
+    $lat = check_field($params,'lat', NULL);
 
-    $accessibility = isset($params['accessibility'])? $params['accessibility']: "PUB"; 
-    
-    $rso_id = isset($params['rso-id'])? $params['rso-id']: 0; 
+    $categories = check_field($params,'categories', ""); 
 
-    $categories = isset($params['categories'])? $params['categories']: ""; 
+    // for faster lookup, the category labels are used as keys.
+    $categories = array_flip(explode(",", $categories));
 
-    $status = isset($params['status'])? $params['status']: 'PND';
+    $accessibility = check_field($params,'accessibility', NULL); 
+
+    // allow user to set the rso from the list of rso's they administrate.
+    // If none was selected, set to 0 to set event to PND -> pending
+    $rso_id = check_field($params,'rso-id', 0); 
+
+    $status = check_field($params, 'status', 'PND');
 
     $query = $this->update_query;
 
@@ -283,7 +343,6 @@ class EventController extends EntityController {
       ":user_id" => $user_id,
       ":rso_id" => $rso_id,
       ":accessibility" => $accessibility,
-      ":categories" => $categories,
       ":status" => $status
     ));
 
@@ -299,6 +358,84 @@ class EventController extends EntityController {
       set_message($msg, "error");
       go_back();
       die();
+
+    }
+
+    // get existing categories on event
+    $current_categories = $this->db->prepared_query(
+      "SELECT label FROM categorized_as WHERE event_id = :event_id",
+      array(":event_id" => $event_id)
+    );
+
+
+    // categories not added for this event previously
+    $new_cat = array();
+
+    // categories that are not in this update request. 
+    $gone_cat = array();
+
+    // go through the existing categories
+    foreach ($current_categories as $key => $category) {
+
+      // the existing category label in databse
+      $extant_label = $category['label'];
+
+      // if the categories we want to add are already in the db
+      if (isset($categories[$extant_label])) {
+
+        // we do not need to insert an existing category
+        unset($categories[$extant_label]);
+
+        // anything not unset in this way will be a new category
+
+      }
+      // if the category in the DB is not found in our current update request
+      // then it must be deleted from the db.
+      else {
+
+        $gone_cat[] = $extant_label;
+
+      }
+
+    }
+
+    // all categories submitted to the update request that already exist in DB have been
+    // removed from the categories to be inserted, leaving only new categories
+    
+    // there may be an empty string added as a category. unset it to make the list empty
+    // if there are no categories on the event.
+    unset($categories['']);
+    $categories = array_flip($categories);
+    $new_cat = $categories;
+
+    if (!empty($new_cat)) {
+
+      $create_cat = "INSERT INTO categorized_as (event_id, label) VALUES ";
+
+      foreach($new_cat as $key => $category) {
+
+        $create_cat .= "($event_id, :cat_$key),";
+
+        // replace keys for the purposes of prepared statement
+        $new_cat[":cat_" . $key] = $new_cat[$key];
+
+        unset($new_cat[$key]);
+
+      }
+
+      $create_cat = substr($create_cat, 0, -1) . ";";
+
+      $this->db->prepared_query($create_cat, $new_cat);
+
+    }
+
+    if (!empty($gone_cat)) {
+
+      $destroy_cat = "DELETE FROM categorized_as WHERE FIND_IN_SET(label, :categories);";
+
+      $this->db->prepared_query($destroy_cat, array(
+        ":categories" => implode("," , $gone_cat)
+      ));
 
     }
 
@@ -327,16 +464,9 @@ class EventController extends EntityController {
 
     if ($password == NULL || !$can_destroy) {
 
-      go_home();
-
-      die();
-
-    }
-    else {
-
       $msg = "The e-mail or password provided is incorrect"; 
       set_message($msg, "error");
-      go_back();
+      go_home();
       die();
 
     }
@@ -345,6 +475,8 @@ class EventController extends EntityController {
 
     $this->db->prepared_query($query, array(":event_id" => $event_id));
     
+    set_message("You have deleted your event succesfully");
+
     // redirect to page of events, or user page. something...
     redirect_entity_view("user", $uid);
      
@@ -440,21 +572,27 @@ class EventController extends EntityController {
 
     $result = $result[0];
 
-    $name = isset($result['name'])? $result['name']: "";
-    $location = isset($result['location'])? $result['location']: "";
-    $description = isset($result['description'])? $result['description']: "";
+    $name = check_field($result, 'name', "");
+    $location = check_field($result, 'location', "");
+    $description = check_field($result, 'description', "");
 
-    // calculate duration from start and end time.
-    $start_time = isset($result['start_time'])? $result['start_time']: "";
-    $end_time = isset($result['end_time'])? $result['end_time']: "";
-    $telephone = isset($result['telephone'])? $result['telephone']: "";
-    $email = isset($result['email'])? $result['email']: "";
-    $lon = isset($result['lon'])? $result['lon']: "";
-    $lat = isset($result['lat'])? $result['lat']: "";
-    $rso_id = isset($result['rso_id'])? $result['rso_id']: "";
-    $rso_name = isset($result['rso_name'])? $result['rso_name']: "";
-    $status = isset($result['status'])? $result['status']: "PND";
-    $accessibility = isset($result['accessibility'])? $result['accessibility']: "PND";
+    $start_time = check_field($result,'start_time', "");
+    $end_time = check_field($result,'end_time', "");
+    $telephone = check_field($result,'telephone', "");
+    $email = check_field($result,'email', "");
+    $lon = check_field($result,'lon', "");
+    $lat = check_field($result,'lat', "");
+    $rso_id = check_field($result,'rso_id', "");
+    $rso_name = check_field($result,'rso_name', "");
+    $status = check_field($result,'status', "PND");
+    $accessibility = check_field($result,'accessibility', "PND");
+
+    $current_categories = $this->db->prepared_query(
+      "SELECT label FROM categorized_as WHERE event_id = :event_id",
+      array(":event_id" => $event_id)
+    );
+
+    $cat_json = json_encode($current_categories);
 
     // if the event is rso created, check 'is-rso' input
     // and leave 'not-rso' unchecked
@@ -644,13 +782,15 @@ class EventController extends EntityController {
     }
     else if ($scope == "other-uni") {
 
-      $uni_id = isset($params['uni_id'])? $params['uni_id']: 0;
+      $uni_id = check_field($params,'uni_id', 0);
 
     }
 
-    $sort_by = isset($params['sort_by']) ? $params['sort_by'] : "date";
+    $sort_by = check_field($params, 'sort_by', "date");
 
-    $accessibility = isset($params['accessibility'])? $params['accessibility']: 'PUB';
+    $accessibility = check_field($params, 'accessibility', 'PUB');
+
+    $categories = check_field($params, 'categories', '');
 
     $query = $this->search_events_query;
 
@@ -659,7 +799,8 @@ class EventController extends EntityController {
       ":uni_id" => $uni_id,
       ":scope" => $scope,
       ":sort_by" => $sort_by,
-      ":accessibility" => $accessibility
+      ":accessibility" => $accessibility,
+      ":categories" => $categories
     ));
 
     if (empty($results)) {
@@ -692,6 +833,55 @@ class EventController extends EntityController {
     $results = $this->db->prepared_query($query, array(
       ":rso_id" => $rso_id,
     ));
+
+    echo json_encode($results);
+
+    die();
+
+  }
+
+  public function get_event_categories_json ($params) {
+
+    $event_id = check_field($params, "event_id", 0);
+
+    $query = $this->get_categories_query;
+
+    $results = $this->db->prepared_query($query, array(
+      ":event_id" => $event_id
+    ));
+
+    if (empty($results)) {
+
+      echo '{"fail": true}';
+
+      die();
+
+    }
+
+    echo json_encode($results);
+
+    die();
+
+  }
+
+  // used to autocomplete categories
+  public function get_event_categories_like_json ($params) {
+
+    $label = check_field($params, 'label', "");
+
+    $query = $this->get_categories_like_query;
+
+    $results = $this->db->prepared_query($query, array(
+      ":label" => $label
+    ));
+
+    if (empty($results)) {
+
+      echo '[]';
+
+      die();
+
+    }
 
     echo json_encode($results);
 

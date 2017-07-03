@@ -44,4 +44,11 @@ $leave_rso_query = <<<EOT
 CALL leave_rso (:user_id, :rso_id);
 EOT;
 
+$view_all_query = <<<EOT
+SELECT n.name AS uni_name, n.uni_id, r.name AS rso_name, r.rso_id
+FROM universities n, has h, rsos r
+WHERE :uni_id = n.uni_id
+AND n.uni_id = h.uni_id
+AND h.rso_id = r.rso_id;
+EOT;
 ?>

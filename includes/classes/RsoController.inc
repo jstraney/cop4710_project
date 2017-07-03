@@ -21,6 +21,7 @@ class RsoController extends EntityController {
 
     $this->create_query = $create_query;
     $this->view_query = $view_query;
+    $this->view_all_query = $view_all_query;
     $this->update_query = $update_query;
     $this->destroy_query = $destroy_query;
 
@@ -45,14 +46,16 @@ class RsoController extends EntityController {
 
     $role = $user->role;
     $user_id = $user->user_id;
-    $name = isset($params['name'])? $params['name']: NULL;
-    $description = isset($params['description'])? $params['description']: NULL;
+
+    $name = check_field($params, 'name', NULL);
+
+    $description = check_field($params, 'description', NULL);
 
     // the members are sent as a comma separated list of ids
-    $members = isset($params['members'])? $params['members']: "";
+    $members = check_field($params, 'members', "");
 
     // the creator of the rso should technically be a member
-    $members .= ",$user_id";
+    $members .= ($members == "" ? $user_id : ",$user_id");
 
     // if no administrator was chosen, you as the creator are assumed to be the administrator
     $rso_administrator = !empty($params['rso-administrator'])? $params['rso-administrator']: $user_id; 
@@ -80,6 +83,19 @@ class RsoController extends EntityController {
       ":rso_administrator" => $rso_administrator, 
       ":uni_id" => $uni_id, 
     ));
+
+    if (empty($result)) {
+
+    }
+    else if (isset($result[0]['_err_msg'])) {
+
+      $msg = $result[0]['_err_msg'];
+      set_message($msg, "error");
+      // go back and die
+      go_back();
+      die();
+
+    }
 
     $rso_id = $result[0]['rso_id'];
 
@@ -146,10 +162,42 @@ class RsoController extends EntityController {
   }
 
   public function view_all($params) {
-    
-    $txt = "";
 
-    return $txt;
+    global $user;
+
+    global $configs;
+
+    if ($user === NULL) {
+
+      go_home();
+      die();
+
+    }
+
+    $user_id = isset($user->user_id)? $user->user_id: 0;
+
+    $uni_id = isset($user->uni_id)? $user->uni_id: 0;
+
+    $site_root = $configs['site_root'];
+
+    $query = $this->view_all_query;
+
+    $results = $this->db->prepared_query($query, array(
+      ":uni_id" => $uni_id
+    ));
+
+    if (empty($results)) {
+
+      $template = "<p> There are no RSOs at your university </p>";
+      return $template;
+
+    }
+
+    $uni_name = $results[0]['uni_name'];
+
+    include get_entity_partial('rso', 'view_all');
+
+    return $template;
 
   }
 
@@ -170,17 +218,17 @@ class RsoController extends EntityController {
     $uni_id = $user->uni_id;
     $role = $user->role;
 
-    $name = isset($params['name'])? $params['name']: NULL;
-    $description = isset($params['description'])? $params['description']: NULL;
+    $name = check_field($params, 'name', NULL);
+    $description = check_field($params, 'description', NULL);
 
     // the members are sent as a comma separated list of ids
-    $members = isset($params['members'])? $params['members']: "";
+    $members = check_field($params, 'members', "");
 
     // the creator of the rso should technically be a member
-    $members .= ", $user_id";
+    $members .= ",$user_id";
 
     // if no administrator was chosen, you as the creator are assumed to be the administrator
-    $rso_administrator = isset($params['rso-administrator'])? $params['rso-administrator']: $user_id; 
+    $rso_administrator = check_field($params, 'rso-administrator', $user_id); 
 
     $query = $this->update_query;
 
@@ -226,7 +274,7 @@ class RsoController extends EntityController {
 
     $rso_id = $params[1];
 
-    $password = isset($params['password'])? $params['password']: "";
+    $password = check_field($params, 'password', NULL);
 
     $view = $this->db->prepared_query($this->view_query, array(
       ':rso_id' => $rso_id,
@@ -319,11 +367,11 @@ class RsoController extends EntityController {
 
     $result = $result[0];
 
-    $name = isset($result['name'])? $result['name']:"";
+    $name = check_field($result, 'name', "");
 
-    $description = isset($result['description'])? $result['description']:"";
+    $description = check_field($result, 'description', "");
 
-    $rso_administrator = isset($result['rso_administrator'])? $result['rso_administrator']:"";
+    $rso_administrator = check_field($result, 'rso_administrator', "");
 
     $members_list = $this->db->prepared_query($this->rso_members_query, array(
       ":rso_id" => $rso_id,

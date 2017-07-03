@@ -137,6 +137,8 @@ class Router {
     $this->routes['POST']['/^event\/rate$/'] = array('rate_event', 'EventController', 'event');
     // list of users attending event.
     $this->routes['POST']['/^event\/participants\/json$/'] = array('event_participants_json', 'EventController', 'event');
+    $this->routes['POST']['/^event\/categories\/json$/'] = array('get_event_categories_json', 'EventController', 'event');
+    $this->routes['POST']['/^event\/categories\/like\/json$/'] = array('get_event_categories_like_json', 'EventController', 'event');
 
     // all events hosted by an rso
     $this->routes['POST']['/^rso\/events\/json$/'] = array('get_rso_events_json', 'EventController', 'event');
