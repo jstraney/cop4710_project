@@ -32,6 +32,7 @@ if ($rso_id != NULL) {
 
   $template .= "<h5>Hosted by ";
   $template .= "<a href=\"{$site_root}/rso/{$rso_id}\">{$rso_name}</a>";
+  $template .= " at <a href=\"{$site_root}/university/{$uni_id}\">{$uni_name}</a>";
   $template .= "</h5>";
 
 }
@@ -49,21 +50,25 @@ $template .= <<<EOT
 <script type="text/javascript" src="https://maps.google.com/maps/api/js?key=AIzaSyBGfGPKeqJZRoQSInY5LXqvZt7lZwihCPA&libraries=places"></script>
 <script src="{$site_root}/js/lib/jquery-locationpicker-plugin/locationpicker.jquery.js"></script>
 <script>app.makeMapPresentation()</script>
+<h5>Event Type</h5>
+<div class="aggregate categories"></div>
 <div>Start time: {$start_time}</div>
 <div>End Time: {$end_time}</div>
 <div>Description: {$description}</div>
 
 <div class="event-page aggregate events">
 <h4>People Attending this Event:</h4>
-
+<!-- populated with AJAX -->
 </div>
 
 <div class="event-page aggregate participants">
-<!-- populate with ajax -->
+<!-- populated with AJAX -->
+
 </div>
 
 <!-- particpate form. populated with JS if user is not attending. -->
 <div class="participate">
+
 </div>
 
 <h4>Average Rating: <span id="total-rating">{$rating}</span>/5.00</h4>

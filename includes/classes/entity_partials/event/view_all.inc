@@ -29,6 +29,14 @@ $template = <<<EOT
   <input type="hidden" id="uni-id" name="uni-id" value=""></input>
 </div>
 
+<div class="input-field category">
+  <input id="category" name="category" value="" type="text"/>
+  <label for="category">Event Type</label>
+  <div class="events-view-all aggregate categories">
+  </div>
+  <input id="categories" name="categories" value="" type="hidden"/>
+</div>
+
 <div class="sort">
   <label>Sort By:</label>
   <input checked="checked" id="sort-date" class="sort-by date" type="radio" name="sort-by" value="date"/>

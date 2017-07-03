@@ -2,13 +2,13 @@
 $create_query = <<<EOT
 CALL create_event (
   :name, :start_time, :end_time, :telephone, :email, :description,
-  :location, :lat, :lon, :accessibility, :categories, :user_id, :rso_id, :uni_id);
+  :location, :lat, :lon, :accessibility, :user_id, :rso_id, :uni_id);
 EOT;
 
 $update_query = <<<EOT
 CALL update_event ( 
   :event_id, :name, :start_time, :end_time, :telephone, :email, :description,
-  :location, :lat, :lon, :accessibility, :categories, :user_id, :rso_id, :status);
+  :location, :lat, :lon, :accessibility, :user_id, :rso_id, :status);
 EOT;
 
 $view_query = <<<EOT
@@ -44,7 +44,7 @@ ORDER BY u.user_id;
 EOT;
 
 $search_events_query = <<<EOT
-CALL search_events(:user_id, :uni_id, :scope, :sort_by, :accessibility);
+CALL search_events(:user_id, :uni_id, :scope, :sort_by, :accessibility, :categories);
 EOT;
 
 $get_rso_events_query = <<<EOT
@@ -53,6 +53,20 @@ FROM events e, r_created_e rce
 WHERE rce.rso_id = :rso_id
 AND rce.event_id = e.event_id
 ORDER BY e.start_time;
+EOT;
+
+// for simply viewing categories on an event
+$get_categories_query = <<<EOT
+SELECT c.label
+FROM categorized_as c
+WHERE c.event_id = :event_id;
+EOT;
+
+// for searching categories for autocomplete 
+$get_categories_like_query = <<<EOT
+SELECT DISTINCT c.label AS value, c.label AS data
+FROM categorized_as c
+WHERE c.label LIKE CONCAT(:label, "%");
 EOT;
 
 ?>

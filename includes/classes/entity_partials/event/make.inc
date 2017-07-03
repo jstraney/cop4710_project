@@ -73,7 +73,7 @@ $template = <<<EOT
       <option id="access-pri"value="PRI">Private</option>
       <option id="access-rso" value="RSO">RSO</option>
     </select>
-    <p class="field-prompt">
+    <p class="form-prompt">
     Events marked as public can be seen by anyone. Events marked as private can only be
     seen by members of the same university. RSO events can only be seen by the RSO specified
     (If any).
@@ -81,8 +81,13 @@ $template = <<<EOT
   </div>
 
   <div class="selection">
-    <label>Pick a Category</label>
-    <input id="category" name="category" type="text"></input>
+    <label>Add Categories</label>
+    <p class="form-prompt">
+      Just start typing a category. Press enter to add the category.
+    </p>
+    <input id="category" type="text"></input>
+    <div class="event-make aggregate categories"></div>
+    <input id="categories" name="categories" type="hidden"></input>
   </div>
 
   <input class="btn btn-large" type="submit" value="Create Event"></input>
