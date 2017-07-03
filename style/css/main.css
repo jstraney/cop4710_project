@@ -139,8 +139,9 @@ textarea {
   min-height: 200px;
   width: 100%;
   font-family: "Open Sans", sans-serif;
-  font-size: 14px;
+  font-size: 18px;
   text-indent: .5em;
+  padding: 5px;
   border: solid 1px #BBBBBB;
 }
 
@@ -313,6 +314,17 @@ div.record.event.comment > .button {
   color: #888888;
 }
 
+div.record.category {
+  position: relative;
+  margin-right: 30px;
+}
+
+div.record.category > .button.destroy {
+  position: absolute;
+  top: -5px;
+  right: -15px;
+}
+
 div.record.event.comment > .button.destroy {
   display: block;
   position: absolute;
@@ -351,6 +363,7 @@ div.events-view-all.aggregate.events > div.record {
   -moz-transition: 1s top;
   transition: 1s top;
   top: -100px;
+  margin-top:35px;
 }
 
 div.events-view-all.aggregate.events > div.record.loaded {
@@ -368,7 +381,7 @@ div.events-view-all.aggregate.events  span.info.status {
   color: #333333;
   font-weight: 600;
   position: absolute;
-  top: 0;
+  bottom: 100%;
   right: 0;
 }
 
