@@ -340,6 +340,18 @@ var app = app || {};
 
   }
 
+  a.getCategories = function (params, callback, error) {
+
+    return apiEndpoint(params, "event/categories/json", callback, error);
+
+  }
+
+  a.getCategoriesLike = function (params, callback, error) {
+
+    return apiEndpoint(params, "event/categories/like/json", callback, error);
+
+  }
+
   // do some global effects on DOM load.
   $(function () {
 

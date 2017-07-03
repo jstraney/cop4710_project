@@ -55,6 +55,89 @@
 
     });
 
+    // hidden categories field
+    var categories = $('input#categories');
+
+    var catAggregate = $('div.aggregate.categories');
+
+    function rebuildCats () {
+
+      // refresh the selection of records
+      var catRecords = $('div.record', catAggregate);
+
+      val = "";
+
+      $.each(catRecords, function (index, elem) {
+
+        val += $("span.value", elem).text() + ",";
+
+      });
+
+      // remove last comma
+      val = val.slice(0, -1);
+
+      categories.val(val);
+
+    }
+
+    function categoryFactory (label) {
+
+      var elem = $('<div class="record category">');
+
+      var remove = $('<div class="button destroy">X</div>');
+
+      remove.click(function () {
+
+        elem.remove();
+
+        rebuildCats();
+
+      });
+
+      elem.html('<span class="value">' + label + '</span>');
+
+      elem.append(remove);
+
+      return elem;
+
+    }
+
+    var category = $("input#category");
+    
+    category.on('keypress', function(e) {
+
+      if (e.keyCode == 13) {
+
+        e.preventDefault();
+
+        var label = category.val();
+
+        catAggregate.append(categoryFactory(label));
+
+        category.val("");
+
+        rebuildCats();
+
+      }
+
+    });
+
+    // check if the event id is in the scope (implies this is being edited.)
+    if (a.scope.categories) {
+
+      var cats = a.scope.categories;
+
+      for (var i in cats) {
+
+        var label = cats[i].label;
+
+        catAggregate.append(categoryFactory(label));
+
+      }
+
+    }
+
+
   });
 
 })(app);

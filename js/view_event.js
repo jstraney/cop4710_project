@@ -103,6 +103,9 @@
         (text == "edit" && self.text('close')) ||
         (text == "close" && self.text('edit'));
 
+        var content = $('p.content', elem).text();
+        $('textarea', editCommentForm).val(content);
+
         // show/hide the edit form.
         editCommentForm.slideToggle();
 
@@ -402,6 +405,40 @@
 
     });
 
+    var catAggregate = $('div.aggregate.categories');
+
+    function categoryFactory (label) {
+
+      var elem = $('<div class="record category">' + label + '</div>');
+      
+      return elem;
+
+    }
+
+    a.getCategories({event_id: a.scope.event_id}, function (data) {
+
+      data = data || "{}";
+      data = JSON.parse(data);
+
+      console.log(data);
+
+      if (data.fail) {
+
+        catAggregate.append('<p class="notice"> This event is untagged </p>');
+        return;
+
+      }
+
+      for (var i in data) {
+
+        var category = data[i];
+        var label = category.label;
+
+        catAggregate.append(categoryFactory(label));
+
+      }
+      
+    })
 
   });
 

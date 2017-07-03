@@ -4,7 +4,8 @@
   var params = {
     "scope" : "my-uni",
     "sort-by": "date",
-    "access": "PUB"
+    "access": "PUB",
+    "categories": "",
   };
 
   // keyed by id.
@@ -147,6 +148,8 @@
       var rating = eventJson.rating;
       var start_time = a.util.parseUTC(eventJson.start_time).formatMdyyyy_time();
       var end_time = a.util.parseUTC(eventJson.end_time).formatMdyyyy_time();
+      var accessibility = eventJson.accessibility;
+      
       var status = eventJson.status == "PND"? "Pending Approval" : "Active";
       var uni_id = eventJson.uni_id;
       var uni_name = eventJson.uni_name;
@@ -160,6 +163,16 @@
       text += '<span class="info end-time">End : ' + end_time + '</span>';
       text += '<span class="info uni"><a href="'+ a.siteRoot + 'university/' + uni_id + '">';
       text += uni_name + '</a></span>';
+      text += '<span class="info access">';
+      if (accessibility == "PUB") {
+        text += "Publicly Accessible";  
+      }
+      else if (accessibility == "PRI") {
+        text += "Privately Accessible";  
+      }
+      else if (accessibility == "RSO") {
+        text += "RSO Accessible";  
+      }
       text += '<span class="info status">Status : ' + status + '</span>';
       elem.html(text);
 
@@ -178,7 +191,7 @@
 
       a.getEventsJson(params, function (data) {
 
-        data = data || "{}";
+        data = data || "[]";
 
         data = JSON.parse(data);
 
@@ -208,6 +221,85 @@
 
     // uncomment once things are working good.
     // window.setInterval(pollEvents, 2500);
+    var categories = $('input#categories');
+    
+    var catAggregate = $('div.aggregate.categories');
+
+    function rebuildCats() {
+
+      var cats = $('div.record.category', catAggregate);
+
+      params.categories = "";
+
+      $.each(cats, function (index, elem) {
+
+        var val = $('span.value', elem).text();
+
+        params.categories += val + ",";
+
+      });
+
+
+      params.categories = params.categories.slice(0, -1);
+
+      categories.val(params.categories);
+
+    }
+
+    function categoryFactory(label) {
+
+      var elem = $('<div class="record category">');
+      elem.html('<span class="value">' + label + '</span>');
+
+      var remove = $('<div class="button destroy">X</div>');
+
+      remove.click(function () {
+
+        elem.remove();
+        rebuildCats();
+        pollEvents();
+
+      });
+
+      elem.append(remove);
+
+      return elem;
+
+    }
+   
+    var category = $('input#category');
+
+    category.devbridgeAutocomplete({
+
+      lookup: function(query, done) {
+
+        a.getCategoriesLike({label: query}, function (data) {
+
+          data = data || '[]';
+          data = JSON.parse(data);
+          var results = {};
+          results.suggestions = data;
+
+          done(results);
+
+        });
+
+      },
+      onSelect: function (suggestion) {
+
+        var label = suggestion.data;
+        
+        catAggregate.append(categoryFactory(label));
+
+        rebuildCats();
+
+        pollEvents();
+
+        category.val("");
+
+      }
+
+    });
 
 
   });
