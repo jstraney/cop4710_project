@@ -47,10 +47,10 @@ VALUES
 (5, 1),
 (6, 1),
 (7, 1),
-(8, 3),
+(8, 6),
 (9, 2),
-(10, 2),
-(11, 6);
+(10, 3),
+(11, 4);
 
 INSERT INTO affiliated_with(user_id, uni_id)
 VALUES
