@@ -4,7 +4,7 @@ $template = <<<EOT
 <script src="{$site_root}/js/user_form.js"></script>
 <div><a href="{$site_root}/user/{$user_id}">Back to profile &raquo;</a></div>
 
-<form method="POST" action="{$site_root}/user/{$user_id}/update">
+<form method="POST" action="{$site_root}/user/{$user_id}/update" enctype="multipart/form-data">
 
   <h3>Edit Account</h3>
 
@@ -24,6 +24,10 @@ $template = <<<EOT
   <div>
     <input id="uni-name" name="uni-name" type="text"></input>
     <input id="uni-id" name="uni-id" type="hidden"></input>
+  </div>
+  <div>
+    <label for="pic">Optional Profile Picture</label>
+    <input id="pic" type="file" name="pic[]" accept="image/png,image/gif,image/jpg,image/jpeg"/>
   </div>
   <p>
   Please enter your password to change your information.

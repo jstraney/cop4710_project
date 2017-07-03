@@ -54,6 +54,12 @@ $template = <<<EOT
           <label for="confirm">Confirm Password</label>
         </div>
 	  </div>
+    <div class="row">
+      <div class="col s4 offset-s2">
+        <label for="pic">Optional Profile Picture</label>
+        <input id="pic" type="file" name="pic" accept="image/png,image/gif,image/jpg"/>
+      </div>
+    </div>
 	  <div class="row">
 	  	<div class="col s4 offset-s2">
 			  <button class="btn waves-effect waves-light" type="submit" name="action">Submit

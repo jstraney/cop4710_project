@@ -5,6 +5,9 @@ global $configs;
 
 $configs = array();
 
+// used in file path operations 
+$configs['dir_root'] = getcwd(); 
+
 // used in request url's
 $configs['site_root'] = "http://localhost/cop4710_project";
 

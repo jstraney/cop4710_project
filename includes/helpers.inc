@@ -26,9 +26,77 @@ function check_password($pw, $hash) {
 
 }
 
-function check_field ($params, $key) {
+// checks the key of an array and returns the default if it is not set or empty.
+function check_field ($params = array(), $key, $default = NULL) {
 
-  return isset($params[$key]) && !empty($params[$key])? $params[$key]: NULL;
+  return isset($params[$key]) && !empty($params[$key])? $params[$key]: $default;
+
+}
+
+// keeping this simple. only allowing 1 main picture.
+function create_entity_pic ($type, $id, $file) {
+
+  global $configs;
+
+  $dir_root = $configs['dir_root'];
+
+  $entity_pic_uri = $dir_root . "/res/$type/$id";
+
+  // see if the dir exists
+  if (!is_dir($entity_pic_uri)) {
+
+    // if not create dir
+    mkdir($entity_pic_uri);
+    
+  }
+
+  // add file to dir
+  move_uploaded_file($file, $entity_pic_uri . "/main.jpg");
+
+  return;
+
+}
+
+// creates an image tag for templates if the entity has profile pic
+function load_entity_pic ($type, $id, $style) {
+
+
+  global $configs;
+
+  $dir_root = $configs['dir_root'];
+  $site_root = $configs['site_root'];
+
+  $entity_pic_uri = $dir_root . "/res/$type/$id/main.jpg";
+
+  // see if the dir exists
+  if (file_exists($entity_pic_uri)) {
+
+    // if it exists return img tag with style and link
+    return '<img class="'.$style.'" src="'.$site_root.'/res/'.$type.'/'.$id.'/main.jpg"></img>';
+    
+  }
+
+  // if it doesn't exist return empty string.
+  return "";
+
+}
+
+function delete_entity_pic ($type, $id) {
+
+  global $configs;
+
+  $dir_root = $configs['dir_root'];
+
+  $entity_pic_uri = $dir_root . "/res/$type/$id/main.jpg";
+
+  if (file_exists($entity_pic_uri)) {
+
+    unlink($entity_pic_uri);
+    return TRUE;
+    
+  }
+
+  return FALSE;
 
 }
 
