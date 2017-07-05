@@ -1,4 +1,5 @@
 <?php
+
 $template = <<<EOT
 <div id="inner-content">
 <script src="{$site_root}/js/user_form.js"></script>
@@ -25,10 +26,12 @@ $template = <<<EOT
     <input id="uni-name" name="uni-name" type="text"></input>
     <input id="uni-id" name="uni-id" type="hidden"></input>
   </div>
+  <!-- holding of on profile pictures for now
   <div>
     <label for="pic">Optional Profile Picture</label>
     <input id="pic" type="file" name="pic[]" accept="image/png,image/gif,image/jpg,image/jpeg"/>
   </div>
+  -->
   <p>
   Please enter your password to change your information.
   </p>

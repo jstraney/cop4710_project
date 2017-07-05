@@ -10,6 +10,7 @@ class RsoController extends EntityController {
   private $delete_query;
 
   private $rso_members_query;
+  private $rso_university_query;
   private $join_rso_query;
   private $leave_rso_query;
 
@@ -26,6 +27,7 @@ class RsoController extends EntityController {
     $this->destroy_query = $destroy_query;
 
     $this->rso_members_query = $rso_members_query;
+    $this->rso_university_query = $rso_university_query;
     $this->administrates_rso_query = $administrates_rso_query;
 
     $this->join_rso_query = $join_rso_query;
@@ -179,21 +181,6 @@ class RsoController extends EntityController {
     $uni_id = isset($user->uni_id)? $user->uni_id: 0;
 
     $site_root = $configs['site_root'];
-
-    $query = $this->view_all_query;
-
-    $results = $this->db->prepared_query($query, array(
-      ":uni_id" => $uni_id
-    ));
-
-    if (empty($results)) {
-
-      $template = "<p> There are no RSOs at your university </p>";
-      return $template;
-
-    }
-
-    $uni_name = $results[0]['uni_name'];
 
     include get_entity_partial('rso', 'view_all');
 
@@ -478,6 +465,49 @@ class RsoController extends EntityController {
 
     echo json_encode($result);
 
+    die();
+
+  }
+
+  public function rso_university_json ($params) {
+
+    global $user;
+
+    if ($user === NULL) {
+
+      echo '{"fail": true}';
+      die();
+
+    }
+
+    $user_id = $user->user_id;
+
+    $role = $user->role;
+
+    // use the uni_id parameter if user is super admin
+    if ($role == "SA") {
+
+      $uni_id = check_field($params, 'uni_id', 0);
+
+    }
+    else {
+
+      $uni_id = isset($user->uni_id)? $user->uni_id: 0;
+
+    }
+
+    $start = check_field($params, 'start', 0);
+    $end = check_field($params, 'end', 9);
+
+    $query = $this->rso_university_query;
+
+    $results = $this->db->prepared_query($query, array(
+      ':uni_id' => $uni_id,
+      ':start' => $start,
+      ':end' => $end,
+    ));
+
+    echo json_encode($results);
     die();
 
   }

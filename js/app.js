@@ -328,6 +328,12 @@ var app = app || {};
 
   }
 
+  a.getRsosAtUniversity = function (params, callback, error) {
+
+    return apiEndpoint(params, "rsos/university/json", callback, error);
+
+  }
+
   a.joinRso = function (params, callback, error) {
 
     return apiEndpoint(params, "rso/join", callback, error);

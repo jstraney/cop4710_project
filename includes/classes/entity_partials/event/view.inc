@@ -52,9 +52,12 @@ $template .= <<<EOT
 <script>app.makeMapPresentation()</script>
 <h5>Event Type</h5>
 <div class="aggregate categories"></div>
-<div>Start time: {$start_time}</div>
-<div>End Time: {$end_time}</div>
-<div>Description: {$description}</div>
+<span class="event time">Start time: {$start_time}</span>
+<span class="event time">End Time: {$end_time}</span>
+<div>
+  <h5>Description:</h5>
+  {$description}
+</div>
 
 <div class="event-page aggregate events">
 <h4>People Attending this Event:</h4>

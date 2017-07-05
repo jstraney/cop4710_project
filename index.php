@@ -63,9 +63,6 @@ $site_root = $configs['site_root'];
     // view, view_all, get_create_form, get_update_form ...
     $action = $router->get_action();
 
-    // user, event, rso, university
-    $resource_name = $router->get_resource_name();
-
     // UserController, EventController, UniversityController
     $controller_class = $router->get_controller_class();
 

@@ -36,6 +36,16 @@ AND m.rso_id = r.rso_id
 AND u.user_id = m.user_id;
 EOT;
 
+$rso_university_query = <<<EOT
+SELECT r.name, r.description, r.rso_id, COUNT(m.user_id) AS total_members
+FROM has h, rsos r
+LEFT JOIN is_member m ON r.rso_id = m.rso_id
+WHERE :uni_id = h.uni_id
+AND h.rso_id = r.rso_id 
+GROUP BY r.rso_id
+LIMIT :start, :end;
+EOT;
+
 $join_rso_query = <<<EOT
 CALL join_rso (:user_id, :rso_id, :uni_id);
 EOT;

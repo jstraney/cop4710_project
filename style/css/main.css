@@ -157,6 +157,27 @@ div.pac-container.pac-logo {
 
 /* general entity css */
 
+img.entity {
+  display: block;
+  margin: 5px 0 10px;
+}
+
+img.entity.thumbnail {
+  width: 100px;
+  height: 100px;
+}
+
+img.entity.medium {
+  width: 200px;
+  height: 200px;
+}
+
+img.entity.large {
+  width: 400px;
+  height: 400px;
+  margin: 5px auto 10px;
+}
+
 div.button:hover {
   opacity: .8; 
   cursor: pointer;
@@ -250,7 +271,60 @@ div.rso-view.aggregate.members > div.member > .button.destroy {
   right: -15px;
 }
 
+div.view-all-rsos.aggregate.rso > div.record {
+  display: block;
+  padding: 5px 0 15px;
+  border-bottom: 1px solid #BBBBBB;
+  position: relative;
+  top: -50px;
+  -webkit-transition: top 1s;
+  -moz-transition: top 1s;
+  transition: top 1s;
+}
+
+div.view-all-rsos.aggregate.rso {
+  min-height: 300px;
+}
+
+div.view-all-rsos.aggregate.rso > div.record.loaded {
+  top: 0px;
+}
+
+div.view-all-rsos.aggregate.rso > div.record > span.info {
+  color: #888888;
+}
+
+div.paginate {
+  text-align: center;
+}
+
+div.button.next, div.button.prev {
+  display: inline-block;
+  vertical-align: middle;
+  padding: 5px;
+}
+
+div.button.prev:before, div.button.next:after {
+  display: inline-block;
+  vertical-align: middle;
+  width: 150px;
+  height: 1em;
+  
+}
+
+div.button.prev:before {
+  content: "<< Previous";
+}
+
+div.button.next:after {
+  content: "Next >>";
+}
+
 /* Event Page */
+
+span.event.time {
+  margin-right: 20px;
+}
 
 /* attendees */
 div.record.participant {
@@ -388,8 +462,7 @@ div.events-view-all.aggregate.events  span.info.status {
 div.events-view-all.aggregate.events  span.info.uni {
   font-weight: 600;
   display: inline-block;
-  
->>>>>>> development
+
 }
 
 div#map {

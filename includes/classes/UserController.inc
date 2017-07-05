@@ -79,6 +79,7 @@ class UserController extends EntityController {
 
     $query = $this->create_query;
 
+
     $result = $this->db->prepared_query($query, array(
       ":email" => $email,
       ":hash" => $hash,
@@ -104,9 +105,19 @@ class UserController extends EntityController {
 
     }
 
-    set_message("You have successfully created an account! Log in to get started.");
+    $result = $result[0];
+    $user_id = $result['user_id'];
 
-    go_home();
+    
+
+    set_message("You've successfully made an account! Get started by creating an RSO or an event.");
+    // log the user in.
+    $session_controller = new SessionController();
+
+    $session_controller->create(array(
+      "e-mail" => $email,
+      "password" => $password,
+    ));
 
   }
 
@@ -163,6 +174,8 @@ class UserController extends EntityController {
     $uni_id = check_field($viewed_user, 'uni_id', 0);
     $uni_name = check_field($viewed_user, 'uni_name', "");
     $user_role = check_field($viewed_user, 'role', "STU");
+
+    $pic = load_entity_pic("users", $user_id, "medium");
 
     include get_entity_partial('user', 'view');
 

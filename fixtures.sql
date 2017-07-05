@@ -1,5 +1,7 @@
 BEGIN;
 
+USE `event`;
+
 -- reset auto-increments
 ALTER TABLE `events` AUTO_INCREMENT = 1;
 ALTER TABLE users AUTO_INCREMENT = 1;

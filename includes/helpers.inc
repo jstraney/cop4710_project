@@ -33,6 +33,27 @@ function check_field ($params = array(), $key, $default = NULL) {
 
 }
 
+// checks for main.jpg in the entities directory
+function entity_has_pic ($type, $id) {
+
+  global $configs;
+
+  $dir_root = $configs['dir_root'];
+  $site_root = $configs['site_root'];
+
+  $entity_pic_uri = $dir_root . "/res/$type/$id/main.jpg";
+
+  // see if the file exists
+  if (file_exists($entity_pic_uri)) {
+
+    return TRUE;
+
+  }
+
+  return FALSE;
+
+}
+
 // keeping this simple. only allowing 1 main picture.
 function create_entity_pic ($type, $id, $file) {
 
@@ -57,31 +78,46 @@ function create_entity_pic ($type, $id, $file) {
 
 }
 
-// creates an image tag for templates if the entity has profile pic
-function load_entity_pic ($type, $id, $style) {
+function get_entity_pic_uri ($type, $id, $default = "default.jpg") {
 
+  global $configs;
+
+  $site_root = $configs['site_root'];
+
+  return $site_root.'/res/'.$type.'/'.$id.'/main.jpg';
+
+}
+
+function get_entity_pic_path ($type, $id, $default = "default.jpg") {
 
   global $configs;
 
   $dir_root = $configs['dir_root'];
+
+  return $dir_root.'/res/'.$type.'/'.$id.'/main.jpg';
+
+}
+
+// creates an image tag for templates if the entity has profile pic
+function load_entity_pic ($type, $id, $style = "thumbnail", $default = "default.jpg") {
+
+  global $configs;
+
   $site_root = $configs['site_root'];
 
-  $entity_pic_uri = $dir_root . "/res/$type/$id/main.jpg";
-
-  // see if the dir exists
-  if (file_exists($entity_pic_uri)) {
+  if (entity_has_pic($type, $id)) {
 
     // if it exists return img tag with style and link
-    return '<img class="'.$style.'" src="'.$site_root.'/res/'.$type.'/'.$id.'/main.jpg"></img>';
+    return '<img class="entity '.$type.' '.$style.'" src="'.get_entity_pic_uri($type, $id).'"></img>';
     
   }
 
   // if it doesn't exist return empty string.
-  return "";
+  return '<img class="entity '.$type.' '.$style.'" src="'.$site_root.'/res/'.$type.'/'.$default.'"></img>';
 
 }
 
-function delete_entity_pic ($type, $id) {
+function destroy_entity_pic ($type, $id) {
 
   global $configs;
 

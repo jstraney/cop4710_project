@@ -63,7 +63,9 @@ class SessionController extends EntityController {
       // put the user id in the session variable
       $_SESSION['uid'] = $user_id;
 
-      go_home();
+      // on success, go to the account.
+      redirect_entity_view("user", $user_id);
+      die();
 
     }
     // not a match, set error message and go home. 
@@ -73,8 +75,9 @@ class SessionController extends EntityController {
 
       redirect_to_url("login");
 
-    }
+      die();
 
+    }
 
   }
 

@@ -11,6 +11,20 @@ $template = <<<EOT
 <div class="entity-list events">
 <h2>Browse Events</h2>
 
+EOT;
+
+if ($role == "SA") {
+  $template .= <<<EOT
+  <p class="form-prompt">
+  You are currently logged in as super admin. Since you have no
+  direct university affiliation, you'll have to look at events using the "at another university" scope.
+  </p>
+EOT;
+
+}
+
+$template .= <<<EOT
+
 <form id="event-search">
 
 <!-- scope of the event search -->
