@@ -19,9 +19,9 @@ WHERE n.uni_id = :uni_id
 EOT;
 
 $university_rsos_query = <<<EOT
-SELECT h.rso_id
-FROM has h
-WHERE h.uni_id = :uni_id
+SELECT h.rso_id, r.name, r.description
+FROM has h, rsos r
+WHERE h.uni_id = :uni_id AND h.rso_id = r.rso_id
 EOT;
 
 $view_all_query = <<<EOT

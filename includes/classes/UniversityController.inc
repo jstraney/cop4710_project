@@ -52,7 +52,7 @@ class UniversityController extends EntityController {
     // view query for university 
     $query = $this->view_query;
 
-    // id of university 
+    // id of university at university/id 
     $id = $params[1];
 
     // result of querying the university 
@@ -79,8 +79,9 @@ class UniversityController extends EntityController {
     $num_students = isset($result['population']) ? $result['population']: 0;
 
     // find rsos associated with this university
-    $associated_rsos = $this->view_associated_rsos($params);
-    print_r ($associated_rsos);
+    $associated_rsos = $this->view_associated_rsos(array(
+      "uni_id" => $id
+    ));
 
     include get_entity_partial('university', 'view');
 
@@ -272,7 +273,7 @@ class UniversityController extends EntityController {
     // show rsos associated with a given university
   public function view_associated_rsos ($params) {
 
-    $uni_id = isset($params['uni_id']) ? $params['uni_id']: 0;
+    $uni_id = isset($params['uni_id']) ? $params['uni_id'] : 0;
 
     $query = $this->university_rsos_query;
 
