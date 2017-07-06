@@ -16,7 +16,8 @@ else {
 $template = <<<EOT
 <div id="inner-content">
 <script>
-app.scope.user_id = {$user_id};
+  app.scope.my_account = {$my_account};
+  app.scope.user_id = {$user_id};
 </script>
 <script src="{$site_root}/js/view_user.js"></script>
 
