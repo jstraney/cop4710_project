@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jun 29, 2017 at 02:04 PM
+-- Generation Time: Jul 06, 2017 at 02:06 AM
 -- Server version: 10.1.13-MariaDB
 -- PHP Version: 7.0.5
 
@@ -30,11 +30,13 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `attend_event` (IN `_event_id` INT(1
   DECLARE _not_participating INT(1);
   DECLARE _status ENUM('PND','ACT');
 
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
@@ -94,9 +96,11 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `change_event_access` (IN `_event_id
   
   DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
@@ -163,11 +167,13 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `comment_on_event` (IN `_content` TI
 
   DECLARE _accessibility ENUM ('PUB','PRI','RSO');
 
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
@@ -204,22 +210,32 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `comment_on_event` (IN `_content` TI
 
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `create_event` (IN `_name` VARCHAR(60), IN `_start_time` TIMESTAMP, IN `_end_time` TIMESTAMP, IN `_telephone` VARCHAR(12), IN `_email` VARCHAR(60), IN `_description` TINYTEXT, IN `_location` VARCHAR(60), IN `_lat` DECIMAL(9,6), IN `_lon` DECIMAL(9,6), IN `_accessibility` ENUM('PUB','PRI','RSO'), IN `_categories` VARCHAR(60), IN `_user_id` INT(11), IN `_rso_id` INT(11), IN `_uni_id` INT(11))  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `create_event` (IN `_name` VARCHAR(60), IN `_start_time` TIMESTAMP, IN `_end_time` TIMESTAMP, IN `_telephone` VARCHAR(12), IN `_email` VARCHAR(60), IN `_description` TINYTEXT, IN `_location` VARCHAR(60), IN `_lat` DECIMAL(9,6), IN `_lon` DECIMAL(9,6), IN `_accessibility` ENUM('PUB','PRI','RSO'), IN `_user_id` INT(11), IN `_rso_id` INT(11), IN `_uni_id` INT(11))  BEGIN
 
   
   DECLARE _event_id INT(11);
 
   DECLARE _status ENUM('PND','ACT');
 
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
   START TRANSACTION;
+
+    
+    IF _name IS NULL OR _start_time IS NULL OR _end_time IS NULL OR _description IS NULL OR
+    _location IS NULL OR _lat IS NULL OR _lon IS NULL OR _accessibility IS NULL THEN
+
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "One or more field was missing from your event";
+
+    END IF;
 
     
     IF EXISTS(
@@ -328,13 +344,21 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `create_rso` (IN `_role` ENUM('SA','
 
   DECLARE EXIT HANDLER FOR SQLEXCEPTION
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
   START TRANSACTION;
+
+    IF _name IS NULL OR _description IS NULL THEN 
+
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "One or more field was missing from your RSO.";
+
+    END IF;
 
     
     CREATE TEMPORARY TABLE temp_members (user_id INT(11) UNSIGNED);
@@ -395,15 +419,27 @@ END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `create_user` (IN `_user_name` VARCHAR(30), IN `_first_name` VARCHAR(60), IN `_last_name` VARCHAR(60), IN `_email` VARCHAR(60), IN `_role` ENUM("SA","ADM","STU"), IN `_hash` VARCHAR(60), IN `_uni_id` INT(11))  BEGIN
 
+  DECLARE _user_id INT(11);
+
   DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
   START TRANSACTION;
+
+    
+    IF _user_name IS NULL OR _first_name IS NULL OR _last_name IS NULL OR
+    _email IS NULL OR _role IS NULL OR _hash IS NULL OR _uni_id IS NULL THEN
+
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "One or more field was missing when creating your account";
+
+    END IF;
 
     
     IF (_role = "STU" OR _role = "ADM") AND (check_uni_emails(_email, _uni_id) < 1) THEN
@@ -412,24 +448,36 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `create_user` (IN `_user_name` VARCH
       BEGIN
         INSERT INTO users (user_name, first_name, last_name, email, role, hash)
         VALUES (_user_name, _first_name, _last_name, _email, _role, _hash);
+
+        SET _user_id = LAST_INSERT_ID();
+
         
         INSERT INTO attending (user_id, uni_id)
-        VALUES (LAST_INSERT_ID(), _uni_id);
+        VALUES (_user_id, _uni_id);
       END;
     
     ELSEIF _role = "ADM" THEN
       BEGIN
         INSERT INTO users (user_name, first_name, last_name, email, role, hash)
         VALUES (_user_name, _first_name, _last_name, _email, _role, _hash);
+
+        SET _user_id = LAST_INSERT_ID();
+
         
         INSERT INTO affiliated_with (user_id, uni_id)
-        VALUES (LAST_INSERT_ID(), _uni_id);
+        VALUES (_user_id, _uni_id);
       END;
     
     ELSEIF _role = "SA"  THEN
       INSERT INTO users (user_name, first_name, last_name, email, role, hash)
       VALUES (_user_name, _first_name, _last_name, _email, role, _hash);
+
+      SET _user_id = LAST_INSERT_ID();
+
     END IF;
+
+    
+    SELECT _user_id AS user_id;
 
   COMMIT;
 
@@ -465,12 +513,13 @@ END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `join_rso` (IN `_user_id` INT(11), IN `_rso_id` INT(11), IN `_uni_id` INT(11))  BEGIN
 
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1
-      _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
@@ -517,13 +566,13 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `leave_rso` (IN `_user_id` INT(11), 
 
   DECLARE _rso_administrator INT(11);
 
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
-
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1
-      _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
@@ -553,11 +602,13 @@ END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `rate_event` (IN `_user_id` INT(11), IN `_event_id` INT(11), IN `_rating` INT(1))  BEGIN
 
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
@@ -599,7 +650,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `rate_event` (IN `_user_id` INT(11),
 
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `search_events` (IN `_user_id` INT(11), IN `_uni_id` INT(11), IN `_scope` TINYTEXT, IN `_sort_by` TINYTEXT, IN `_accessibility` ENUM('PUB','PRI','RSO'))  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `search_events` (IN `_user_id` INT(11), IN `_uni_id` INT(11), IN `_scope` TINYTEXT, IN `_sort_by` TINYTEXT, IN `_accessibility` ENUM('PUB','PRI','RSO'), IN `_categories` VARCHAR(500))  BEGIN
 
   DECLARE _is_owner INT(1);
   DECLARE _is_participating INT(1);
@@ -615,18 +666,21 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `search_events` (IN `_user_id` INT(1
 
   
   
-
   
+
   IF _scope = "other-uni" THEN
-    SELECT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
+    SELECT DISTINCT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
     e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
     _is_participating AS is_participating, e.rating, h.uni_id AS uni_id, n.name AS uni_name,
     manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
-    FROM events e, hosting h, universities n
+    FROM public_events pe, hosting h, universities n, events e
+    LEFT JOIN categorized_as c ON e.event_id = c.event_id
     WHERE _uni_id = n.uni_id
     AND n.uni_id = h.uni_id
     AND h.event_id = e.event_id
+    
     AND e.accessibility = "PUB"
+    AND (_categories = "" OR FIND_IN_SET(c.label, _categories))
     ORDER BY
       CASE _sort_by WHEN "date" THEN e.start_time
       WHEN "location" THEN distance 
@@ -635,15 +689,19 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `search_events` (IN `_user_id` INT(1
   
   ELSEIF _accessibility = "PUB" THEN
     BEGIN
-      SELECT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
+      SELECT DISTINCT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
       e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
       _is_participating AS is_participating, e.rating, h.uni_id AS uni_id,
       n.name AS uni_name, manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
-      FROM events e, public_events pe, hosting h, universities n
+      FROM  public_events pe, hosting h, universities n, events e
+      LEFT JOIN categorized_as c ON e.event_id = c.event_id
       WHERE n.uni_id = _uni_id 
       AND n.uni_id = h.uni_id
       AND h.event_id = e.event_id
       AND e.event_id = pe.event_id
+      
+      
+      AND (_categories = "" OR FIND_IN_SET(c.label, _categories))
       ORDER BY
         CASE _sort_by WHEN "date" THEN e.start_time 
         WHEN "location" THEN distance 
@@ -657,11 +715,14 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `search_events` (IN `_user_id` INT(1
       e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
       _is_participating AS is_participating, e.rating, h.uni_id AS uni_id,
       n.name AS uni_name, manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
-      FROM events e, private_events p, attending at, affiliated_with aw, hosting h, universities n
+      FROM private_events p, attending at, affiliated_with aw, hosting h, universities n, events e
+      LEFT JOIN categorized_as c ON e.event_id = c.event_id
       WHERE _uni_id = n.uni_id
       AND n.uni_id = h.uni_id
       AND h.uni_id = p.uni_id 
       AND p.event_id = e.event_id
+      
+      AND (_categories = "" OR FIND_IN_SET(c.label, _categories))
       ORDER BY
         CASE _sort_by WHEN "date" THEN e.start_time 
         WHEN "location" THEN distance 
@@ -671,20 +732,29 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `search_events` (IN `_user_id` INT(1
   
   ELSEIF _accessibility = "RSO" THEN
     BEGIN
-      SELECT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
+      SELECT DISTINCT e.event_id, e.name, e.start_time, e.end_time, e.description, e.location,
       e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
       _is_participating AS is_participating, e.rating, h.uni_id AS uni_id,
       n.name AS uni_name, manhattan_distance(_uni_lat, _uni_lon, e.lat, e.lon) AS distance
-      FROM events e, rso_events re, hosting h, universities n
+      FROM rso_events re, hosting h, universities n, events e
+      LEFT JOIN categorized_as c ON e.event_id = c.event_id
       WHERE e.event_id = re.event_id
       AND _uni_id = h.uni_id
       AND h.uni_id = n.uni_id
+      
       AND re.rso_id = ANY(
         SELECT r.rso_id 
         FROM rsos r, is_member m
-        WHERE _user_id = m.user_id AND m.rso_id = r.rso_id);
+        WHERE _user_id = m.user_id AND m.rso_id = r.rso_id)
+      AND (_categories = "" OR FIND_IN_SET(c.label, _categories))
+      ORDER BY
+        CASE _sort_by WHEN "date" THEN e.start_time 
+        WHEN "location" THEN distance 
+        END ASC; 
     END;
+
   END IF;
+
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `select_students` ()  BEGIN
@@ -693,7 +763,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `select_students` ()  BEGIN
   WHERE u.role = "STU";
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `update_event` (IN `_event_id` INT(11), IN `_name` VARCHAR(60), IN `_start_time` TIMESTAMP, IN `_end_time` TIMESTAMP, IN `_telephone` VARCHAR(12), IN `_email` VARCHAR(60), IN `_description` TINYTEXT, IN `_location` VARCHAR(60), IN `_lat` DECIMAL(9,6), IN `_lon` DECIMAL(9,6), IN `_accessibility` ENUM('PUB','PRI','RSO'), IN `_categories` VARCHAR(60), IN `_user_id` INT(11), IN `_rso_id` INT(11), IN `_status` ENUM('ACT','PND'))  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `update_event` (IN `_event_id` INT(11), IN `_name` VARCHAR(60), IN `_start_time` TIMESTAMP, IN `_end_time` TIMESTAMP, IN `_telephone` VARCHAR(12), IN `_email` VARCHAR(60), IN `_description` TINYTEXT, IN `_location` VARCHAR(60), IN `_lat` DECIMAL(9,6), IN `_lon` DECIMAL(9,6), IN `_accessibility` ENUM('PUB','PRI','RSO'), IN `_user_id` INT(11), IN `_rso_id` INT(11), IN `_status` ENUM('ACT','PND'))  BEGIN
 
   
   
@@ -708,15 +778,24 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `update_event` (IN `_event_id` INT(1
 
   DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1
-      _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
   START TRANSACTION;
 
+    
+    IF _name IS NULL OR _start_time IS NULL OR _end_time IS NULL OR _description IS NULL OR
+    _location IS NULL OR _lat IS NULL OR _lon IS NULL OR _accessibility IS NULL THEN
+
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "One or more field was missing from your event";
+
+    END IF;
+  
     
     SELECT h.uni_id INTO _uni_id
     FROM hosting h
@@ -830,15 +909,23 @@ END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `update_rso` (IN `_rso_id` INT(11), IN `_role` ENUM('SA','ADM','STU'), IN `_user_id` INT(11), IN `_name` VARCHAR(60), IN `_description` TEXT(500), IN `_members` VARCHAR(300), IN `_rso_admin_id` INT(11), IN `_uni_id` INT(11))  BEGIN
 
-  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
   START TRANSACTION;
+
+    IF _name IS NULL OR _description IS NULL THEN 
+
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "One or more field was missing from your RSO.";
+
+    END IF;
 
     
     IF _user_id <> (SELECT a.user_id FROM administrates a WHERE a.rso_id = _rso_id) THEN
@@ -872,9 +959,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `update_rso` (IN `_rso_id` INT(11), 
 
     
     INSERT INTO new_members (user_id)
-    SELECT u.user_id
+    SELECT DISTINCT u.user_id
     FROM users u, is_member m, attending a
-
     
     WHERE FIND_IN_SET(u.user_id, _members)
     AND u.user_id = a.user_id
@@ -923,17 +1009,27 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `update_rso` (IN `_rso_id` INT(11), 
 
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `update_user` (IN `_user_id` INT(11), IN `_user_name` VARCHAR(30), IN `_first_name` VARCHAR(60), IN `_last_name` VARCHAR(60), IN `_email` VARCHAR(60), IN `_role` ENUM("SA","ADM","STU"), IN `_hash` VARCHAR(60), IN `_uni_id` INT(11))  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `update_user` (IN `_user_id` INT(11), IN `_user_name` VARCHAR(30), IN `_first_name` VARCHAR(60), IN `_last_name` VARCHAR(60), IN `_email` VARCHAR(60), IN `_role` ENUM("SA","ADM","STU"), IN `_uni_id` INT(11))  BEGIN
 
   DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
+    DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    GET DIAGNOSTICS CONDITION 1 _err_msg = MESSAGE_TEXT;
+    GET DIAGNOSTICS _c_num = NUMBER;
+    GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
   END;
 
   START TRANSACTION;
+
+    
+    IF _user_name IS NULL OR _first_name IS NULL OR _last_name IS NULL OR
+    _email IS NULL OR _role IS NULL OR _uni_id IS NULL THEN
+
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "One or more field was missing when updating your account";
+
+    END IF;
     
     IF _role = "STU" AND (check_uni_emails(_email, _uni_id) < 1) THEN
       SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'e-mail must match university selected.';
@@ -944,8 +1040,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `update_user` (IN `_user_id` INT(11)
     first_name = _first_name,
     last_name = _last_name,
     email = _email,
-    role = _role,
-    hash = _hash
+    role = _role
     WHERE user_id = _user_id;
 
     IF _role = "STU" THEN
@@ -975,43 +1070,48 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `view_event` (IN `_event_id` INT(11)
   
   
   SET _is_owner = get_is_owner(_user_id, _event_id);
+
   SET _is_participating = get_is_participating(_user_id, _event_id);
 
   
-  IF _accessibility = "PUB" THEN
+  IF _role = "SA" OR _accessibility = "PUB" THEN
     BEGIN
-      SELECT e.name, e.start_time, e.end_time, e.description, e.location,
+      SELECT DISTINCT e.name, e.start_time, e.end_time, e.description, e.location,
       e.telephone, e.email, e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
       _is_participating AS is_participating, e.rating, r.rso_id, r.name as rso_name
-      FROM events e
+      FROM public_events pe, universities n, events e
       LEFT OUTER JOIN r_created_e re ON re.event_id = e.event_id
       LEFT OUTER JOIN rsos r ON r.rso_id = re.rso_id
       WHERE e.event_id = _event_id
+      AND e.event_id = pe.event_id
+      AND pe.uni_id = n.uni_id
       LIMIT 1;
     END;
 
   
   ELSEIF _accessibility = "PRI" THEN
     BEGIN
-      SELECT e.name, e.start_time, e.end_time, e.description, e.location,
+      SELECT DISTINCT e.name, e.start_time, e.end_time, e.description, e.location,
       e.telephone, e.email, e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-      _is_participating AS is_participating, e.rating, e.event_id, re.rso_id, r.name AS rso_name
-      FROM events e, private_events p
+      _is_participating AS is_participating, e.rating, e.event_id, re.rso_id, r.name AS rso_name,
+      n.name AS uni_name, n.uni_id
+      FROM events e, universities n, private_events p
       LEFT OUTER JOIN r_created_e re ON re.event_id = p.event_id
       LEFT OUTER JOIN rsos r ON r.rso_id = re.rso_id
       WHERE e.event_id = _event_id
       AND e.event_id = p.event_id
-      AND p.uni_id = _uni_id
-      OR _role = "SA" LIMIT 1;
+      AND p.uni_id = n.uni_id
+      AND n.uni_id = _uni_id LIMIT 1;
     END;
 
   
   ELSEIF _accessibility = "RSO" THEN
     BEGIN
-      SELECT e.name, e.start_time, e.end_time, e.description, e.location,
+      SELECT DISTINCT e.name, e.start_time, e.end_time, e.description, e.location,
       e.telephone, e.email, e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-      _is_participating AS is_participating, e.rating, r.rso_id, r.name AS rso_name
-      FROM events e, rso_events re, rsos r
+      _is_participating AS is_participating, e.rating, r.rso_id, r.name AS rso_name,
+      n.name AS uni_name, n.uni_id
+      FROM events e, universities n, rso_events re, rsos r
       WHERE e.event_id = _event_id
       AND re.event_id = e.event_id
       AND re.rso_id = r.rso_id
@@ -1019,7 +1119,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `view_event` (IN `_event_id` INT(11)
         SELECT r.rso_id 
         FROM rsos r, is_member m
         WHERE _user_id = m.user_id AND m.rso_id = r.rso_id)
-      OR _role = "SA" LIMIT 1;
+      AND re.uni_id = n.uni_id;
     END;
 
   END IF;
@@ -1209,6 +1309,17 @@ CREATE TABLE `attending` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `categorized_as`
+--
+
+CREATE TABLE `categorized_as` (
+  `event_id` int(11) UNSIGNED NOT NULL,
+  `label` varchar(60) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `commented_on`
 --
 
@@ -1239,7 +1350,7 @@ CREATE TABLE `events` (
   `lon` decimal(9,6) NOT NULL,
   `accessibility` enum('PUB','PRI','RSO') NOT NULL DEFAULT 'PUB',
   `status` enum('PND','ACT') NOT NULL DEFAULT 'PND',
-  `rating` decimal(9,2) NOT NULL
+  `rating` decimal(9,2) NOT NULL DEFAULT '0.00'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -1427,6 +1538,13 @@ ALTER TABLE `attending`
   ADD KEY `uni_id` (`uni_id`);
 
 --
+-- Indexes for table `categorized_as`
+--
+ALTER TABLE `categorized_as`
+  ADD KEY `event_id` (`event_id`),
+  ADD KEY `label` (`label`) USING HASH;
+
+--
 -- Indexes for table `commented_on`
 --
 ALTER TABLE `commented_on`
@@ -1583,6 +1701,12 @@ ALTER TABLE `affiliated_with`
 ALTER TABLE `attending`
   ADD CONSTRAINT `attending_uni_id` FOREIGN KEY (`uni_id`) REFERENCES `universities` (`uni_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `attending_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `categorized_as`
+--
+ALTER TABLE `categorized_as`
+  ADD CONSTRAINT `categorized_as_event_id` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `has`
