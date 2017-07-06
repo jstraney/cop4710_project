@@ -271,7 +271,8 @@ div.rso-view.aggregate.members > div.member > .button.destroy {
   right: -15px;
 }
 
-div.view-all-rsos.aggregate.rso > div.record {
+div.view-all-rsos.aggregate.rso > div.record,
+div.view-all-users.aggregate.users > div.record{
   display: block;
   padding: 5px 0 15px;
   border-bottom: 1px solid #BBBBBB;
@@ -282,11 +283,13 @@ div.view-all-rsos.aggregate.rso > div.record {
   transition: top 1s;
 }
 
-div.view-all-rsos.aggregate.rso {
+div.view-all-rsos.aggregate.rso,
+div.view-all-users.aggregate.users {
   min-height: 300px;
 }
 
-div.view-all-rsos.aggregate.rso > div.record.loaded {
+div.view-all-rsos.aggregate.rso > div.record.loaded,
+div.view-all-users.aggregate.users > div.record.loaded{
   top: 0px;
 }
 

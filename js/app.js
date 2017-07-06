@@ -191,11 +191,9 @@ var app = app || {};
   }
 
   // get all students at a university 
-  a.getStudentList = function (uni_id, callback, error) {
+  a.getStudentList = function (params, callback, error) {
 
-    uni_id = uni_id || 0; 
-
-    return apiEndpoint("user/university=" + uni_id + "/json", callback, error);
+    return apiEndpoint(params, "students/university/json", callback, error);
   
   }
 

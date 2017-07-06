@@ -99,7 +99,7 @@ class Router {
 
     // get all students from a university by uni_id.
     // user endpoints
-    $this->routes['POST']['/^users\/university=([0-9]+)\/json$/'] = array('get_students_json', 'UserController');
+    $this->routes['POST']['/^students\/university\/json$/'] = array('get_students_json', 'UserController');
 
     // gets users at the same university based on matching name. checks users uni_id within controller.
     $this->routes['POST']['/^user\/peer\/like\/json$/'] = array('get_peers_json', 'UserController');

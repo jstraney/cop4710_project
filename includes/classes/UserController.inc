@@ -184,10 +184,36 @@ class UserController extends EntityController {
   }
 
   public function view_all($params) {
-    
-    $txt = "";
 
-    return $txt;
+    global $user;
+    global $configs;
+
+    $site_root = $configs['site_root'];
+
+    if ($user === NULL) {
+
+      go_home();
+      die();
+
+    }
+
+    $user_id = $user->user_id;
+    $role = $user->role;
+
+    if ($role == "SA") {
+
+      $uni_id = check_field($params, 'uni_id', 0);
+
+    }
+    else {
+
+      $uni_id = isset($user->uni_id)? $user->uni_id: 0;
+
+    }
+
+    include get_entity_partial('user', 'view_all');
+
+    return $template;
 
   }
 
@@ -474,14 +500,42 @@ class UserController extends EntityController {
   // gets list of students at university in JSON format. used in 'view students attending' lists
   public function get_students_json ($params) {
 
-    // university id from url
-    $uni_id = explode("=", $params[1])[1];
+    global $user;
+
+    $role = $user->role;
+    
+    if ($role == "SA") {
+
+      $uni_id = check_field($params, 'uni_id', 0);
+
+    }
+    else {
+
+      $uni_id = $user->uni_id;
+
+    }
+
+    $start = check_field($params, 'start', 0);
+
+    $end = check_field($params, 'end', 9);
 
     $query = $this->user_university_query;
 
-    $results = $this->db->prepared_query($query, array(":uni_id" => $uni_id));
+    $results = $this->db->prepared_query($query, array(
+      ":uni_id" => $uni_id,
+      ":start" => $start,
+      ":end" => $end,
+    ));
+
+    if (empty($results)) {
+
+      echo '{"fail" : true}';
+      die();
+
+    }
 
     echo json_encode($results);
+    die();
 
   }
 
