@@ -27,9 +27,9 @@ $site_root = $configs['site_root'];
           <h5 class="white-text">View</h5>
           <ul>
 			<li><a class="white-text" href="<?php echo $site_root; ?>/universities/0-10">Universities</a></li>
-			<li><a class="white-text" href="<?php echo $site_root; ?>/rsos/0-10">RSO's</a></li>
-			<li><a class="white-text" href="<?php echo $site_root; ?>/events/0-10">Events</a></li>
-			<li><a class="white-text" href="<?php echo $site_root; ?>/users/0-10">Students</a></li>
+			<li><a class="white-text" href="<?php echo $site_root; ?>/rsos/">RSO's</a></li>
+			<li><a class="white-text" href="<?php echo $site_root; ?>/events/">Events</a></li>
+			<li><a class="white-text" href="<?php echo $site_root; ?>/users/">Students</a></li>
           </ul>
         </div>
         <div class="col s4 ">

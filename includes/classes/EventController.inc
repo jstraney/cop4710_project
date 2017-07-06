@@ -62,6 +62,9 @@ class EventController extends EntityController {
 
     $user_id = $user->user_id;
 
+    // we have to examine the users role to determine if the university can be chosen
+    // (such as when SA, which has no university imports UCF events) or if it is based on users affiliation with
+    // the school
     $role = $user->role;
 
     $name = check_field($params,'name', NULL);
@@ -86,8 +89,14 @@ class EventController extends EntityController {
     // If none was selected, set to 0 to set event to PND -> pending
     $rso_id = check_field($params,'rso-id', 0); 
 
-    // always use the users university
-    $uni_id = isset($user->uni_id)? $user->uni_id: 0; 
+    // Super Admin can choose university (like when they import UCF events)
+    if ($role == "SA") {
+      $uni_id = check_field($params, 'uni-id', 0); 
+    } 
+    // always use the users university if they are not SA
+    else {
+      $uni_id = isset($user->uni_id)? $user->uni_id: 0; 
+    }
 
     $query = $this->create_query;
 
@@ -118,11 +127,12 @@ class EventController extends EntityController {
 
     }
     else if (isset($result[0]["_err_msg"])) {
-
+      header_remove();
+      console_log($params);
+      die();
       $msg = $result[0]["_err_msg"];
       set_message($msg, "error");
       go_back();
-      die();
 
     }
 

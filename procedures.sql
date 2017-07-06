@@ -75,6 +75,8 @@ CREATE PROCEDURE create_user (
   IN _uni_id INT(11))
 BEGIN
 
+  DECLARE _user_id INT(11);
+
   DECLARE EXIT HANDLER FOR SQLEXCEPTION 
   BEGIN
     DECLARE _c_num INT;
@@ -102,24 +104,36 @@ BEGIN
       BEGIN
         INSERT INTO users (user_name, first_name, last_name, email, role, hash)
         VALUES (_user_name, _first_name, _last_name, _email, _role, _hash);
+
+        SET _user_id = LAST_INSERT_ID();
+
         -- add relationship to user_attending_university table
         INSERT INTO attending (user_id, uni_id)
-        VALUES (LAST_INSERT_ID(), _uni_id);
+        VALUES (_user_id, _uni_id);
       END;
     -- admin is affiliated with a university
     ELSEIF _role = "ADM" THEN
       BEGIN
         INSERT INTO users (user_name, first_name, last_name, email, role, hash)
         VALUES (_user_name, _first_name, _last_name, _email, _role, _hash);
+
+        SET _user_id = LAST_INSERT_ID();
+
         -- add affiliated_with relationship
         INSERT INTO affiliated_with (user_id, uni_id)
-        VALUES (LAST_INSERT_ID(), _uni_id);
+        VALUES (_user_id, _uni_id);
       END;
     -- super admin has no affiliation with university
     ELSEIF _role = "SA"  THEN
       INSERT INTO users (user_name, first_name, last_name, email, role, hash)
       VALUES (_user_name, _first_name, _last_name, _email, role, _hash);
+
+      SET _user_id = LAST_INSERT_ID();
+
     END IF;
+
+    -- return the user id for redirect/login/picture creation purposes.
+    SELECT _user_id AS user_id;
 
   COMMIT;
 

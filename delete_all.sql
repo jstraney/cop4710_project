@@ -1,3 +1,5 @@
+BEGIN;
+
 USE `event`;
 
 DELETE FROM users WHERE 1;
@@ -5,3 +7,13 @@ DELETE FROM universities WHERE 1;
 DELETE FROM rsos WHERE 1;
 DELETE FROM events WHERE 1;
 DELETE FROM commented_on WHERE 1;
+
+--- reset auto-increments
+ALTER TABLE `events` AUTO_INCREMENT = 1;
+ALTER TABLE users AUTO_INCREMENT = 1;
+ALTER TABLE universities AUTO_INCREMENT = 1;
+ALTER TABLE commented_on AUTO_INCREMENT = 1;
+ALTER TABLE events AUTO_INCREMENT = 1;
+ALTER TABLE rsos AUTO_INCREMENT = 1;
+
+COMMIT;

@@ -38,6 +38,7 @@ EOT;
 $template .= <<<EOT
 <div class="user-view aggregate rsos">
 <h3>{$user_name} belongs to these RSO's</h3>
+
 <!-- populate with ajax -->
 </div>
 
@@ -49,7 +50,14 @@ EOT;
 // only super admins can make a university
 if ($my_account && $role === "SA") {
   $template .= <<<EOT
-<div><a href="{$site_root}/university/new">Create a University &raquo;</a></div>
+  <div>
+    <a href="{$site_root}/university/new">
+      Create a University &raquo;
+    </a>
+    <form class="lefty" method="POST" action="{$site_root}/ucf/import">
+      <input class="btn btn-large" type="submit" value="Import UCF Events"/>
+    </form>
+  </div>
 EOT;
 }
 

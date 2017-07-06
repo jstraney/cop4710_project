@@ -7,7 +7,7 @@ $template = <<<EOT
 <div id="inner-content">
 <script src="{$site_root}/js/user_form.js"></script>
 <div class="row">
-    <form method="POST" action="{$site_root}/user/create" class="col s12 ">
+    <form method="POST" action="{$site_root}/user/create" class="col s12 " enctype="multipart/form-data">
 	  <div class="row">
 	  </div>
 	  <div class="row">
@@ -54,12 +54,14 @@ $template = <<<EOT
           <label for="confirm">Confirm Password</label>
         </div>
 	  </div>
+    <!-- holding of on profile pictures for now
     <div class="row">
       <div class="col s4 offset-s2">
         <label for="pic">Optional Profile Picture</label>
-        <input id="pic" type="file" name="pic" accept="image/png,image/gif,image/jpg"/>
+        <input id="pic" type="file" name="pic[]" accept="image/png,image/gif,image/jpeg"/>
       </div>
     </div>
+    -->
 	  <div class="row">
 	  	<div class="col s4 offset-s2">
 			  <button class="btn waves-effect waves-light" type="submit" name="action">Submit
