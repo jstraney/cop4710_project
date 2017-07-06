@@ -1,5 +1,6 @@
 (function (a) {
 
+  console.log(a.scope.my_account);
   function aggregateFactory (entity_id, entity_name, entity_type) {
 
     var box = $('<div class="record '+entity_type+'">'+entity_name+'</div>');
@@ -56,7 +57,13 @@
 
       if (data.fail) {
 
-        isMember.append('<p class="notice">This user is not a member of any RSO\'s</p>');
+        var my_account = a.scope.my_account;
+        if (my_account) {
+          isMember.append('<p>You are not a member of any RSO\'s. Feel free to <a href="' + a.siteRoot + 'rsos">Explore RSO\'s</a>');
+        }
+        else {
+          isMember.append('<p class="notice">This user is not a member of any RSO\'s</p>');
+        } 
 
       }
        

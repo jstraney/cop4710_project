@@ -42,6 +42,10 @@ class PictureController extends EntityController {
 
     $id = check_field($params, 'id', 0);
 
+    $style = check_field($params, 'style', 'thumbnail');
+
+    $default = check_field($params, 'default', 'default.jpg');
+
     $template = load_entity_pic($type, $id, $style, $default);
 
     echo '{"img" : ' . $template . '}';

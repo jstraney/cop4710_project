@@ -12,6 +12,105 @@ var app = app || {};
 
   a.util = {};
 
+  // elem is assumed to be a div or some empty container
+  a.util.pictureWidget = function (elem, config) {
+
+    config = config || {};
+
+    if (config == {}) {
+
+      return;
+
+    }
+
+    var type = config.type;
+
+    var id = config.id;
+
+    var form = $('<form method="POST" enctype="multipart/form-data" action="'+a.siteRoot+'pic/upload" class="pic upload">');
+
+    var typeInput = $('<input type="hidden" name="type" value="' + type + '"/>');
+
+    var idInput = $('<input type="hidden" name="id" value="' + id + '"/>');
+
+    var upload = $('<input type="file" name="pic[]"/>');
+
+    form.append(typeInput, idInput, upload);
+
+    form.submit(function (e) {
+
+      e.preventDefault();
+      // send request to pic/upload
+      
+      // on success update the image source
+        // show destroy button, return
+      
+      // on fail, set image source to default.
+        // show upload button
+        
+      console.log(e);
+      
+    });
+
+    // url if the entity has a picture. Each entity can have one picture.
+    var picSetUrl = a.siteRoot + 'res/' + type + '/' + id + '/main.jpg';
+
+    // url to default image if entity has no picture.
+    var noPicUrl = a.siteRoot + 'res/' + type + '/default.jpg';
+
+    var pic = $('<img>');
+
+    var create = $('<div class="button create">');
+
+    create.click(function () {
+
+      var self = $(this);
+
+      // send picture data to server.
+      form.submit();
+
+      // hide the upload button. re-shows if the upload fails.
+      self.hide();
+
+    });
+
+    var destroy = $('<div class="button upload">');
+
+    destroy.click(function () {
+
+      var self = $(this);
+
+      a.picDestroy({type: type, id: id}, function (data) {
+
+        data = data || '{}';
+        
+        data = JSON.parse(data);
+
+        // on failure
+        if (data.fail) {
+
+          // show a message
+          a.util.spawnMsg("We could not delete your picture at this time. Sorry!");          
+          return;
+
+        }
+
+        // on success
+        
+        // set image to default image
+        pic.attr('src', noPicUrl);
+        // hide this button 
+        self.hide();
+        
+      });
+
+    });
+
+    // will change elem by reference
+    elem.append(pic, form, create, destroy);
+
+  }
+
   a.util.spawnMsg = function (msg, type) {
 
     var modal = $('<div style="display:none" class="sup-modal ' + type + '">' + msg + '</div>');
@@ -353,6 +452,18 @@ var app = app || {};
   a.getCategoriesLike = function (params, callback, error) {
 
     return apiEndpoint(params, "event/categories/like/json", callback, error);
+
+  }
+
+  a.createPic = function (params, callback, error) {
+
+    return apiEndpoint(params, "pic/upload", callback, error);
+
+  }
+
+  a.destroyPic = function (params, callback, error) {
+
+    return apiEndpoint(params, "pic/destroy", callback, error);
 
   }
 
