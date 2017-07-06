@@ -78,6 +78,9 @@ class UniversityController extends EntityController {
     $website_url = isset($result['website_url']) ? $result['website_url']: "";
     $num_students = isset($result['population']) ? $result['population']: 0;
 
+    // format num_students for output
+    $num_students = number_format($num_students, 0, ".", ",");
+
     // find rsos associated with this university
     $associated_rsos = $this->view_associated_rsos(array(
       "uni_id" => $id
