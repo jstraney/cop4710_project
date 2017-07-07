@@ -157,6 +157,8 @@ class RsoController extends EntityController {
 
     $viewed_by_admin = $rso_administrator == $user_id;
 
+    $has_pic = entity_has_pic("rsos", $rso_id)? 1: 0;
+
     include get_entity_partial('rso', 'view');
 
     return $template;

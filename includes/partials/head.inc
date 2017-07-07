@@ -20,6 +20,7 @@ $site_root = $configs['site_root'];
   <link rel="stylesheet" type="text/css" href="<?php echo $site_root; ?>/js/lib/jquery-ui/jquery-ui.css">
   <script type="application/javascript" src="<?php echo $site_root; ?>/js/lib/jquery/jquery-3.2.0.js"></script>
   <script type="application/javascript" src="<?php echo $site_root; ?>/js/lib/devbridge/jquery.autocomplete.js"></script>
+  <script type="application/javascript" src="<?php echo $site_root; ?>/js/lib/howler/howler.js"></script>
   <script type="application/javascript" src="<?php echo $site_root; ?>/js/app.js"></script>
   <script type="application/javascript" src="<?php echo $site_root; ?>/js/extras.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.99.0/js/materialize.min.js"></script>

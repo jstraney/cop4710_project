@@ -5,7 +5,7 @@ $template = <<<EOT
 <script src="{$site_root}/js/view_all_rsos.js"></script>
 <div id="inner-content">
   <span class="prompt paginate"></span>
-  <div class="view-all-rsos aggregate rso">
+  <div class="view-all-rsos aggregate rso loading">
 
   </div>
   <div class="paginate">

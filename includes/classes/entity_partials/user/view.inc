@@ -16,12 +16,44 @@ else {
 $template = <<<EOT
 <div id="inner-content">
 <script>
-  app.scope.my_account = {$my_account};
-  app.scope.user_id = {$user_id};
+  (function (a) {
+    a.scope.has_pic = {$has_pic};
+    a.scope.my_account = {$my_account};
+    a.scope.user_id = {$user_id};
+  })(app);
 </script>
+
 <script src="{$site_root}/js/view_user.js"></script>
 
 <h2>{$user_name}'s Profile</h2>
+
+EOT;
+
+// if user is owner of profile, include the widget uploader
+if ($my_account) {
+  $template .= '<div class="widget picture"></div>';
+  $template .= <<<EOT
+  <script>
+
+    (function (a) {
+
+      // configure the picture widget
+      var configs = {type: "users", id: {$user_id}, style: "medium"};
+    
+      // bind events/build the widget with the dom element.
+      a.util.pictureWidget($("div.widget.picture"), configs);
+
+    })(app);
+
+  </script>
+EOT;
+}
+// otherwise provide a static image.
+else {
+  $template .= load_entity_pic('users', $user_id, 'medium');
+}
+
+$template .= <<<EOT
 
 {$user_uni_rel}
 <div>E-mail: {$email} </div>

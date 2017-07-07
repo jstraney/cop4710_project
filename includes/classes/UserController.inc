@@ -130,6 +130,7 @@ class UserController extends EntityController {
     if (isset($user)) {
 
       $role = $user->role;
+
       $current_uid = $user->user_id;;
 
     }
@@ -137,6 +138,7 @@ class UserController extends EntityController {
 
       // id's start from 1
       $current_uid = 0;
+
       $role = FALSE;
 
     }
@@ -147,11 +149,11 @@ class UserController extends EntityController {
 
     $user_id = $params[1];
 
-    $my_account = FALSE;
+    $my_account = 0;
 
     if ($current_uid == $user_id) {
       // this is the current users profile
-      $my_account = TRUE;
+      $my_account = 1;
 
     }
 
@@ -175,7 +177,7 @@ class UserController extends EntityController {
     $uni_name = check_field($viewed_user, 'uni_name', "");
     $user_role = check_field($viewed_user, 'role', "STU");
 
-    $pic = load_entity_pic("users", $user_id, "medium");
+    $has_pic = entity_has_pic("users", $user_id) ? 1: 0;
 
     include get_entity_partial('user', 'view');
 
@@ -535,6 +537,7 @@ class UserController extends EntityController {
     }
 
     echo json_encode($results);
+
     die();
 
   }

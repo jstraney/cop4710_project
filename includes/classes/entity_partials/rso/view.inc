@@ -4,10 +4,14 @@ $template = <<<EOT
 <script>
 // scope set by php
 (function (a) {
+
   a.scope.rso_id = {$rso_id};
   a.scope.user_id = {$user_id};
   a.scope.user_name = "{$user_name}";
   a.scope.rso_administrator = {$rso_administrator};
+
+  a.scope.has_pic = {$has_pic};
+
 }) (app);
 </script>
 
@@ -26,6 +30,24 @@ if ($viewed_by_admin) {
   $template .= "<a href=\"{$site_root}/rso/{$rso_id}/delete\">Delete RSO</a>";
   $template .= '</div>';
 
+  // include the image widget
+  $template .= <<<EOT
+  <div class="widget picture"></div>
+  <script>
+  (function (a) {
+
+    var configs = {type: "rsos", id: {$rso_id}, style: "large"};
+
+    a.util.pictureWidget($('div.widget.picture'), configs);
+
+  })(app);
+  </script>
+EOT;
+
+}
+else {
+  // just use the RSOS Portrait
+  $template .= load_entity_pic('rsos', $rso_id, 'large');
 }
 
 $template .= <<<EOT

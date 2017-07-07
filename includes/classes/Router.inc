@@ -152,6 +152,15 @@ class Router {
     // route for event service
     $this->routes['POST']['/^ucf\/import$/'] = array('import_ucf_events', 'EventService');
 
+    // routes for picture uploads
+    $this->routes['POST']['/^pic\/upload$/'] = array('create', 'PictureController');
+
+    // routes for ajax picture loading
+    $this->routes['POST']['/^pic\/view$/'] = array('view', 'PictureController');
+
+    // routes for picture destruction 
+    $this->routes['POST']['/^pic\/destroy$/'] = array('destroy', 'PictureController');
+
   }
 
   // break url into tokens. determine if request is GET or POST

@@ -36,9 +36,11 @@ EOT;
 
 // gets student by university id.
 $user_university_query = <<<EOT
-SELECT u.user_name, u.first_name, u.last_name, a.uni_id
-FROM users u, attending a
-WHERE u.user_id = a.user_id AND a.uni_id = :uni_id
+SELECT u.user_id, u.user_name, u.first_name, u.last_name, a.uni_id, n.name AS uni_name
+FROM users u, attending a, universities n
+WHERE u.user_id = a.user_id
+AND a.uni_id = n.uni_id 
+AND n.uni_id = :uni_id
 LIMIT :start, :end;
 EOT;
 

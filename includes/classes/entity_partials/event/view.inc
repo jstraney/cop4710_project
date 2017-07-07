@@ -7,6 +7,7 @@ $template = <<<EOT
   a.scope.event_id = {$event_id};
   a.scope.status = "{$status}";
   a.scope.current_user_id = {$user_id};
+  a.scope.has_pic = "{$has_pic}";
 })(app);
 </script>
 
@@ -16,24 +17,43 @@ $template = <<<EOT
 
 EOT;
 
+$template .= "<h2>{$name}</h2>";
+
 // if the current user is the owner, show the link to edit.
 if ($is_owner) {
 
   $template .= "<div><a href=\"{$site_root}/event/{$event_id}/edit\">&laquo; Edit Event</a></div>";
   $template .= "<div><a href=\"{$site_root}/event/{$event_id}/delete\">&laquo; Delete Event</a></div>";
+  $template .= <<<EOT
+  <div class="view-event widget picture"></div>
+  <script>
+  (function (a) {
+    var configs = {type : "events", id: $event_id, style: "medium"};
+    a.util.pictureWidget($('div.widget.picture'), configs);
+  })(app);
+  </script>
+EOT;
 
 }
+else {
+  $template .= load_entity_pic('events', $event_id, 'view-event medium');
+}
 
-$template .= <<<EOT
-<h2>{$name}</h2>
 
-EOT;
 if ($rso_id != NULL) {
 
-  $template .= "<h5>Hosted by ";
-  $template .= "<a href=\"{$site_root}/rso/{$rso_id}\">{$rso_name}</a>";
-  $template .= " at <a href=\"{$site_root}/university/{$uni_id}\">{$uni_name}</a>";
-  $template .= "</h5>";
+  $template .= '<div class="view-event pane rso">';
+  $template .= '<div class="info">Hosted by ';
+  $template .= "<strong>{$rso_name}</strong>";
+  $template .= " at <strong>{$uni_name}</strong>";
+  $template .= "</div>";
+  $template .= "<a href=\"{$site_root}/rso/{$rso_id}\">";
+  $template .= load_entity_pic('rsos', $rso_id, 'thumbnail');
+  $template .= "</a>";
+  $template .= "<a href=\"{$site_root}/university/{$uni_id}\">";
+  $template .= load_entity_pic('universities', $uni_id, 'thumbnail');
+  $template .= "</a>";
+  $template .= "</div>";
 
 }
 
@@ -42,7 +62,7 @@ if ($status == "PND") {
 }
 
 $template .= <<<EOT
-<div>Location: {$location}</div>
+<div class="clearfix">Location: {$location}</div>
 <input type="hidden" id="location" value="{$location}"></input>
 <input type="hidden" id="lon" value="{$lon}"></input>
 <input type="hidden" id="lat" value="{$lat}"></input>

@@ -72,7 +72,7 @@ $template .= <<<EOT
 </form>
 
 
-<div class="events-view-all aggregate events"></div>
+<div class="events-view-all aggregate events loading"></div>
 </div>
 </div>
 EOT;

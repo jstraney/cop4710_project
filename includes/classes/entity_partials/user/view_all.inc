@@ -5,7 +5,7 @@ $template = <<<EOT
 <script src="{$site_root}/js/view_all_users.js"></script>
 <div id="inner-content">
   <span class="prompt paginate"></span>
-  <div class="view-all-users aggregate users">
+  <div class="view-all-users aggregate users loading">
   </div>
   <div class="paginate">
     <div class="button prev">

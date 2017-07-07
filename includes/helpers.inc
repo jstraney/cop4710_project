@@ -71,10 +71,15 @@ function create_entity_pic ($type, $id, $file) {
     
   }
 
-  // add file to dir
-  move_uploaded_file($file, $entity_pic_uri . "/main.jpg");
+  // delete the file if it exists
+  if (entity_has_pic($type, $id)) {
 
-  return;
+    destroy_entity_pic($type, $id);
+
+  }
+
+  // add file to dir
+  return move_uploaded_file($file, $entity_pic_uri . "/main.jpg");
 
 }
 
@@ -128,6 +133,7 @@ function destroy_entity_pic ($type, $id) {
   if (file_exists($entity_pic_uri)) {
 
     unlink($entity_pic_uri);
+
     return TRUE;
     
   }

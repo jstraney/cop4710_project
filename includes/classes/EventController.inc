@@ -236,6 +236,7 @@ class EventController extends EntityController {
     $status = isset($result['status'])? $result['status']: "";
 
     $uni_id = check_field($result, 'uni_id', 0);
+
     $uni_name = check_field($result, 'uni_name', "");
 
     // if the event was created by an RSO allow the following.
@@ -260,6 +261,7 @@ class EventController extends EntityController {
 
     }
 
+    $has_pic = entity_has_pic("events", $event_id)? 1: 0;
 
     // return the partial using the variable defined above.
     include get_entity_partial('event', 'view');
