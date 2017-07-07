@@ -4,13 +4,107 @@ var app = app || {};
 // add methods to the app object to build a front-end controller
 (function (a) {
 
+  // global JS variables.
+  a.siteRoot = "http://localhost/cop4710_project/";
+
   // a global space for variables used in post requests. set from the php script
   // that renders the page. for example, on an RSO page, only user members matching
   // that rso's id should be requested. The rso_id would be set here to be sent to
   // POST rso/members/json
   a.scope = {};
 
+  var sounds = {};
+
+  function loadSounds() {
+
+    var files = ['ryuhadoken.wav', 'ryushoryken.wav', 'ryutatsumakisenpukyaku.wav'];
+
+    for (var i in files) {
+
+      var name = files[i];
+
+      var key = name.split('.')[0];
+
+      sounds[key] = new Howl({
+        src: [ a.siteRoot + 'res/sounds/' + name]  
+      });
+
+    }
+
+    a.playSound = function (soundName) {
+
+      sounds[soundName].play();
+
+    };
+
+    a.playRandomRyu = function () {
+
+      var ryuSounds = ['ryuhadoken', 'ryushoryken', 'ryutatsumakisenpukyaku'];
+
+      var i = Math.floor(Math.random() * ryuSounds.length)
+
+      var choice = ryuSounds[i];
+
+      a.playSound(choice);
+
+    };
+
+  }
+
+  // get sounds set methods.
+  loadSounds();
+
   a.util = {};
+
+  // used in ajaxified displays 
+  a.util.loadEntityPic = function (config) {
+
+    config = config || {};
+
+    var type = config.type;
+
+    var id = config.id;
+
+    var style = config.style || "";
+
+    var link = config.link || false;
+
+    if (!type || !id) {
+
+      return;
+
+    }
+
+    var img = $('<img class="entity ' + type + ' ' + style + '">');
+
+    var picSetUrl = a.siteRoot + 'res/' + type + "/" + id + '/main.jpg';
+    var noPicUrl = a.siteRoot + 'res/' + type + "/default.jpg";
+
+    img.on('error', function () {
+
+      var self = $(this);
+
+      self.attr('src', noPicUrl);
+
+    });
+
+    img.attr('src', picSetUrl + "#" + new Date().getTime()); 
+
+    if (link) {
+
+      // oog, I knew it was a bad idea to pluralize the directories...
+      var singular_type = type.slice(0, -1);
+
+      var anchor = $('<a class="entity ' + type + ' ' + style + '" href="' + a.siteRoot + singular_type + '/' + id + '"></a>');
+
+      return anchor.append(img);
+
+    }
+
+    return img;
+
+  };
+
 
   // elem is assumed to be a div or some empty container
   a.util.pictureWidget = function (elem, config) {
@@ -23,6 +117,15 @@ var app = app || {};
 
     }
 
+    // the destroy button
+    var destroy;
+
+    destroy = $('<div class="button destroy">Delete</div>');
+
+    var style = config.style || "thumbnail"
+
+    elem.addClass(style);
+
     var type = config.type;
 
     var id = config.id;
@@ -33,22 +136,59 @@ var app = app || {};
 
     var idInput = $('<input type="hidden" name="id" value="' + id + '"/>');
 
-    var upload = $('<input type="file" name="pic[]"/>');
+    var upload = $('<label for="pic">Upload Picture</label><input id="pic" type="file" name="pic[]"/>');
 
     form.append(typeInput, idInput, upload);
 
     form.submit(function (e) {
 
       e.preventDefault();
+
+      var formData = new FormData();
+
+      var input = $('input[type=file]', form)[0];
+
+      if (!input.files || input.files.length == 0) {
+
+        return;
+
+      }
+
+      formData.append('pic', input.files[0]);
       // send request to pic/upload
+     
+      formData.append('type', type);
+
+      formData.append('id', id);
       
-      // on success update the image source
-        // show destroy button, return
-      
-      // on fail, set image source to default.
-        // show upload button
-        
-      console.log(e);
+      a.createPic(formData, function (data) {
+
+        data = data || '{}';
+
+        data = JSON.parse(data);
+
+        // on fail, set image source to default.
+        if (data.fail) {
+
+          pic.attr('src', noPicUrl);
+
+          return;
+
+        }
+        else if (data.success) {
+          // on success update the image source
+          // appending timestamp to end to fool browser cache
+          pic.attr('src', picSetUrl + '#' + new Date().getTime());
+
+          upload.text("Update Picture");
+
+          // show destroy button, return
+          destroy.show();
+
+          return;
+        }
+
+      });
       
     });
 
@@ -58,11 +198,37 @@ var app = app || {};
     // url to default image if entity has no picture.
     var noPicUrl = a.siteRoot + 'res/' + type + '/default.jpg';
 
-    var pic = $('<img>');
+    var pic = $('<img class="entity ' + style + '">');
 
-    var create = $('<div class="button create">');
+    // if there is an error loading the image, set it to the default.
+    pic.on('error', function () {
 
-    create.click(function () {
+      var self = $(this);
+
+      self.attr('src', noPicUrl);
+
+    });
+
+    // set the source of the picture depending on if the entity has a picture.
+    var has_pic = a.scope.has_pic;
+
+    if (has_pic) {
+
+      // appending timestamp to end to fool browser cache
+      pic.attr('src', picSetUrl + "#" + new Date().getTime());
+
+      $(upload).text("Update Picture");
+
+      destroy.show();
+
+    }
+    else {
+
+      pic.attr('src', noPicUrl);
+
+    }
+
+    upload.change(function () {
 
       var self = $(this);
 
@@ -74,13 +240,11 @@ var app = app || {};
 
     });
 
-    var destroy = $('<div class="button upload">');
-
     destroy.click(function () {
 
       var self = $(this);
 
-      a.picDestroy({type: type, id: id}, function (data) {
+      a.destroyPic({type: type, id: id}, function (data) {
 
         data = data || '{}';
         
@@ -91,14 +255,16 @@ var app = app || {};
 
           // show a message
           a.util.spawnMsg("We could not delete your picture at this time. Sorry!");          
+
           return;
 
         }
 
         // on success
-        
+        upload.text('Upload Picture');
         // set image to default image
         pic.attr('src', noPicUrl);
+
         // hide this button 
         self.hide();
         
@@ -107,9 +273,206 @@ var app = app || {};
     });
 
     // will change elem by reference
-    elem.append(pic, form, create, destroy);
+    elem.append(pic, form, destroy);
 
   }
+
+  a.util.unleashTheTarantula = function () {
+
+    // disable text selection for click and drag
+    $(document.body).css({
+      '-moz-user-select' : 'none',
+      '-webkit-user-select' : 'none',
+      '-ms-user-select' : 'none',
+      'user-select' : 'none',
+    });
+
+    // the tarantula's name is doug
+    // doug is also a div.
+    var doug;
+
+    // add a new doug.
+    function appendDoug () {
+
+      doug= $('<div class="doug">');
+
+      $(document.body).append(doug);
+
+      var coords = doug.position();
+
+      // possible starting positions. keyed by x's -> y's
+      var positions = [
+        {
+          x: -200,
+          y : 'rand' 
+        },
+        {
+          x: window.innerWidth,
+          y : 'rand' 
+        },
+        {
+          x: 'rand',
+          y : -200
+        },
+        {
+          x: 'rand',
+          y : window.innerHeight 
+        },
+      ];
+
+      var position = positions[Math.floor(Math.random() * positions.length)];
+
+      if (position.x == 'rand') {
+
+        doug.x = Math.random() * window.innerWidth;
+        doug.y = position.y;
+
+      }
+      else if (position.y == 'rand') {
+
+        doug.x = position.x;
+        doug.y = Math.random() * window.innerHeight;
+
+      }
+
+      doug.spd = 3;
+      doug.w = doug.width();
+      doug.h = doug.height();
+
+    }
+
+    // release the spider.
+    appendDoug();
+
+    var lastmousex = 0;
+    var lastmousey = 0;
+    var mousex = 0;
+    var mousey = 0;
+
+    // meme projectile. if any.
+    var meme;
+
+    $(document).on('mousemove', function (e) {
+
+      lastmousex = mousex;
+      lastmousey = mousey;
+
+      mousex = e.clientX + window.scrollX; 
+      mousey = e.clientY + window.scrollY; 
+
+      if (meme) {
+
+        memew = meme.width();
+        memeh = meme.width();
+
+        // if there is a meme, update position
+        meme && meme.css({left: (mousex - (memew / 2)) + 'px', top: (mousey - (memeh /2)) + 'px'});
+
+      }
+
+    });
+
+    var randomMemes = ["doge", "chzbrgr", "grmpy"];
+
+    // update meme position on mousedown
+    $(document).on('mousedown', function (e) {
+
+      if (!meme) {
+
+        var random = randomMemes[Math.floor(Math.random() * randomMemes.length)];
+
+        meme = $('<div style="display:none" class="meme ' + random + '">');
+
+        $(document.body).append(meme);
+
+        meme.fadeIn();
+
+      }
+
+    });
+
+    $(document).on('mouseup', function (e) {
+      // get vectors based on mouse movement
+      var v1 = mousex - lastmousex;
+      var v2 = mousey - lastmousey;
+
+      var projectile = meme;
+
+      var projw = projectile.width();
+      var projh = projectile.height();
+
+      a.playRandomRyu();
+
+      meme = null;
+
+      var projInterval = setInterval(function () {
+
+        var coords = projectile.position();
+
+        lastx = coords.left; 
+        lasty = coords.top; 
+
+        // check if off screen
+        if (lastx + projw < 0 || lasty + projh < 0 ||
+          lastx > window.innerWidth || lasty > window.innerHeight) {
+
+          // remove
+          projectile.remove();
+
+          // clear the interval to update the position
+          window.clearInterval(projInterval);
+
+        }
+
+        projectile.css({left:(lastx + v1) + 'px', top:(lasty + v2) + 'px'});  
+
+        var memeCenterX = lastx + (projw / 2);
+        var memeCenterY = lasty + (projh / 2);
+
+        // check if meme hits the spider
+        if ((doug.x + doug.w) > memeCenterX && (doug.x < memeCenterX) &&
+            (doug.y + doug.h) > memeCenterY && (doug.y < memeCenterY)) {
+
+          // reset spider.
+          doug.remove();
+          doug = null;
+          appendDoug();
+
+        }
+
+      }, 50);
+
+    });
+
+    // move doug every 50 ms for 20fps
+    window.setInterval(function () {
+      
+      if ((doug.x + (doug.w / 2) < mousex)) {
+
+        doug.x += doug.spd;
+
+      }
+      else if ((doug.x + (doug.w / 2) > mousex)) {
+
+        doug.x -= doug.spd;
+
+      }
+      if ((doug.y + (doug.y / 2) < mousey)) {
+
+        doug.y += doug.spd;
+
+      }
+      else if ((doug.y + (doug.y / 2) > mousey)) {
+
+        doug.y -= doug.spd;
+
+      }
+
+      doug.css({top: doug.y + 'px', left: doug.x + 'px'});
+
+    }, 60);
+
+  };
 
   a.util.spawnMsg = function (msg, type) {
 
@@ -179,8 +542,6 @@ var app = app || {};
 
   };
 
-  // global JS variables.
-  a.siteRoot = "http://localhost/cop4710_project/";
 
   // one method of the app object is to make a location picker
   a.makePicker = function (configs) {
@@ -270,12 +631,34 @@ var app = app || {};
       console.error(err);
     };
 
+    var processData, contentType;
+
+    // special case for picture uploads. in this case. it is a class of FormData
+    if (typeof(params.get) === "function") {
+
+      processData = params.get("processData");
+
+      contentType = false;
+
+    }
+    else {
+
+      processData = true;
+
+      contentType = "application/x-www-form-urlencoded; charset=UTF-8";
+
+    }
+
+    delete params.processData;
+
     return $.ajax({
       url: a.siteRoot + url,
       method: "POST",
       success: callback,
       failure: error,
-      data: params
+      data: params,
+      processData: processData,
+      contentType: contentType,
     });
 
   };

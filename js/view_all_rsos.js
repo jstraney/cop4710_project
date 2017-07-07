@@ -19,6 +19,10 @@
 
     elem.append('<p>'+description+'</p>');
 
+    var img = a.util.loadEntityPic({type: "rsos", id: rso_id, style: "medium", link: true});
+
+    elem.append(img);
+
     window.setTimeout(function () {
 
       elem.fadeIn(1000);
@@ -37,18 +41,26 @@
     var start = paginate.start;
     var end = paginate.end;
 
+    rsoAggregate.addClass('loading');
+
     a.getRsosAtUniversity({uni_id: uni_id, start: start, end: end}, function (data) {
 
       data = data || '[]';
       data = JSON.parse(data);
 
-      if (data.fail) {
+      if (data.fail || data.length == 0) {
 
-        rsoAggregate.html('<p class="notice">There are no Rsos at your university at this time.</p>');
+        rsoAggregate.html('<p class="notice">There are no more RSO\'s to view at your university at this time.</p>');
+
+      }
+      else {
+
+        rsoAggregate.html("");
 
       }
 
-      rsoAggregate.html("");
+      rsoAggregate.removeClass('loading');
+
       paginatePrompt.text( 'Viewing ' + paginate.start + ' - ' + paginate.end);
 
       for (var i = 0; i < data.length; i++) {

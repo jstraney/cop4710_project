@@ -1,11 +1,12 @@
 (function (a) {
 
-  console.log(a.scope.my_account);
   function aggregateFactory (entity_id, entity_name, entity_type) {
 
     var box = $('<div class="record '+entity_type+'">'+entity_name+'</div>');
 
-    var link = $('<a href="'+ a.siteRoot + entity_type + '/' + entity_id + '"></a>');
+    var type = entity_type + 's';
+
+    var link = a.util.loadEntityPic({type: type, id: entity_id, style: 'thumbnail', link: true});
 
     link.append(box);
 
@@ -58,11 +59,16 @@
       if (data.fail) {
 
         var my_account = a.scope.my_account;
+
         if (my_account) {
+
           isMember.append('<p>You are not a member of any RSO\'s. Feel free to <a href="' + a.siteRoot + 'rsos">Explore RSO\'s</a>');
+
         }
         else {
+
           isMember.append('<p class="notice">This user is not a member of any RSO\'s</p>');
+
         } 
 
       }

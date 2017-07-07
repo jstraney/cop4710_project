@@ -7,6 +7,8 @@
     userJson = userJson || {};
 
     var user_id = userJson.user_id || 0;
+    var uni_id = userJson.uni_id || 0;
+    var uni_name = userJson.uni_name || "";
 
     var user_name = userJson.user_name || "";
 
@@ -14,12 +16,19 @@
 
     elem.append('<h4><a href="'+a.siteRoot+'user/'+user_id+'">'+user_name+'</a></h4>');
 
+    var img = a.util.loadEntityPic({type: 'users', id: user_id, style: 'medium', link: true});
+
+    elem.append(img);
+
+    elem.append('<span>Currently attending <a href="' + a.siteRoot + 'university/' + uni_id + '">' + uni_name + '</a></span>');
+
     window.setTimeout(function () {
 
-      elem.fadeIn(1000);
+      elem.fadeIn();
+
       elem.addClass('loaded');
 
-    }, 300);
+    }, 100);
 
     return elem;
 
@@ -32,6 +41,8 @@
     var start = paginate.start;
     var end = paginate.end;
 
+    userAggregate.addClass('loading');
+
     a.getStudentList({uni_id: uni_id, start: start, end: end}, function (data) {
 
       data = data || '[]';
@@ -39,15 +50,18 @@
 
       if (data.fail) {
 
-        userAggregate.html('<p class="notice">There are no students at your university at this time.</p>');
+        userAggregate.html('<p class="notice">There are no more students to view at your university at this time.</p>');
 
       }
+      else {
 
-      userAggregate.html("");
+        userAggregate.html("");
 
-      console.log(userAggregate);
+      } 
 
       paginatePrompt.text( 'Viewing ' + paginate.start + ' - ' + paginate.end);
+
+      userAggregate.removeClass('loading');
 
       for (var i = 0; i < data.length; i++) {
 
@@ -73,8 +87,15 @@
       pollUsers();
     },
     prev: function () {
-      this.start -= this.range;  
-      this.end -= this.range;  
+      // don't go into negative pagination
+      if (this.start - this.range < 0) {
+        return;
+      }
+      else {
+        this.start -= this.range;  
+        this.end -= this.range;  
+      }
+
       pollUsers();
 
     },

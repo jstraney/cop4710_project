@@ -174,7 +174,10 @@
         text += "RSO Accessible";  
       }
       text += '<span class="info status">Status : ' + status + '</span>';
+
       elem.html(text);
+
+      elem.append(a.util.loadEntityPic({type: "events", id: event_id, style: "medium", link: true}));
 
       window.setTimeout(function () {
 
@@ -189,6 +192,8 @@
 
     function pollEvents() {
 
+      eventsAggregate.addClass('loading');
+
       a.getEventsJson(params, function (data) {
 
         data = data || "[]";
@@ -199,11 +204,23 @@
 
         if (data.length == 0) {
 
-          eventsAggregate.html('<p class="notice">No events match your search</p>');
+          var text = '<p class="notice">No events match your search. Battle spiders with early 2000\'s memes instead?</p>';
+
+          eventsAggregate.html(text);
+
+          var releaseSpiders = $('<div class="btn">Battle Spiders</div>');
+
+          releaseSpiders.click(a.util.unleashTheTarantula);
+
+          eventsAggregate.append(releaseSpiders);
+
+          eventsAggregate.removeClass('loading');
 
           return;
 
         }
+
+        eventsAggregate.removeClass('loading');
 
         for (var i = 0; i < data.length; i++) {
 
