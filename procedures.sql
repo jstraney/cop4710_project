@@ -938,7 +938,8 @@ BEGIN
     BEGIN
       SELECT DISTINCT e.name, e.start_time, e.end_time, e.description, e.location,
       e.telephone, e.email, e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-      _is_participating AS is_participating, e.rating, r.rso_id, r.name as rso_name
+      _is_participating AS is_participating, e.rating, r.rso_id, r.name as rso_name,
+      n.name AS uni_name, n.uni_id
       FROM public_events pe, universities n, events e
       LEFT OUTER JOIN r_created_e re ON re.event_id = e.event_id
       LEFT OUTER JOIN rsos r ON r.rso_id = re.rso_id
