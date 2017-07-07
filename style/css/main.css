@@ -37,7 +37,7 @@ body {
 }
 
 #main-view { 
-  margin: 50px 0 50px;
+  margin: 50px 0 0px;
   padding: 5px 0 0;
   position: relative;
 }
@@ -75,12 +75,14 @@ div.nav-wrapper > a#logo-container {
 
 div#main-view > div#inner-content {
   max-width: 800px;
-  margin: 0 auto;
+  margin: 0 auto 50px;
 }
 
 div.nav-wrapper > a#logo-container > img {
   width: 100%;
 }
+
+
 
 #content {
   width: 100%;
@@ -156,10 +158,22 @@ div.pac-container.pac-logo {
 }
 
 /* general entity css */
+a.entity.thumbnail {
+  display: inline-block;
+  overflow: hidden;
+}
+
+a.entity.thumbnail > div.record {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 100px;
+  overflow: hidden;
+}
 
 img.entity {
   display: block;
   margin: 5px 0 10px;
+  border: solid 1px #BBBBBB;
 }
 
 img.entity.thumbnail {
@@ -175,7 +189,6 @@ img.entity.medium {
 img.entity.large {
   width: 400px;
   height: 400px;
-  margin: 5px auto 10px;
 }
 
 div.button:hover {
@@ -198,6 +211,12 @@ div.aggregate {
   margin-bottom: 25px;
 }
 
+div.aggregate.loading {
+  background-image: url("http://localhost/cop4710_project/res/icons/loading.gif");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
 div.record {
   display: inline-block;
   margin-right: 25px;
@@ -218,17 +237,94 @@ p.form-prompt {
   font-size: 14px;
 }
 
+div.widget.picture {
+  margin: 10px 0px;
+  display: block;
+  background-color: RGBA(30, 30, 30, .5);
+  position: relative;
+  border: 1px solid #BBBBBB;
+  overflow: hidden;
+}
+
+div.widget.picture > img {
+  display: block;
+  margin: 0 auto;
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 0; right: 0;
+  width: auto;
+  height: 100%;
+}
+
+div.widget.picture > div.button.destroy {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+}
+
+div.widget.picture > form {
+  display: block;
+  position: absolute;
+  margin: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30px;
+  padding-left: 5px;
+  background-color: RGBA(30, 30, 30, .2);
+}
+
+div.widget.picture > form > label[for="pic"],
+div.widget.picture > div.button.destroy {
+  color: #CCCCCC;
+  font-size: .8em;
+  text-shadow: 1px 1px 0 #333333;
+}
+
+div.widget.picture > form > label[for="pic"]:hover,
+div.widget.picture > div.button.destroy:hover {
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
+div.widget.picture > form > input[type="file"]{
+  display: none;
+}
+
+div.widget.picture.thumbnail {
+  width: 100px;
+  height: 100px;
+}
+
+div.widget.picture.medium {
+  width: 200px;
+  height: 200px;
+}
+
+div.widget.picture.large {
+  width: 400px;
+  height: 400px;
+}
+
+div.user-view.aggregate.events div.record.event {
+  margin: 0;
+  border-bottom: 0;
+  padding: 0;
+  position: static;
+}
+
 /* RSO pages */
 div.record.event {
   display: block;
   border-bottom: solid 1px #BBBBBB;
+  margin-top: 50px;
   padding-bottom: 15px;
   position: relative;
 }
 
 div.record.event > span.time {
   position: absolute;
-  top: 0;
+  top: -25px;
   right: 0;
   color: #666666;
   font-size: 14px;
@@ -277,6 +373,7 @@ div.view-all-users.aggregate.users > div.record{
   padding: 5px 0 15px;
   border-bottom: 1px solid #BBBBBB;
   position: relative;
+  min-height: 220px;
   top: -50px;
   -webkit-transition: top 1s;
   -moz-transition: top 1s;
@@ -297,14 +394,23 @@ div.view-all-rsos.aggregate.rso > div.record > span.info {
   color: #888888;
 }
 
+div.view-all-rsos.aggregate.rso > div.record > img.entity.rsos,
+div.view-all-rsos.aggregate.rso > div.record > a.entity.rsos {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
 div.paginate {
   text-align: center;
+  white-space: nowrap;
 }
 
 div.button.next, div.button.prev {
   display: inline-block;
   vertical-align: middle;
   padding: 5px;
+  
 }
 
 div.button.prev:before, div.button.next:after {
@@ -324,10 +430,28 @@ div.button.next:after {
 }
 
 /* Event Page */
+div.view-event.widget.picture.medium,
+img.view-event.entity.events.medium {
+  float: left;
+  margin-bottom: 15px;
+}
+
+div.view-event.pane.rso {
+  max-width: 300px;
+  float: right;
+  margin-bottom: 15px;
+}
+
+div.view-event.pane.rso > a {
+  float: left;
+  margin-right: 30px;
+}
 
 span.event.time {
   margin-right: 20px;
 }
+
+
 
 /* attendees */
 div.record.participant {
@@ -394,6 +518,12 @@ div.record.event.comment > .button {
 div.record.category {
   position: relative;
   margin-right: 30px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  background-color: #26A69A;
+  color: #FFFFFF;
+  text-align: center;
+  letter-spacing: .5px;
 }
 
 div.record.category > .button.destroy {
@@ -432,6 +562,7 @@ form#event-search > div {
 
 div.events-view-all.aggregate.events {
   min-height: 200px;
+  
 }
 
 div.events-view-all.aggregate.events > div.record {
@@ -440,13 +571,20 @@ div.events-view-all.aggregate.events > div.record {
   -moz-transition: 1s top;
   transition: 1s top;
   top: -100px;
-  margin-top:35px;
+  margin-top:50px;
+  min-height: 205px;
+  padding-right: 200px;
 }
 
 div.events-view-all.aggregate.events > div.record.loaded {
   top: 0;
 }
 
+div.events-view-all.aggregate.events > div.record > a.entity.events {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
 
 div.events-view-all.aggregate.events  span.info {
   color: #888888;
@@ -458,7 +596,7 @@ div.events-view-all.aggregate.events  span.info.status {
   color: #333333;
   font-weight: 600;
   position: absolute;
-  bottom: 100%;
+  top: -30px;
   right: 0;
 }
 
@@ -504,3 +642,62 @@ div.sup-modal {
   transition: 1s top;
 }
 
+@media only screen and (max-width: 768px) {
+  
+  div.events-view-all.aggregate.events-view-all > div.record {
+    padding-right: 0;
+  }
+  
+  div.events-view-all.aggregate.events  span.info {
+    white-space: nowrap;
+    display: block;
+  }
+  
+  div.events-view-all.aggregate.events > div.record > a.entity.events,
+  div.view-all-rsos.aggregate.rso > div.record > img.entity.rsos,
+  div.view-all-rsos.aggregate.rso > div.record > a.entity.rsos {
+    position: static;
+  }
+}
+
+div.doug {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  top: -200px;
+  left: -200px;
+  background-image:url("http://localhost/cop4710_project/res/icons/doug.gif");
+  background-repeat: no-repeat;
+  background-size: 100%;
+  background-position: 0 0;
+}
+
+div.meme {
+  width: 200px;
+  height: 200px;
+  position: absolute;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-size: 100%;
+}
+
+div.meme.doge {
+  background-image:
+    url("http://localhost/cop4710_project/res/icons/doge.png"),
+    url("http://localhost/cop4710_project/res/icons/sparkles.gif");
+
+}
+
+div.meme.chzbrgr {
+  background-image:
+    url("http://localhost/cop4710_project/res/icons/chzbrgr.png"),
+    url("http://localhost/cop4710_project/res/icons/sparkles.gif");
+
+}
+
+div.meme.grmpy {
+  background-image:
+    url("http://localhost/cop4710_project/res/icons/grmpy.png"),
+    url("http://localhost/cop4710_project/res/icons/sparkles.gif");
+
+}
