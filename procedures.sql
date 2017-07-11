@@ -283,6 +283,7 @@ BEGIN
   DECLARE _status ENUM('PND','ACT');
 
   DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+
   BEGIN
     DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
@@ -362,8 +363,12 @@ BEGIN
     IF _accessibility = 'RSO' THEN
 
       BEGIN
-        -- check if rso does not exist 
-        IF NOT EXISTS (SELECT r.rso_id FROM rsos r WHERE r.rso_id = _rso_id) THEN
+        -- check if rso does not exist. notice that it must be active to be found.
+        IF NOT EXISTS (
+          SELECT r.rso_id
+          FROM rsos r 
+          WHERE r.rso_id = _rso_id
+          AND r.status = 'ACT') THEN
 
           -- throw error
           SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "The rso specified cannot be found.";
@@ -514,6 +519,18 @@ BEGIN
 
     -- check if the event used to have no RSO, but has just added one.
     ELSEIF _current_rso_id IS NULL AND _rso_id > 0 THEN
+
+      -- If the rso is not active
+      IF NOT EXISTS(
+        SELECT r.rso_id
+        FROM rsos
+        WHERE r.rso_id = _rso_id
+        AND r.status = 'ACT') THEN
+
+        -- throw an error.
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "The RSO specified cannot be found";
+
+      END IF;
 
       -- indicated that this is an RSO created event. Allow joins when viewing events.
       INSERT INTO r_created_e (event_id, rso_id)
@@ -1187,9 +1204,9 @@ BEGIN
 
     END IF;
 
-    -- insert the rso into the base table
-    INSERT INTO rsos (name, description)
-    VALUES (_name, _description);
+    -- insert the rso into the base table. 5 members are confirmed, as an error is thrown above.
+    INSERT INTO rsos (name, description, status)
+    VALUES (_name, _description, 'ACT');
 
     -- get the id from the rso just inserted
     SET _rso_id = LAST_INSERT_ID();
@@ -1329,6 +1346,23 @@ BEGIN
     DELETE FROM is_member WHERE user_id IN (SELECT user_id FROM gone_members);
     DROP TABLE gone_members;
 
+    -- if there are fewer than 5 members, make the RSO inactive 
+    IF (
+      SELECT COUNT(m.user_id) 
+      FROM is_member m 
+      WHERE m.rso_id = _rso_id) < 5 THEN
+        UPDATE rsos SET
+        status = 'PND'
+        WHERE rso_id = _rso_id;
+
+    -- make the rso active
+    ELSE
+        UPDATE rsos SET
+        status = 'ACT'
+        WHERE rso_id = _rso_id;
+
+    END IF;
+
     -- return the id of RSO created for redirect purposes
     SELECT _rso_id AS rso_id FROM rsos LIMIT 1;
 
@@ -1364,7 +1398,7 @@ BEGIN
   IF _role = "SA" THEN
 
     -- select the university. Do not bother to check affiliation
-    SELECT r.rso_id, r.name, r.description, a.user_id AS rso_administrator
+    SELECT r.rso_id, r.name, r.description, r.status, a.user_id AS rso_administrator
     FROM rsos r, administrates a, has h
     WHERE r.rso_id = _rso_id
     AND r.rso_id = a.rso_id;
@@ -1372,7 +1406,7 @@ BEGIN
   -- if not SA (stu, or adm), apply the condition that the user must
   -- attend/affiliate with the University
   ELSE
-    SELECT r.rso_id, r.name, r.description, a.user_id AS rso_administrator
+    SELECT r.rso_id, r.name, r.description, r.status, a.user_id AS rso_administrator
     FROM rsos r, administrates a, has h
     WHERE r.rso_id = _rso_id
     AND r.rso_id = a.rso_id
@@ -1430,6 +1464,12 @@ BEGIN
       INSERT INTO is_member (user_id, rso_id)
       VALUES (_user_id, _rso_id);
 
+      IF (SELECT COUNT(m.user_id) FROM is_member m WHERE m.rso_id = _rso_id) >= 5 THEN
+        UPDATE rsos SET
+        status = 'ACT'
+        WHERE rso_id = _rso_id;
+      END IF;
+
       SELECT _user_id AS user_id;
 
     END IF;
@@ -1475,6 +1515,13 @@ BEGIN
     DELETE FROM is_member 
     WHERE user_id = _user_id
     AND rso_id = _rso_id;
+
+    -- if the new count of users is less than 5, make RSO pending
+    IF (SELECT COUNT(m.user_id) FROM is_member m WHERE m.rso_id = _rso_id) < 5 THEN
+      UPDATE rsos SET
+      status = 'PND'
+      WHERE rso_id = _rso_id;
+    END IF;
 
     SELECT _user_id AS user_id;
 

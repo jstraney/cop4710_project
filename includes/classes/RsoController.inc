@@ -153,6 +153,9 @@ class RsoController extends EntityController {
 
     $description = $result['description'];
 
+    $status = check_field($result, 'status', 'inactive');
+    $status = $status == "ACT"? "active": "inactive";
+
     $rso_administrator = $result['rso_administrator'];
 
     $viewed_by_admin = $rso_administrator == $user_id;

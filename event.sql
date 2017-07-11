@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jul 06, 2017 at 02:06 AM
+-- Generation Time: Jul 11, 2017 at 01:49 PM
 -- Server version: 10.1.13-MariaDB
 -- PHP Version: 7.0.5
 
@@ -218,6 +218,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `create_event` (IN `_name` VARCHAR(6
   DECLARE _status ENUM('PND','ACT');
 
   DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+
   BEGIN
     DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
@@ -298,7 +299,11 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `create_event` (IN `_name` VARCHAR(6
 
       BEGIN
         
-        IF NOT EXISTS (SELECT r.rso_id FROM rsos r WHERE r.rso_id = _rso_id) THEN
+        IF NOT EXISTS (
+          SELECT r.rso_id
+          FROM rsos r 
+          WHERE r.rso_id = _rso_id
+          AND r.status = 'ACT') THEN
 
           
           SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "The rso specified cannot be found.";
@@ -392,8 +397,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `create_rso` (IN `_role` ENUM('SA','
     END IF;
 
     
-    INSERT INTO rsos (name, description)
-    VALUES (_name, _description);
+    INSERT INTO rsos (name, description, status)
+    VALUES (_name, _description, 'ACT');
 
     
     SET _rso_id = LAST_INSERT_ID();
@@ -553,6 +558,12 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `join_rso` (IN `_user_id` INT(11), I
       INSERT INTO is_member (user_id, rso_id)
       VALUES (_user_id, _rso_id);
 
+      IF (SELECT COUNT(m.user_id) FROM is_member m WHERE m.rso_id = _rso_id) >= 5 THEN
+        UPDATE rsos SET
+        status = 'ACT'
+        WHERE rso_id = _rso_id;
+      END IF;
+
       SELECT _user_id AS user_id;
 
     END IF;
@@ -593,6 +604,13 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `leave_rso` (IN `_user_id` INT(11), 
     DELETE FROM is_member 
     WHERE user_id = _user_id
     AND rso_id = _rso_id;
+
+    
+    IF (SELECT COUNT(m.user_id) FROM is_member m WHERE m.rso_id = _rso_id) < 5 THEN
+      UPDATE rsos SET
+      status = 'PND'
+      WHERE rso_id = _rso_id;
+    END IF;
 
     SELECT _user_id AS user_id;
 
@@ -855,6 +873,16 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `update_event` (IN `_event_id` INT(1
     
     ELSEIF _current_rso_id IS NULL AND _rso_id > 0 THEN
 
+      IF NOT EXISTS(
+        SELECT r.rso_id
+        FROM rsos
+        WHERE r.rso_id = _rso_id
+        AND r.status = 'ACT') THEN
+
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "The RSO specified cannot be found";
+
+      END IF;
+
       
       INSERT INTO r_created_e (event_id, rso_id)
       VALUES (_event_id ,_rso_id);
@@ -1003,6 +1031,23 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `update_rso` (IN `_rso_id` INT(11), 
     DROP TABLE gone_members;
 
     
+    IF (
+      SELECT COUNT(m.user_id) 
+      FROM is_member m 
+      WHERE m.rso_id = _rso_id) < 5 THEN
+        UPDATE rsos SET
+        status = 'PND'
+        WHERE rso_id = _rso_id;
+
+    
+    ELSE
+        UPDATE rsos SET
+        status = 'ACT'
+        WHERE rso_id = _rso_id;
+
+    END IF;
+
+    
     SELECT _rso_id AS rso_id FROM rsos LIMIT 1;
 
   COMMIT;
@@ -1078,7 +1123,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `view_event` (IN `_event_id` INT(11)
     BEGIN
       SELECT DISTINCT e.name, e.start_time, e.end_time, e.description, e.location,
       e.telephone, e.email, e.lat, e.lon, e.accessibility, e.status, _is_owner AS is_owner,
-      _is_participating AS is_participating, e.rating, r.rso_id, r.name as rso_name
+      _is_participating AS is_participating, e.rating, r.rso_id, r.name as rso_name,
+      n.name AS uni_name, n.uni_id
       FROM public_events pe, universities n, events e
       LEFT OUTER JOIN r_created_e re ON re.event_id = e.event_id
       LEFT OUTER JOIN rsos r ON r.rso_id = re.rso_id
@@ -1149,7 +1195,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `view_rso` (IN `_rso_id` INT(11), IN
   IF _role = "SA" THEN
 
     
-    SELECT r.rso_id, r.name, r.description, a.user_id AS rso_administrator
+    SELECT r.rso_id, r.name, r.description, r.status, a.user_id AS rso_administrator
     FROM rsos r, administrates a, has h
     WHERE r.rso_id = _rso_id
     AND r.rso_id = a.rso_id;
@@ -1157,7 +1203,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `view_rso` (IN `_rso_id` INT(11), IN
   
   
   ELSE
-    SELECT r.rso_id, r.name, r.description, a.user_id AS rso_administrator
+    SELECT r.rso_id, r.name, r.description, r.status, a.user_id AS rso_administrator
     FROM rsos r, administrates a, has h
     WHERE r.rso_id = _rso_id
     AND r.rso_id = a.rso_id
@@ -1441,7 +1487,8 @@ CREATE TABLE `rating` (
 CREATE TABLE `rsos` (
   `rso_id` int(11) UNSIGNED NOT NULL,
   `name` varchar(60) NOT NULL,
-  `description` text NOT NULL
+  `description` text NOT NULL,
+  `status` enum('PND','ACT') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

@@ -16,6 +16,11 @@ $template = <<<EOT
 </script>
 
 <script src="{$site_root}/js/view_rso.js"></script>
+
+<div class="status {$status}">
+This RSO is {$status}
+</div>
+
 <h2>{$name}</h2>
 
 EOT;
@@ -65,10 +70,18 @@ $template .= <<<EOT
 <!-- populated with AJAX -->
 </div>
 
-<form id="join" class="lefty" method="POST" action="{$site_root}/rso/{$rso_id}/join">
-  <input class="btn btn-large" type="submit" value="Join {$name}!"/>
-</form>
+EOT;
+if ($status === 'inactive') {
 
+  $template .= <<<EOT
+  <form id="join" class="lefty" method="POST" action="{$site_root}/rso/{$rso_id}/join">
+    <input class="btn btn-large" type="submit" value="Join {$name}!"/>
+  </form>
+EOT;
+
+}
+
+$template .= <<<EOT
 </div>
 </div>
 EOT;
