@@ -3,12 +3,12 @@
 class UniversityController extends EntityController {
 
   private $create_query;
-
   private $view_query;
   private $view_all_query;
   private $update_query;
   private $delete_query;
   private $university_rsos_query;
+  private $university_events_query;
 
   public function __construct() {
 
@@ -22,6 +22,7 @@ class UniversityController extends EntityController {
     $this->update_query = $update_query;
     $this->destroy_query = $destroy_query;
     $this->university_rsos_query = $university_rsos_query;
+    $this->university_events_query = $university_events_query;
     $this->select_all_query = $select_all_query;
     $this->match_name_query = $match_name_query;
 
@@ -83,6 +84,11 @@ class UniversityController extends EntityController {
 
     // find rsos associated with this university
     $associated_rsos = $this->view_associated_rsos(array(
+      "uni_id" => $id
+    ));
+
+    // find events associated with this university
+    $associated_events = $this->view_associated_events(array(
       "uni_id" => $id
     ));
 
@@ -285,6 +291,16 @@ class UniversityController extends EntityController {
     return $result;
   }
 
+  public function view_associated_events ($params) {
+
+    $uni_id = isset($params['uni_id']) ? $params['uni_id'] : 0;
+
+    $query = $this->university_events_query;
+
+    $result = $this->db->prepared_query($query, array(":uni_id" => $uni_id));
+
+    return $result;
+  }
 }
 
 ?>

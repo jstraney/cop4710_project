@@ -24,6 +24,12 @@ FROM has h, rsos r
 WHERE h.uni_id = :uni_id AND h.rso_id = r.rso_id
 EOT;
 
+$university_events_query = <<<EOT
+SELECT h.event_id, e.name, e.description
+FROM hosting h, events e
+WHERE h.uni_id = :uni_id AND h.event_id = e.event_id
+EOT;
+
 $view_all_query = <<<EOT
 SELECT uni_id, name, description, location, lat, lon, website_url
 FROM universities LIMIT :start, :end;
