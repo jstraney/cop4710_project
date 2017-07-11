@@ -210,7 +210,13 @@
 
           var releaseSpiders = $('<div class="btn">Battle Spiders</div>');
 
-          releaseSpiders.click(a.util.unleashTheTarantula);
+          releaseSpiders.click(function () {
+
+            a.util.unleashTheTarantula();
+
+            releaseSpiders.addClass('disabled');
+
+          });
 
           eventsAggregate.append(releaseSpiders);
 

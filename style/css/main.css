@@ -530,6 +530,7 @@ div.record.category > .button.destroy {
   position: absolute;
   top: -5px;
   right: -15px;
+  color: #333333;
 }
 
 div.record.event.comment > .button.destroy {
@@ -619,11 +620,11 @@ div.message {
   text-align: center;
 }
 
-div.message.error {
+div.message.error, div.status.inactive {
   color: #FF0022;
 }
 
-div.message.info {
+div.message.info, div.status.active {
   color: #33cc44;
 }
 
