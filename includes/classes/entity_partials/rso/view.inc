@@ -8,6 +8,7 @@ $template = <<<EOT
   a.scope.rso_id = {$rso_id};
   a.scope.user_id = {$user_id};
   a.scope.user_name = "{$user_name}";
+  a.scope.status = "{$user_name}";
   a.scope.rso_administrator = {$rso_administrator};
 
   a.scope.has_pic = {$has_pic};
@@ -16,7 +17,11 @@ $template = <<<EOT
 </script>
 
 <script src="{$site_root}/js/view_rso.js"></script>
+
 <h2>{$name}</h2>
+<div class="status {$status}">
+This RSO is {$status}
+</div>
 
 EOT;
 
@@ -33,6 +38,7 @@ if ($viewed_by_admin) {
   // include the image widget
   $template .= <<<EOT
   <div class="widget picture"></div>
+
   <script>
   (function (a) {
 
@@ -41,6 +47,7 @@ if ($viewed_by_admin) {
     a.util.pictureWidget($('div.widget.picture'), configs);
 
   })(app);
+
   </script>
 EOT;
 
@@ -53,22 +60,25 @@ else {
 $template .= <<<EOT
 
 <h3>About {$name}:</h3>
+
 <p>{$description}</p>
 
 <h3>Events Hosted by {$name}:</h3>
 <div class="rso-view aggregate events">
-<!-- populated with AJAX -->
+  <!-- populated with AJAX -->
 </div>
 
 <h3>Members in {$name}:</h3>
 <div class="rso-view aggregate members">
-<!-- populated with AJAX -->
+  <!-- populated with AJAX -->
 </div>
 
 <form id="join" class="lefty" method="POST" action="{$site_root}/rso/{$rso_id}/join">
   <input class="btn btn-large" type="submit" value="Join {$name}!"/>
 </form>
+EOT;
 
+$template .= <<<EOT
 </div>
 </div>
 EOT;

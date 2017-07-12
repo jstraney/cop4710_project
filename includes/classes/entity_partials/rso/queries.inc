@@ -25,6 +25,7 @@ FROM users u, administrates a, rsos r
 WHERE u.user_id = :user_id
 AND u.user_id = a.user_id
 AND a.rso_id = r.rso_id
+AND r.status = 'ACT'
 AND r.name LIKE CONCAT(:name, "%");
 EOT;
 

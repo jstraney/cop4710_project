@@ -75,7 +75,7 @@ var app = app || {};
 
     }
 
-    var img = $('<img class="entity ' + type + ' ' + style + '">');
+    var img = $('<img>');
 
     var picSetUrl = a.siteRoot + 'res/' + type + "/" + id + '/main.jpg';
     var noPicUrl = a.siteRoot + 'res/' + type + "/default.jpg";
@@ -90,6 +90,8 @@ var app = app || {};
 
     img.attr('src', picSetUrl + "#" + new Date().getTime()); 
 
+    var wrapper = $('<div class="entity ' + type + ' ' + style + '">');
+
     if (link) {
 
       // oog, I knew it was a bad idea to pluralize the directories...
@@ -97,11 +99,18 @@ var app = app || {};
 
       var anchor = $('<a class="entity ' + type + ' ' + style + '" href="' + a.siteRoot + singular_type + '/' + id + '"></a>');
 
-      return anchor.append(img);
+      anchor.append(img);
+
+      wrapper.append(anchor);
+
+    }
+    else {
+
+      wrapper.append(img);
 
     }
 
-    return img;
+    return wrapper;
 
   };
 

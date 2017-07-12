@@ -20,7 +20,7 @@
 
     elem.append(img);
 
-    elem.append('<span>Currently attending <a href="' + a.siteRoot + 'university/' + uni_id + '">' + uni_name + '</a></span>');
+    elem.append('<div>Currently attending <a href="' + a.siteRoot + 'university/' + uni_id + '">' + uni_name + '</a></div>');
 
     window.setTimeout(function () {
 
