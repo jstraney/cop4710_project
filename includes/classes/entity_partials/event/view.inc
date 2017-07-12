@@ -19,6 +19,7 @@ EOT;
 
 $template .= "<h2>{$name}</h2>";
 
+$template .= '<div class="event access">'.$access_msg.'</div>';
 // if the current user is the owner, show the link to edit.
 if ($is_owner) {
 

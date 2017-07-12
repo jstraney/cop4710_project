@@ -1,9 +1,10 @@
+
 -- phpMyAdmin SQL Dump
 -- version 4.5.2
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jul 11, 2017 at 01:49 PM
+-- Generation Time: Jul 11, 2017 at 10:05 PM
 -- Server version: 10.1.13-MariaDB
 -- PHP Version: 7.0.5
 
@@ -19,6 +20,9 @@ SET time_zone = "+00:00";
 --
 -- Database: `event`
 --
+CREATE DATABASE IF NOT EXISTS `event`;
+
+USE `event`;
 
 DELIMITER $$
 --
@@ -352,6 +356,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `create_rso` (IN `_role` ENUM('SA','
     DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
+    DROP TABLE IF EXISTS temp_members;
     GET DIAGNOSTICS _c_num = NUMBER;
     GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
@@ -873,12 +878,14 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `update_event` (IN `_event_id` INT(1
     
     ELSEIF _current_rso_id IS NULL AND _rso_id > 0 THEN
 
+      
       IF NOT EXISTS(
         SELECT r.rso_id
         FROM rsos
         WHERE r.rso_id = _rso_id
         AND r.status = 'ACT') THEN
 
+        
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "The RSO specified cannot be found";
 
       END IF;

@@ -170,23 +170,40 @@ a.entity.thumbnail > div.record {
   overflow: hidden;
 }
 
-img.entity {
-  display: block;
+div.entity {
+  display: inline-block;
   margin: 5px 0 10px;
   border: solid 1px #BBBBBB;
+  overflow: hidden;
+  text-align: center;
+  vertical-align: top;
 }
 
-img.entity.thumbnail {
+div.entity a {
+  width: 100%;
+  height: 100%;
+  display: inline-block;
+}
+
+div.entity img {
+  height: 100%;
+  width: auto;
+  margin: 0 -100%;
+  display: inline-block;
+  vertical-align: middle;  
+}
+
+div.entity.thumbnail {
   width: 100px;
   height: 100px;
 }
 
-img.entity.medium {
+div.entity.medium {
   width: 200px;
   height: 200px;
 }
 
-img.entity.large {
+div.entity.large {
   width: 400px;
   height: 400px;
 }
@@ -239,21 +256,19 @@ p.form-prompt {
 
 div.widget.picture {
   margin: 10px 0px;
-  display: block;
   background-color: RGBA(30, 30, 30, .5);
   position: relative;
   border: 1px solid #BBBBBB;
   overflow: hidden;
+  text-align: center;
 }
 
 div.widget.picture > img {
-  display: block;
-  margin: 0 auto;
-  position: absolute;
-  top: 0; bottom: 0;
-  left: 0; right: 0;
+  margin: 0 -100%;
   width: auto;
   height: 100%;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 div.widget.picture > div.button.destroy {
@@ -279,6 +294,12 @@ div.widget.picture > div.button.destroy {
   color: #CCCCCC;
   font-size: .8em;
   text-shadow: 1px 1px 0 #333333;
+}
+
+div.widget.picture > form > label[for="pic"] {
+  position: absolute;
+  left: 5px;
+  bottom: 5px;
 }
 
 div.widget.picture > form > label[for="pic"]:hover,
@@ -325,7 +346,7 @@ div.record.event {
 div.record.event > span.time {
   position: absolute;
   top: -25px;
-  right: 0;
+  left: 0;
   color: #666666;
   font-size: 14px;
 }
@@ -380,6 +401,18 @@ div.view-all-users.aggregate.users > div.record{
   transition: top 1s;
 }
 
+div.view-all-rsos.aggregate.rso > div.record {
+  padding-right: 220px;
+}
+
+div.aggregate div.entity.thumbnail {
+  margin-right: 15px;
+}
+
+div.aggregate > div.record div.entity.medium {
+  margin: 0;
+}
+
 div.view-all-rsos.aggregate.rso,
 div.view-all-users.aggregate.users {
   min-height: 300px;
@@ -394,8 +427,8 @@ div.view-all-rsos.aggregate.rso > div.record > span.info {
   color: #888888;
 }
 
-div.view-all-rsos.aggregate.rso > div.record > img.entity.rsos,
-div.view-all-rsos.aggregate.rso > div.record > a.entity.rsos {
+div.view-all-rsos.aggregate.rso > div.record > div.entity.rsos,
+div.view-all-rsos.aggregate.rso > div.record > div.entity.rsos {
   position: absolute;
   right: 0;
   top: 0;
@@ -443,8 +476,8 @@ div.view-event.pane.rso {
 }
 
 div.view-event.pane.rso > a {
-  float: left;
-  margin-right: 30px;
+  float: right;
+  margin-left: 20px
 }
 
 span.event.time {
@@ -581,7 +614,7 @@ div.events-view-all.aggregate.events > div.record.loaded {
   top: 0;
 }
 
-div.events-view-all.aggregate.events > div.record > a.entity.events {
+div.events-view-all.aggregate.events > div.record div.entity.events {
   position: absolute;
   right: 0;
   top: 0;
@@ -644,7 +677,7 @@ div.sup-modal {
 }
 
 @media only screen and (max-width: 768px) {
-  
+  div.view-all-rsos.aggregate.rso > div.record,
   div.events-view-all.aggregate.events-view-all > div.record {
     padding-right: 0;
   }
@@ -654,11 +687,16 @@ div.sup-modal {
     display: block;
   }
   
-  div.events-view-all.aggregate.events > div.record > a.entity.events,
-  div.view-all-rsos.aggregate.rso > div.record > img.entity.rsos,
-  div.view-all-rsos.aggregate.rso > div.record > a.entity.rsos {
+  div.events-view-all.aggregate.events > div.record > div.entity.events,
+  div.view-all-rsos.aggregate.rso > div.record > div.entity.rsos,
+  div.view-all-rsos.aggregate.rso > div.record > div.entity.rsos {
     position: static;
   }
+  
+  div.entity.medium, div.entity.large {
+    margin: 0 auto;
+  }
+  
 }
 
 div.doug {

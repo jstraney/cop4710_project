@@ -113,12 +113,12 @@ function load_entity_pic ($type, $id, $style = "thumbnail", $default = "default.
   if (entity_has_pic($type, $id)) {
 
     // if it exists return img tag with style and link
-    return '<img class="entity '.$type.' '.$style.'" src="'.get_entity_pic_uri($type, $id).'"></img>';
+    return '<div class="entity '.$type.' '.$style.'"><img src="'.get_entity_pic_uri($type, $id).'"></img></div>';
     
   }
 
-  // if it doesn't exist return empty string.
-  return '<img class="entity '.$type.' '.$style.'" src="'.$site_root.'/res/'.$type.'/'.$default.'"></img>';
+  // if it doesn't exist return default pic.
+  return '<div class="entity '.$type.' '.$style.'" ><img src="'.$site_root.'/res/'.$type.'/'.$default.'"></img></div>';
 
 }
 

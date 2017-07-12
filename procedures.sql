@@ -1160,6 +1160,7 @@ BEGIN
     DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
+    DROP TABLE IF EXISTS temp_members;
     GET DIAGNOSTICS _c_num = NUMBER;
     GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
@@ -1516,7 +1517,7 @@ BEGIN
     WHERE user_id = _user_id
     AND rso_id = _rso_id;
 
-    -- if the new count of users is less than 5, make RSO pending
+    -- if the new count of users is less than 5, make RSO pending, or unable to post events.
     IF (SELECT COUNT(m.user_id) FROM is_member m WHERE m.rso_id = _rso_id) < 5 THEN
       UPDATE rsos SET
       status = 'PND'
