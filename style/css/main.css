@@ -485,6 +485,10 @@ div.view-event.pane.rso {
   margin-bottom: 15px;
 }
 
+div.view-event.pane.rso > div.info {
+  text-align: right;
+}
+
 div.view-event.pane.rso > a {
   float: right;
   margin-left: 20px
@@ -564,6 +568,10 @@ div.record.event.comment {
 
 div.record.event.comment > .button {
   color: #888888;
+}
+
+div.record.comment div.entity.users {
+  float: right;
 }
 
 div.record.category {
