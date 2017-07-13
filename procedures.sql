@@ -89,18 +89,19 @@ BEGIN
 
   START TRANSACTION;
 
-    -- check for manditory fields
-    IF _user_name IS NULL OR _first_name IS NULL OR _last_name IS NULL OR
-    _email IS NULL OR _role IS NULL OR _hash IS NULL OR _uni_id IS NULL THEN
-
-      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "One or more field was missing when creating your account";
-
-    END IF;
-
     -- only perform insert if the email matches the universities email domain 
     IF (_role = "STU" OR _role = "ADM") AND (check_uni_emails(_email, _uni_id) < 1) THEN
       SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'e-mail must match university selected.';
     ELSEIF _role = "STU" THEN
+
+      -- check for manditory fields
+      IF _user_name IS NULL OR _first_name IS NULL OR _last_name IS NULL OR
+      _email IS NULL OR _role IS NULL OR _hash IS NULL OR _uni_id IS NULL THEN
+
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "One or more field was missing when creating your account";
+
+      END IF;
+
       BEGIN
         INSERT INTO users (user_name, first_name, last_name, email, role, hash)
         VALUES (_user_name, _first_name, _last_name, _email, _role, _hash);
@@ -114,6 +115,14 @@ BEGIN
     -- admin is affiliated with a university
     ELSEIF _role = "ADM" THEN
       BEGIN
+        -- check for manditory fields
+        IF _user_name IS NULL OR _first_name IS NULL OR _last_name IS NULL OR
+        _email IS NULL OR _role IS NULL OR _hash IS NULL OR _uni_id IS NULL THEN
+
+          SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "One or more field was missing when creating your account";
+
+        END IF;
+
         INSERT INTO users (user_name, first_name, last_name, email, role, hash)
         VALUES (_user_name, _first_name, _last_name, _email, _role, _hash);
 
@@ -125,6 +134,13 @@ BEGIN
       END;
     -- super admin has no affiliation with university
     ELSEIF _role = "SA"  THEN
+
+        IF _user_name IS NULL OR _first_name IS NULL OR _last_name IS NULL OR
+        _email IS NULL OR _role IS NULL OR _hash IS NULL THEN
+
+          SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "One or more field was missing when creating your account";
+
+        END IF;
       INSERT INTO users (user_name, first_name, last_name, email, role, hash)
       VALUES (_user_name, _first_name, _last_name, _email, _role, _hash);
 

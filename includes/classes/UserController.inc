@@ -253,13 +253,22 @@ class UserController extends EntityController {
 
     $id = $params[1];
 
+    global $user;
+
+    if ($user === NULL) {
+
+      go_home();
+      die();
+
+    }
+
     $user_name = check_field($params, 'user-name', NULL);
     $first_name = check_field($params,'first-name', NULL); 
     $last_name = check_field($params,'last-name', NULL); 
     $email = check_field($params, 'e-mail', NULL); 
     $password = check_field($params, 'password', NULL); 
-    $uni_id = check_field($params, 'uni-id', NULL);
-    $user_role = check_field($params, 'role', "STU");
+    $uni_id = check_field($params, 'uni-id', 0);
+    $user_role = $user->role;
 
     if ($this->check_credentials($id, $password)) {
 
@@ -416,7 +425,7 @@ class UserController extends EntityController {
     $first_name = $viewed_user['first_name'];
     $last_name = $viewed_user['last_name'];
     $email = $viewed_user['email'];
-    $uni_id = $viewed_user['uni_id'];
+    $uni_id = check_field($viewed_user, 'uni_id', 0);
 
     include get_entity_partial("user", "edit");
 

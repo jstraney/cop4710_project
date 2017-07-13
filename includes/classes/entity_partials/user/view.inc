@@ -24,10 +24,18 @@ $template = <<<EOT
 </script>
 
 <script src="{$site_root}/js/view_user.js"></script>
-
-<h2>{$user_name}'s Profile</h2>
-
 EOT;
+
+if ($my_account) {
+
+  $template .= "<h2>Your Profile</h2>";
+
+}
+else {
+
+  $template .= "<h2>{$user_name}'s Profile</h2>";
+
+}
 
 // if user is owner of profile, include the widget uploader
 if ($my_account) {
