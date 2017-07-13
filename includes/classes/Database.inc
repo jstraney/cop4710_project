@@ -105,10 +105,6 @@ class Database {
     catch (PDOException $e) {
 
       // uncomment two statement below to debug
-      console_log($e);
-      console_log($e->getMessage());
-      die();
-
       $msg = $e->getMessage();
 
       set_message($msg, 'error');
@@ -121,9 +117,6 @@ class Database {
     catch (Exception $e) {
 
       // uncomment two statement below to debug
-      console_log($e->getMessage());
-      die();
-      
       $msg = $e->getMessage();
 
       set_message($msg, 'error');

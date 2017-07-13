@@ -157,7 +157,9 @@ class UserController extends EntityController {
 
     }
 
-    $result = $this->db->prepared_query($query, array(":user_id" => $user_id));
+    $result = $this->db->prepared_query($query, array(
+      ":user_id" => $user_id,
+    ));
 
     if (empty($result)) {
 

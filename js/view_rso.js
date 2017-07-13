@@ -15,6 +15,10 @@
 
     var box = $('<div class="record member user-' + user_id + '">');
 
+    var img = a.util.loadEntityPic({type: "users", id: user_id, style: "thumbnail", link: true});
+
+    box.append(img);
+
     var memberLink = $('<a href="'+ a.siteRoot + 'user/' + user_id +'">');
     memberLink.text(user_name);
 

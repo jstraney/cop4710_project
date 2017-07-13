@@ -354,26 +354,36 @@ div.record.event > span.time {
 div.record.member {
   position: relative;
   vertical-align: top;
-  margin-top: 10px;
+  margin-top: 30px;
+}
+
+div.record.member div.entity {
+  margin: 15px 0 10px;
+  display: block;
 }
 
 div.record.member.marked-administrator,
 div.record.member.marked-administrator > a {
   color: #33AA66;
+
 }
 
 
 div.rso-view.aggregate.members > div.record.member.marked-administrator:before {
   content: "\2666";
-  display: inline-block;
   padding: 0 5px 0 0;
   color: #CC8833;
+  position: absolute;
+  top: -20px;
 }
 
 div.record.member > .remove {
   position: absolute;
   top: -20px;
   right: 0;
+}
+ {
+  color: green;
 }
 
 div.record.member > .make-admin {
@@ -384,8 +394,8 @@ div.record.member > .make-admin {
 
 div.rso-view.aggregate.members > div.member > .button.destroy {
   position: absolute;
-  top: 0px;
-  right: -15px;
+  top: -20px;
+  left: 20px;
 }
 
 div.view-all-rsos.aggregate.rso > div.record,
@@ -478,6 +488,14 @@ div.view-event.pane.rso {
 div.view-event.pane.rso > a {
   float: right;
   margin-left: 20px
+}
+
+p.notice.PND {
+  color: #FF0022;
+}
+
+p.notice.ACT {
+  color:
 }
 
 span.event.time {
@@ -653,11 +671,11 @@ div.message {
   text-align: center;
 }
 
-div.message.error, div.status.inactive {
+div.message.error, div.status.inactive, p.notice.pnd {
   color: #FF0022;
 }
 
-div.message.info, div.status.active {
+div.message.info, div.status.active, p.notice.act {
   color: #33cc44;
 }
 

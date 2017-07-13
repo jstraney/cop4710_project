@@ -98,6 +98,14 @@ class RsoController extends EntityController {
       die();
 
     }
+    else if (!isset($result[0]['rso_id'])) {
+
+      $msg = "Something went wrong creating your RSO";
+      set_message($msg, "error");
+      go_back();
+      die();
+
+    }
 
     $rso_id = $result[0]['rso_id'];
 

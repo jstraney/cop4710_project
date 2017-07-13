@@ -39,7 +39,9 @@ class SessionController extends EntityController {
     // todo: waiting on the database to have a 'user' table
     // instead of 'student'. once this is done the queries should
     // work.
+
     $credentials = $controller->get_credentials_by_email($email);
+
 
     if (empty($credentials)) {
 

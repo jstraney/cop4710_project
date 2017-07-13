@@ -20,6 +20,11 @@
   function memberBoxFactory (user_id, user_name) {
 
     var box = $('<div class="record member user-' + user_id + '">');
+
+    // load a nice little portrait
+    var img = a.util.loadEntityPic({type: "users", id: user_id, style: "thumbnail", link: true});
+    box.append(img);
+
     // x on the box to remove this member from rso
     var remove = $('<div title="remove user" class="button remove">X</div>');
 

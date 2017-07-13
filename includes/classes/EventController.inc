@@ -127,12 +127,11 @@ class EventController extends EntityController {
 
     }
     else if (isset($result[0]["_err_msg"])) {
-      header_remove();
-      console_log($params);
-      die();
+
       $msg = $result[0]["_err_msg"];
       set_message($msg, "error");
       go_back();
+      die();
 
     }
 

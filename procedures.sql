@@ -126,7 +126,7 @@ BEGIN
     -- super admin has no affiliation with university
     ELSEIF _role = "SA"  THEN
       INSERT INTO users (user_name, first_name, last_name, email, role, hash)
-      VALUES (_user_name, _first_name, _last_name, _email, role, _hash);
+      VALUES (_user_name, _first_name, _last_name, _email, _role, _hash);
 
       SET _user_id = LAST_INSERT_ID();
 
@@ -244,7 +244,7 @@ BEGIN
     LIMIT 1;
   ELSEIF _role = "SA" THEN
     SELECT u.user_name, u.email, u.first_name, u.last_name, u.role
-    FROM users u, attending a 
+    FROM users u 
     WHERE _user_id = u.user_id
     LIMIT 1;
   END IF;
@@ -338,6 +338,16 @@ BEGIN
 
       -- set status to active. No super admin approval needed
       SET _status = 'ACT';
+
+      IF NOT EXISTS (
+        SELECT a.user_id
+        FROM administrates a
+        WHERE _rso_id = a.rso_id
+        AND a.user_id = _user_id) THEN
+
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "You must administrate the RSO selected";
+
+      END IF;
 
       -- create relationship between the event and the RSO 
       INSERT INTO r_created_e (rso_id, event_id)
@@ -458,6 +468,22 @@ BEGIN
     _location IS NULL OR _lat IS NULL OR _lon IS NULL OR _accessibility IS NULL THEN
 
       SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "One or more field was missing from your event";
+
+    END IF;
+
+    -- no event should be happening at the same time
+    IF EXISTS(
+
+      SELECT e.event_id FROM events e 
+      -- location is the same.
+      WHERE e.location = _location
+      -- the end time is between the start and end time of this event 
+      AND ((_end_time >= e.start_time AND _end_time <= e.end_time) OR
+        -- or the start time is between the start and end time of this event.
+          (_start_time >= e.start_time AND _start_time <= e.end_time))) THEN
+
+      -- throw an error.
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "Your event is occuring at the same time and location as another event";
 
     END IF;
   
@@ -1160,7 +1186,6 @@ BEGIN
     DECLARE _c_num INT;
     DECLARE _err_msg TEXT;
     ROLLBACK;
-    DROP TABLE IF EXISTS temp_members;
     GET DIAGNOSTICS _c_num = NUMBER;
     GET DIAGNOSTICS CONDITION _c_num _err_msg = MESSAGE_TEXT;
     SELECT _err_msg;
@@ -1168,19 +1193,21 @@ BEGIN
 
   START TRANSACTION;
 
-    IF _name IS NULL OR _description IS NULL THEN 
-
-      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "One or more field was missing from your RSO.";
-
-    END IF;
-
     -- create a temporary table for members using the comma separated list
     CREATE TEMPORARY TABLE temp_members (user_id INT(11) UNSIGNED);
     INSERT INTO temp_members (user_id)
     SELECT user_id FROM users WHERE FIND_IN_SET(user_id, _members);
 
+    IF _name IS NULL OR _description IS NULL THEN 
+
+      DROP TABLE IF EXISTS temp_members;
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "One or more field was missing from your RSO.";
+
+    END IF;
+
     -- check if the members list has 5 records (or more). waive for SA and ADM
     IF _role = "STU" AND (SELECT COUNT(user_id) FROM temp_members) < 5 THEN
+      DROP TABLE IF EXISTS temp_members;
       SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "You must specify at least 5 members";
     END IF;
 
@@ -1192,6 +1219,7 @@ BEGIN
       AND u.user_id = a.user_id 
       AND a.uni_id = n.uni_id
       AND n.uni_id = _uni_id) THEN
+      DROP TABLE IF EXISTS temp_members;
       SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "You may only create an RSO at a university you attend";
     -- similarly, an admin should not be able to make RSO's for other universities.
     ELSEIF _role = "ADM" AND NOT EXISTS (
@@ -1201,6 +1229,7 @@ BEGIN
       AND u.user_id = a.user_id 
       AND a.uni_id = n.uni_id
       AND n.uni_id = _uni_id) THEN
+      DROP TABLE IF EXISTS temp_members;
       SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "You may only create an RSO at a university you're affiliated with";
 
     END IF;

@@ -20,6 +20,18 @@ EOT;
 $template .= "<h2>{$name}</h2>";
 
 $template .= '<div class="event access">'.$access_msg.'</div>';
+
+if ($status == "PND") {
+  $status_msg = 'This event is still pending the super admin\'s approval';
+}
+else if ($status == "ACT") {
+  $status_msg = 'This event is active';
+}
+else {
+  $status_msg = "";
+}
+
+$template .= '<p class="notice '.strtolower($status).'">'.$status_msg.'</p>';
 // if the current user is the owner, show the link to edit.
 if ($is_owner) {
 
@@ -58,9 +70,6 @@ if ($rso_id != NULL) {
 
 }
 
-if ($status == "PND") {
-  $template .= '<p class="notice">This event is still pending the super admin\'s approval</p>';
-}
 
 $template .= <<<EOT
 <div class="clearfix">Location: {$location}</div>
