@@ -58,8 +58,11 @@
   function commentFactory (comment_id, user_id, user_name, date_posted, content) {
 
     var elem = $('<div id="comment-'+comment_id+'" class="record event comment">');
+    var avatar = $('<div>' + user_name + '</div>');
+    var img = a.util.loadEntityPic({type: 'users', id: user_id, style: "thumbnail", link: true});
+    avatar.append(img);
     // put in a link to the user including name. TODO retrieve name in comment data
-    elem.append('<a class="user" href="'+ a.siteRoot + 'user/' + user_id + '">'+user_name+'</a>');
+    elem.append(avatar);
 
     var contentElem = $('<p class="content">'+content+'</p>');
 
