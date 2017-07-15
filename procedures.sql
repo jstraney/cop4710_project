@@ -492,7 +492,7 @@ BEGIN
 
       SELECT e.event_id FROM events e 
       -- location is the same.
-      WHERE e.location = _location
+      WHERE e.event_id <> _event_id AND e.location = _location
       -- the end time is between the start and end time of this event 
       AND ((_end_time >= e.start_time AND _end_time <= e.end_time) OR
         -- or the start time is between the start and end time of this event.

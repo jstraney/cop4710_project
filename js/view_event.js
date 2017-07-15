@@ -389,6 +389,8 @@
     // stop form from doing regular submit
     $('form#new-comment').submit(function (e) {
 
+      self = $(this)
+
       e.preventDefault();
 
       content = commentBody.val();
@@ -403,6 +405,9 @@
 
         // look for new ones, which should include ours.
         pollComments();
+
+        $('textarea', self).val('');
+
         
       });
 

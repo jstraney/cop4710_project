@@ -17,7 +17,7 @@ var app = app || {};
 
   function loadSounds() {
 
-    var files = ['ryuhadoken.wav', 'ryushoryken.wav', 'ryutatsumakisenpukyaku.wav'];
+    var files = ['ryuhadoken.wav', 'ryushoryken.wav', 'ryutatsumakisenpukyaku.wav', 'sonic_boss.mp3'];
 
     for (var i in files) {
 
@@ -36,6 +36,14 @@ var app = app || {};
       sounds[soundName].play();
 
     };
+
+    sounds['sonic_boss'].volume(.2);
+
+    a.playSonic = function () {
+
+      a.playSound('sonic_boss'); 
+
+    }
 
     a.playRandomRyu = function () {
 
@@ -287,6 +295,8 @@ var app = app || {};
   }
 
   a.util.unleashTheTarantula = function () {
+
+    a.playSonic();
 
     // disable text selection for click and drag
     $(document.body).css({
