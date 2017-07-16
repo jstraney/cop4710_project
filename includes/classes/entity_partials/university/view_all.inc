@@ -1,12 +1,12 @@
 <?php
 
 $template = <<<EOT
+<div id="inner-content">
 <h2>Browse all Universities</h2>
 <div class="entity-list university">
 EOT;
-// console_log($universities);
+
 $template .= <<<EOT
-<div id="inner-content">
   <span class="prompt paginate"></span>
   <div class="view-all-universities aggregate university">
 EOT;
