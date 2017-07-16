@@ -60,7 +60,7 @@ $template = <<<EOT
     <div class="section no-pad-bot">
       <div class="container">
         <div class="row center">
-          <h5 class="header col s12 light">A modern responsive front-end framework based on Material Design</h5>
+          <h5 class="header col s12 light">A brand new way to connect with your friends</h5>
         </div>
       </div>
     </div>
