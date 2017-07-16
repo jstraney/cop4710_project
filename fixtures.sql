@@ -124,7 +124,7 @@ CALL create_rso(
   -- description
   'Earning your doctorates? Passionate about your field? We are too. Let\'s talk about what fascinates us and make some breakthroughs. Non-doctorate program students are welcome to sit in and participate',
   '11,12', -- members. since the rso is being made by an administrator, the 5 member condition is waived. 
-   11, -- admin,  jbosch
+   12, -- admin,  jbosch
    4 -- university, Univ. of Michigan 
 );
 
@@ -167,7 +167,7 @@ CALL create_event(
   '28.603014', -- lat
   '-81.198650', -- lon
   'PUB', -- accessibility
-  '2', -- user id, jbillabog
+  '13', -- user id, jbillabog
   '2', -- rso id. debate club at UCF 
   '1'-- university id, UCF
 );
@@ -183,7 +183,7 @@ CALL create_event(
   '28.603014', -- lat
   '-81.198650', -- lon
   'PUB', -- accessibility
-  '2', -- user id, jbillabog
+  '13', -- user id, jbillabog
   '2', -- rso id. debate club at UCF 
   '1'-- university id, UCF
 );
@@ -199,7 +199,7 @@ CALL create_event(
   '28.605335', -- lat
   '-81.198346', -- lon
   'RSO', -- accessibility
-  '13', -- user id, smackley 
+  '2', -- user id, smackley 
   '1', -- rso id. no rso. Surprise Society. Will be active as a result 
   '1'-- university id
 );
@@ -216,7 +216,7 @@ CALL create_event(
   '-83.740442', -- lon
   'PUB', -- accessibility. since it's public. it will be seen by members of other schools.
   '12', -- user id, ttarmach 
-  '3', -- rso id. no rso. should be pending status as a result
+  '4', -- rso id. no rso. should be pending status as a result
   '4'-- university id, University of Michigan
 );
 
@@ -232,12 +232,12 @@ CALL create_event(
   '-83.740442', -- lon
   'PRI', -- accessibility. should only be visible to students at michigan university
   '12', -- user id, ttarmach 
-  '3', -- rso id. no rso. should be pending status as a result
+  '4', -- rso id. no rso. should be pending status as a result
   '4'-- university id, University of Michigan
 );
 
 CALL create_event(
-  'FSU Event 1', -- name
+  'FSU Event 0', -- name
   '2017-07-12 15:00:00', -- start time -- this overlaps an earlier event, but is in a different location.
   '2017-07-12 18:00:00', -- end time
   '123-456-7890', -- telephone
@@ -254,7 +254,7 @@ CALL create_event(
 );
 
 CALL create_event(
-  'FSU Event 2', -- name
+  'FSU Event 1', -- name
   '2017-07-12 15:00:00', -- start time -- this overlaps an earlier event, but is in a different location.
   '2017-07-12 18:00:00', -- end time
   '123-456-7890', -- telephone
