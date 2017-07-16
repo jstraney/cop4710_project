@@ -30,13 +30,44 @@ class UniversityController extends EntityController {
 
   public function create($params) {
 
-    $result = $this->db->prepared_query($this->create_query, array());
+    $name = check_field($params, 'name', NULL);
+    $description = check_field($params, 'description', NULL);
+    $location = check_field($params, 'location', NULL);
+    $lat = check_field($params, 'lat', NULL);
+    $lon = check_field($params, 'lon', NULL);
+    $email_domain = check_field($params, 'email_domain', NULL);
+    $website_url = check_field($params, 'website_url', NULL);
+    $population = check_field($params, 'population', NULL);
 
-    if ($result === FALSE) {
+    $before_count = $this->db->query("
+    SELECT COUNT(uni_id) FROM universities;
+    ");
 
+    $this->db->prepared_query($this->create_query, array(
+      ':name' => $name,
+      ':description' => $description,
+      ':location' => $location,
+      ':lat' => $lat,
+      ':lon' => $lon,
+      ':email_domain' => $email_domain,
+      ':website_url' => $website_url,
+      ':population' => $population
+    ));
+
+    $after_count = $this->db->query("
+    SELECT COUNT(uni_id) FROM universities;
+    ");
+
+    if ($before_count == $after_count) {
+
+      set_message("Could not create university.", "error");
+      
       go_home();
+      die();
 
     } 
+
+    set_message("Successfully created university.");
 
     go_home();
 
@@ -100,6 +131,10 @@ class UniversityController extends EntityController {
 
   public function view_all($params) {
 
+    global $configs;
+
+    $site_root = $configs['site_root'];
+
     // get range of universities to show. e.g. 10-20
     $range = explode('-', $params[1]);
     $start = $range[0];
@@ -111,7 +146,7 @@ class UniversityController extends EntityController {
       ':start' => $start, 
       ':end' => $end, 
     ));
-
+    
     if (empty($universities)) {
 
       $template = "No universities found.";
@@ -122,6 +157,7 @@ class UniversityController extends EntityController {
 
     include get_entity_partial('university', 'view_all');
     
+    return $template;
   }
 
   public function update($params) {
@@ -131,9 +167,26 @@ class UniversityController extends EntityController {
     $location = isset($result['location']) ? $result['location']: "";
     $lat = isset($result['lat']) ? $result['lat']: "";
     $lon = isset($result['lon']) ? $result['lon']: "";
+    $email_domain = isset($result['email_domain']) ? $result['email_domain']: ""; 
     $website_url = isset($result['website_url']) ? $result['website_url']: "";
+    $population = isset($result['population']) ? $result['population']: "";
 
+    $query = $this->update_query;
 
+    $this->db->prepared_query($query, array(
+      ':name' => $name,
+      ':description' => $description,
+      ':location' => $location,
+      ':lat' => $lat,
+      ':lon' => $lon,
+      ':email_domain' => $email_domain,
+      ':website_url' => $website_url,
+      ':population' => $population
+    ));
+
+    set_message("University successfully updated.");
+
+    go_home();
   }
 
   public function destroy ($params) {
@@ -142,9 +195,20 @@ class UniversityController extends EntityController {
     global $user;
 
     $user_id = $user->user_id;
-
     $role = $user->role;
-     
+
+    $uni_id = $params->uni_id;
+
+    $query = $this->delete_query;
+
+    $this->db->prepared_query($query, array(
+      ':uni_id' => $uni_id
+    ));
+
+    set_message("University successfully deleted.");
+    
+    go_home(); 
+
   }
 
   public function make ($params) {

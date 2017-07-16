@@ -12,7 +12,6 @@ CALL view_rso(:rso_id, :user_id, :role);
 EOT;
 
 $view_all_query = <<<EOT
-
 EOT;
 
 $destroy_query = <<<EOT

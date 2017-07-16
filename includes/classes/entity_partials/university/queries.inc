@@ -1,15 +1,18 @@
 <?php
 
 $create_query = <<<EOT
-
+INSERT INTO universities (name, description, location, lat, lon, email_domain, website_url, population)
+VALUES (:name, :description, :location, :lat, :lon, :email_domain, :website_url, :population);
 EOT;
 
 $update_query = <<<EOT
-
+UPDATE universities
+SET name = :name, description = :description, location = :location, lat = :lat, lon = :lon, email_domain = :email_domain, website_url = :website_url, population = :population
 EOT;
 
 $destroy_query = <<<EOT
-
+DELETE FROM universities u
+WHERE u.uni_id = :uni_id
 EOT;
 
 $view_query = <<<EOT
