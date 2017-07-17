@@ -702,6 +702,16 @@ div.sup-modal {
   transition: 1s top;
 }
 
+div.record.university {
+  margin-top: 10px;
+  width: 150px;
+}
+
+div.record.university div.entity {
+  display: block;
+  margin: 15px 0 0;
+}
+
 @media only screen and (max-width: 768px) {
   div.view-all-rsos.aggregate.rso > div.record,
   div.events-view-all.aggregate.events-view-all > div.record {
