@@ -20,6 +20,10 @@ SET time_zone = "+00:00";
 -- Database: `event`
 --
 
+CREATE DATABASE IF NOT EXISTS `event`;
+
+USE `event`;
+
 DELIMITER $$
 --
 -- Procedures
