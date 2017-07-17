@@ -5,14 +5,40 @@ $university_pic = load_entity_pic('universities', $id, $style = "medium");
 $template = <<<EOT
 <div id="inner-content">
 
-<h2>{$name}</h2>
-{$university_pic}
+  <h2>{$name}</h2>
 
-<h3>Students at {$name}</h3>
-<div class="related-resource-box">{$num_students}</div>
+  {$university_pic}
 
-<h3>RSOs at {$name}</h3>
-<div class="related-resource-box">
+  <p class="university description">
+  {$description}
+  </p>
+
+  <div class="university related-resource-box address">Address: {$location}</div>
+
+  <div id="map" class="university map" ></div>
+
+  <input id="lat" name="lat" type="hidden" value="{$lat}"/>
+  <input id="lon" name="lon" type="hidden" value="{$lon}"/>
+
+  <script type="text/javascript" 
+    src="https://maps.google.com/maps/api/js?key=AIzaSyBGfGPKeqJZRoQSInY5LXqvZt7lZwihCPA&libraries=places">
+  </script>
+
+  <script src="{$site_root}/js/lib/jquery-locationpicker-plugin/locationpicker.jquery.js"></script>
+
+  <script>
+    (function (a) {
+      a.makeMapPresentation();
+    })(app);
+  </script>
+
+  <h5>Students at {$name}</h5>
+
+  <div class="university related-resource-box population">{$num_students}</div>
+
+  <h3>RSOs at {$name}</h3>
+
+  <div class="university-view aggregate rso">
 EOT;
 
 // list associated rsos
@@ -34,10 +60,12 @@ EOT;
   }
 
 $template .= <<<EOT
-</div>
+  </div>
 
-<h3>Events at {$name}</h3>
-<div class="university-view aggregate events">
+
+  <h3>Events at {$name}</h3>
+
+  <div class="university-view aggregate events">
 EOT;
 
 // list associated rsos
@@ -55,13 +83,12 @@ foreach($associated_events as $event) {
         {$event_name}
       </a>
     </div> 
-
-</div>
 EOT;
+
 }
 
 $template .= <<<EOT
-<div>Address: {$location}</div>
+  </div>
 
 </div>
 EOT;

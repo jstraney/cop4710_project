@@ -702,6 +702,8 @@ div.sup-modal {
   transition: 1s top;
 }
 
+/* University */
+
 div.record.university {
   margin-top: 10px;
   width: 150px;
@@ -712,7 +714,26 @@ div.record.university div.entity {
   margin: 15px 0 0;
 }
 
+div.university-view.aggregate .record.rso {
+  width: 150px;
+}
+
+div.university.related-resource-box.address {
+  clear: both;
+}
+
+p.university.description {
+  display: inline-block;
+  max-width: 550px;
+  margin: 10px 0 20px 10px;
+}
+
 @media only screen and (max-width: 768px) {
+  
+  p.university.description {
+    margin-left: 0;
+  }
+  
   div.view-all-rsos.aggregate.rso > div.record,
   div.events-view-all.aggregate.events-view-all > div.record {
     padding-right: 0;

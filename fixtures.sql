@@ -15,14 +15,14 @@ ALTER TABLE rsos AUTO_INCREMENT = 1;
 -- It would be cool to write an 'install script' with the option of test records
 -- but for now, you can just copy this query and paste it into phpMyadmin under the
 -- SQL tab of the proper table.
-INSERT INTO universities (name, location, lat, lon, email_domain, website_url, population)
+INSERT INTO universities (name, description, location, lat, lon, email_domain, website_url, population)
 VALUES
-("University of Central Florida", "4000 Central Florida Blvd, Orlando, FL 32816", 28.602427, -81.200060, "@knights.ucf.edu", "http://www.ucf.edu", 64318),
-("Florida State University", "600 W College Ave, Tallahassee, FL 32306", 30.441878, -84.298489, "@noles.fsu.edu", "http://www.fsu.edu", 41867),
-("University of Kansas", "1450 Jayhawk Blvd, Lawrence, KS 66045", 38.954344, -95.255796, "@kansas.ppl.edu", "http://www.kans.edu", 28401),
-("University of Michigan", "500 S State St, Ann Arbor, MI 48109", 42.278044, -83.738224, "@mich.ppl.edu", "http://www.mich.edu", 44718),
-("Cornell University", "Ithaca, NY 14850", 42.453449 , -76.473503, "@corn.ppl.edu", "http://www.corn.edu", 21904),
-("Yale University", "New Haven, CT 06520", 41.316324, -72.922343, "@yale.ppl.edu", "http://www.yale.edu", 12385);
+("University of Central Florida", "With more than 64,000 students, UCF is one of the largest universities in the U.S. In addition to its impressive size and strength, UCF is ranked as a best-value university by The Princeton Review and Kiplinger's, as well as one of the nation's most affordable colleges by Forbes.", "4000 Central Florida Blvd, Orlando, FL 32816", 28.602427, -81.200060, "@knights.ucf.edu", "http://www.ucf.edu", 64318),
+("Florida State University", "Florida State University (commonly referred to as Florida State or FSU) is an American public space-grant and sea-grant research university. ... It is a senior member of the State University System of Florida. Founded in 1851, it is located on the oldest continuous site of higher education in the state of Florida.", "600 W College Ave, Tallahassee, FL 32306", 30.441878, -84.298489, "@noles.fsu.edu", "http://www.fsu.edu", 41867),
+("University of Kansas", "The University of Kansas, often referred to as KU or Kansas, is a public research university in the U.S. state of Kansas. The main campus in Lawrence, one of the largest college towns in Kansas, is on Mount Oread, the highest elevation in Lawrence.", "1450 Jayhawk Blvd, Lawrence, KS 66045", 38.954344, -95.255796, "@kansas.ppl.edu", "http://www.kans.edu", 28401),
+("University of Michigan", "From research to sports to music to medicine: the University of Michigan has a 200-year-old tradition of excellence. ", "500 S State St, Ann Arbor, MI 48109", 42.278044, -83.738224, "@mich.ppl.edu", "http://www.mich.edu", 44718),
+("Cornell University", "Cornell is a privately endowed research university and a partner of the State University of New York. As the federal land-grant institution in New York State, we have a responsibility—unique within the Ivy League—to make contributions in all fields of knowledge in a manner that prioritizes public engagement to help improve the quality of life in our state, the nation, the world.", "Ithaca, NY 14850", 42.453449 , -76.473503, "@corn.ppl.edu", "http://www.corn.edu", 21904),
+("Yale University", "Yale’s reach is both local and international. It partners with its hometown of New Haven, Connecticut to strengthen the city’s community and economy. And it engages with people and institutions across the globe in the quest to promote cultural understanding, improve the human condition, delve more deeply into the secrets of the universe, and train the next generation of world leaders.", "New Haven, CT 06520", 41.316324, -72.922343, "@yale.ppl.edu", "http://www.yale.edu", 12385);
 
 -- all users have a password of 1234
 CALL create_user (
