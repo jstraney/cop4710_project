@@ -6,7 +6,7 @@ class UniversityController extends EntityController {
   private $view_query;
   private $view_all_query;
   private $update_query;
-  private $delete_query;
+  private $destroy_query;
   private $university_rsos_query;
   private $university_events_query;
 
@@ -197,9 +197,9 @@ class UniversityController extends EntityController {
     $user_id = $user->user_id;
     $role = $user->role;
 
-    $uni_id = $params->uni_id;
+    $uni_id = $params['uni_id'];
 
-    $query = $this->delete_query;
+    $query = $this->destroy_query;
 
     $this->db->prepared_query($query, array(
       ':uni_id' => $uni_id
