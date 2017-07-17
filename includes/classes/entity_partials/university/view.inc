@@ -2,13 +2,34 @@
 
 $university_pic = load_entity_pic('universities', $id, $style = "medium");
 
+$has_pic = entity_has_pic('universities', $id);
+
 $template = <<<EOT
 <div id="inner-content">
 
   <h2>{$name}</h2>
 
-  {$university_pic}
+EOT;
 
+if ($role == "SA") {
+  $template .= <<<EOT
+  <div class="widget picture"></div>
+  <script>
+    (function (a) {
+      a.scope.has_pic = {$has_pic};
+      var configs = {type : "universities", id: $id, style: "medium"};
+      a.util.pictureWidget($('div.widget.picture'), configs);
+    })(app);
+  </script>
+EOT;
+
+}
+else {
+
+  $template .= $university_pic;
+
+}
+$template .= <<<EOT
   <p class="university description">
   {$description}
   </p>

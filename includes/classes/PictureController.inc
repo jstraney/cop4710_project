@@ -216,6 +216,18 @@ class PictureController extends EntityController {
 
     $id = check_field($params, 'id', 0);
 
+    if ($type == NULL || $id == 0) {
+
+      return;
+
+    }
+
+    if (!$this->check_ownership($params)) {
+
+      return;
+
+    }
+
     destroy_entity_pic($type, $id);
 
     // echo response

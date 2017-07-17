@@ -722,6 +722,11 @@ div.university.related-resource-box.address {
   clear: both;
 }
 
+div.widget.picture.universities {
+  display: inline-block;
+  vertical-align: top;
+}
+
 p.university.description {
   display: inline-block;
   max-width: 550px;

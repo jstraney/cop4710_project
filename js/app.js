@@ -139,11 +139,13 @@ var app = app || {};
 
     destroy = $('<div class="button destroy">Delete</div>');
 
+    var type = config.type;
+
     var style = config.style || "thumbnail"
 
-    elem.addClass(style);
+    style += " " + type;
 
-    var type = config.type;
+    elem.addClass(style);
 
     var id = config.id;
 

@@ -24,11 +24,11 @@ EOT;
 
 $owns_university_query = <<<EOT
 -- only the super admin can edit a universities picture.
-SELECT COUNT(u.user_id)
+SELECT COUNT(u.user_id) AS is_owner
 FROM users u
 WHERE u.user_id = :user_id
 AND u.role = "SA"
 -- have to include this or pdo throws error. all params must be used.
-AND :entity_id = :entity_id;
+AND :entity_id > 0;
 EOT;
 ?>

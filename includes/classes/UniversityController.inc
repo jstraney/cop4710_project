@@ -79,6 +79,8 @@ class UniversityController extends EntityController {
 
     global $user;
 
+    $role = isset($user->role)? $user->role: NULL;
+
     $site_root = $configs['site_root'];
 
     // view query for university 
